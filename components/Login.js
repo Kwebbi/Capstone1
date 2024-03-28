@@ -77,7 +77,7 @@ export default function Login({ navigation }) {
 
             <Text className="text-gray-700 text-center py-2">or</Text>
 
-            <TouchableOpacity className="py-3 bg-blue-300 rounded-xl" onPress={()=> navigation.navigate('Register')}>
+            <TouchableOpacity className="py-3 bg-blue-300 rounded-xl mb-20" onPress={()=> navigation.navigate('Register')}>
               <Text className="font-xl font-bold text-center text-gray-700">Register</Text>
             </TouchableOpacity>
           </View>
