@@ -6,11 +6,13 @@ import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from '../config/firebase';
 import { Ionicons } from "@expo/vector-icons";
+import Checkbox from 'expo-checkbox';
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
   
   const handleSubmit = async ()=>{
     if (email && password) {
@@ -58,13 +60,13 @@ export default function Login({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          <View className= "flex-row space-x-20 mb-3">
-            <TouchableOpacity>
-              <Text className="text-gray-500">Remember Me</Text>
-            </TouchableOpacity>
+          <View className="flex-row ml-1 mb-3">
+            <Checkbox style={{marginRight: 8}} value={isChecked} onValueChange={setIsChecked} color={isChecked ? "grey" : undefined}/>
+
+            <Text className="text-gray-500">Remember Me</Text>
             
-            <TouchableOpacity>
-              <Text className="text-gray-500 ml-9">Forgot password?</Text>
+            <TouchableOpacity style={{ position: "absolute", right: 6 }}>
+              <Text className="text-gray-500">Forgot password?</Text>
             </TouchableOpacity>
           </View>
 
@@ -72,7 +74,7 @@ export default function Login({ navigation }) {
             <Text className="font-xl font-bold text-center text-gray-700">Login</Text>
           </TouchableOpacity>
 
-          <Text className="text-gray-700 font-bold text-center py-2">or</Text>
+          <Text className="text-gray-700 text-center py-2">or</Text>
 
           <TouchableOpacity className="py-3 bg-blue-300 rounded-xl" onPress={()=> navigation.navigate('Register')}>
             <Text className="font-xl font-bold text-center text-gray-700">Register</Text>
@@ -80,8 +82,6 @@ export default function Login({ navigation }) {
         </View>
       </View>
     </View>
-
-    
   );
 }
 
