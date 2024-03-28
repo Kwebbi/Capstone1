@@ -5,12 +5,12 @@ import { StyleSheet, View, TouchableOpacity, Image, Text, TextInput, Touchable }
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from '../config/firebase';
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-
+  const [showPassword, setShowPassword] = useState(false);
   
   const handleSubmit = async ()=>{
     if (email && password) {
@@ -22,7 +22,6 @@ export default function Login({ navigation }) {
       }
     }
   }  
-  
   
   return (
     <View className="flex-1 bg-white" style={{backgroundColor: "#cfe2f3"}}>
@@ -48,8 +47,16 @@ export default function Login({ navigation }) {
             value={email} onChangeText={value=> setEmail(value)} placeholder='Enter Email'/>
           
           <Text className="text-gray-700 ml-2">Password</Text>
-          <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
-            secureTextEntry value={password} onChangeText={value=> setPassword(value)} placeholder='Enter Password'/>
+          <View className="space-y-3">
+            <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
+              secureTextEntry={!showPassword} value={password} onChangeText={value=> setPassword(value)} placeholder='Enter Password'/>
+
+            <TouchableOpacity onPress={()=>setShowPassword(!showPassword)} style={{ position: "absolute", right: 12 }}>
+              {
+                showPassword == true ? ( <Ionicons name= "eye" size={24} color= "grey"/> ) : ( <Ionicons name= "eye-off" size={24}  color= "grey"/> )
+              }
+            </TouchableOpacity>
+          </View>
 
           <View className= "flex-row space-x-20 mb-3">
             <TouchableOpacity>
