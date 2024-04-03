@@ -1,18 +1,3 @@
-/*import React from "react";
-import { Button, View, Text } from "react-native";
-
-export default function startPage({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>start page</Text>
-      <Button
-        title="Go to register"
-        onPress={() => navigation.navigate("register")}
-      />
-    </View>
-  );
-} */
-
 import React, { Component, useState } from "react";
 import { StyleSheet, View, TouchableOpacity, Image, Text, TextInput, Touchable, ScrollView } from "react-native";
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,7 +12,7 @@ export default function Profiles({ navigation }) {
               <TouchableOpacity style={{ position: "absolute", left: 22, top: 27 }} onPress={()=> navigation.navigate('Login')}>
                 <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
               </TouchableOpacity>
-              
+
             <Text className="text-white mt-5" style={styles.titleText}>Baby Profiles</Text>
           </View>
         </SafeAreaView>
