@@ -5,6 +5,7 @@ import HomeScreen from './components/HomeScreen';
 import AboutScreen from './components/AboutScreen';
 import Register from './components/Register';
 import Login from './components/Login';
+import Profiles from './components/Profiles';
 import { registerRootComponent } from 'expo';
 import useAuth from './hooks/useAuth';
 
@@ -53,6 +54,11 @@ export default function App() {
                         name="About"
                         options={{headerShown: false}}
                         component={AboutScreen}
+                    />
+                    <Stack.Screen
+                        name="Profiles"
+                        options={{headerShown: false}}
+                        component={Profiles}
                     />
                 </Stack.Navigator>
             </NavigationContainer>
