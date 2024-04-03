@@ -70,7 +70,7 @@ export default function Login({ navigation }) {
                 <Text className="text-gray-500">Forgot password?</Text>
               </TouchableOpacity>
             </View>
-
+            
             <TouchableOpacity onPress={handleSubmit} className="py-3 bg-blue-300 rounded-xl">
               <Text className="font-xl font-bold text-center text-gray-700">Login</Text>
             </TouchableOpacity>
