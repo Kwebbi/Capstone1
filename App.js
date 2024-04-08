@@ -1,10 +1,11 @@
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from './components/HomeScreen';
-import AboutScreen from './components/AboutScreen';
+//import HomeScreen from './components/HomeScreen';
 import Register from './components/Register';
 import Login from './components/Login';
+import AddProfile from './components/AddProfile';
+import Profiles from './components/Profiles';
 import { registerRootComponent } from 'expo';
 import useAuth from './hooks/useAuth';
 
@@ -15,19 +16,19 @@ export default function App() {
     if (user) {
         return (
             <NavigationContainer> 
-                <Stack.Navigator initialRouteName='Home'> 
+                <Stack.Navigator initialRouteName='Profiles'> 
 
                     <Stack.Screen
-                        name="Home"
+                        name="Profiles"
                         options={{headerShown: false}}
-                        component={HomeScreen}
+                        component={Profiles}
                     />             
                     <Stack.Screen
-                        name="About"
+                        name="AddProfile"
                         options={{headerShown: false}}
-                        component={AboutScreen}
+                        component={AddProfile}
                     />
-         
+       
                 </Stack.Navigator>
             </NavigationContainer>
         );        
@@ -42,20 +43,10 @@ export default function App() {
                         component={Login}
                     /> 
                     <Stack.Screen
-                        name="Home"
-                        options={{headerShown: false}}
-                        component={HomeScreen}
-                    />
-                    <Stack.Screen
                         name="Register"
                         options={{headerShown: false}}
                         component={Register}
                     />                
-                    <Stack.Screen
-                        name="About"
-                        options={{headerShown: false}}
-                        component={AboutScreen}
-                    />
         
                 </Stack.Navigator>
             </NavigationContainer>

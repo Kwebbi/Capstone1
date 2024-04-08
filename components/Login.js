@@ -1,10 +1,9 @@
-//import { signInWithEmailAndPassword } from "firebase/auth";
 import React, { Component, useState } from "react";
-import { StyleSheet, View, TouchableOpacity, Image, Text, TextInput, Touchable } from "react-native";
-//import { TouchableOpacity } from "react-native-gesture-handler";
+import { StyleSheet, View, TouchableOpacity, Image, Text, TextInput, Platform, ScrollView } from "react-native";
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from '../config/firebase';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
@@ -25,6 +24,7 @@ export default function Login({ navigation }) {
   
   
   return (
+  <ScrollView automaticallyAdjustKeyboardInsets={true}>
     <View className="flex-1 bg-white" style={{backgroundColor: "#cfe2f3"}}>
       <SafeAreaView className="flex">
           <View className="flex-row justify-center">
@@ -43,11 +43,17 @@ export default function Login({ navigation }) {
 
       <View className="flex-1 bg-white px-8 pt-10" style={{borderTopLeftRadius: 50, borderTopRightRadius: 50}}>
         <View className="form space-y-2">
+        
           <Text className="text-gray-700 ml-4">Email Address</Text>
+
+
           <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
             value={email} onChangeText={value=> setEmail(value)} placeholder='Enter Email'/>
-          
+         
+
+
           <Text className="text-gray-700 ml-4">Password</Text>
+ 
           <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
             secureTextEntry value={password} onChangeText={value=> setPassword(value)} placeholder='Enter Password'/>
           
@@ -64,19 +70,27 @@ export default function Login({ navigation }) {
           <TouchableOpacity className="py-3 bg-blue-300 rounded-xl" onPress={()=> navigation.navigate('Register')}>
             <Text className="font-xl font-bold text-center text-gray-700">Register</Text>
           </TouchableOpacity>
+
         </View>
       </View>
     </View>
-
+    </ScrollView>
     
   );
 }
 
+
+/*
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+
+<KeyboardAwareScrollView>
+  <TextInput />
+</KeyboardAwareScrollView>
+*/
 const styles = StyleSheet.create({
 
   titleText: {
     color: '#28436d',
-    fontFamily: 'lucida grande',
     fontSize: 20,
     fontWeight: 'bold',
   },
