@@ -1,11 +1,20 @@
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+<<<<<<< HEAD
+//import HomeScreen from './components/HomeScreen';
+import Register from './components/Register';
+import Login from './components/Login';
+import AddProfile from './components/AddProfile';
+import Profiles from './components/Profiles';
+//import EditBaby from './components/EditBaby';
+=======
 import HomeScreen from './components/HomeScreen';
 //import AboutScreen from './components/AboutScreen';
 import Register from './components/Register';
 import Login from './components/Login';
 import Profiles from './components/Profiles';
+>>>>>>> main
 import { registerRootComponent } from 'expo';
 import useAuth from './hooks/useAuth';
 
@@ -17,6 +26,19 @@ export default function App() {
         return (
             <NavigationContainer> 
                 <Stack.Navigator initialRouteName='Profiles'> 
+<<<<<<< HEAD
+
+                    <Stack.Screen
+                        name="Profiles"
+                        options={{headerShown: false}}
+                        component={Profiles}
+                    />             
+                    <Stack.Screen
+                        name="AddProfile"
+                        options={{headerShown: false}}
+                        component={AddProfile}
+                    />    
+=======
                     <Stack.Screen           // 'Profiles' is the home screen when a user logs in and is the first screen they see
                         name="Profiles"
                         options={{headerShown: false}}
@@ -27,6 +49,7 @@ export default function App() {
                         options={{headerShown: false}}
                         component={HomeScreen}
                     />
+>>>>>>> main
                 </Stack.Navigator>
             </NavigationContainer>
         );        
@@ -45,7 +68,11 @@ export default function App() {
                         options={{headerShown: false}}
                         component={Register}
                     />                
+<<<<<<< HEAD
+        
+=======
 
+>>>>>>> main
                 </Stack.Navigator>
             </NavigationContainer>
         );
