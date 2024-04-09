@@ -1,3 +1,8 @@
+/******************************** 
+    This screen is not in use
+********************************/
+
+
 import React, { Component, useState } from "react";
 import { StyleSheet, Button, View, Text, TouchableOpacity, FlatList, Image } from "react-native";
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
@@ -33,6 +38,8 @@ export default function HomeScreen({ navigation }) {
 
       <View style={styles.container}>
       <View style={styles.body}>
+
+
         <FlatList
           style={styles.container}
           enableEmptySections={true}

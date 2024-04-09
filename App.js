@@ -6,6 +6,7 @@ import Register from './components/Register';
 import Login from './components/Login';
 import AddProfile from './components/AddProfile';
 import Profiles from './components/Profiles';
+//import EditBaby from './components/EditBaby';
 import { registerRootComponent } from 'expo';
 import useAuth from './hooks/useAuth';
 
@@ -27,8 +28,7 @@ export default function App() {
                         name="AddProfile"
                         options={{headerShown: false}}
                         component={AddProfile}
-                    />
-       
+                    />    
                 </Stack.Navigator>
             </NavigationContainer>
         );        

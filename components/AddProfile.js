@@ -57,7 +57,7 @@ export default function AddProfile({ navigation }) {
       <View className="flex bg-white" style={{backgroundColor: "#cfe2f3"}}>
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
-              <TouchableOpacity style={{ position: "absolute", left: 22, top: 27 }} onPress={()=> navigation.navigate('Login')}>
+              <TouchableOpacity style={{ position: "absolute", left: 22, top: 27 }} onPress={()=> navigation.navigate('Profiles')}>
                 <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
               </TouchableOpacity>
 
