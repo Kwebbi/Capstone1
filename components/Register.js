@@ -47,11 +47,10 @@ export default function Register({ navigation }) {
 
   return (
     <ScrollView automaticallyAdjustKeyboardInsets={true}>
-      <View className="flex-1 bg-white" style={{backgroundColor: "#cfe2f3"}}>
+      <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
         <SafeAreaView className="flex">
             <View className="flex-row justify-center">
-              <Image source={require('../assets/logo.png')}
-                  style={{width: 225, height: 225}} />
+              <Image source={require('../assets/logo.png')} style={{ width: 225, height: 225 }}/>
             </View>
             
             <View className="flex-row justify-center" style={styles.container}>

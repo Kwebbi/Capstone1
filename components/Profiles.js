@@ -37,7 +37,7 @@ export default function Profiles({ navigation }) {
     }, []);
         
     return (
-      <View className="flex bg-white" style={{backgroundColor: "#cfe2f3"}}>
+      <View className="flex bg-white" style={{ backgroundColor: "#cfe2f3" }}>
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
             <Text className="text-white mt-5" style={styles.titleText}>Baby Profiles</Text>
@@ -45,7 +45,7 @@ export default function Profiles({ navigation }) {
         </SafeAreaView>
         {isLoading ? ( // Check if isLoading is true
             // Render ActivityIndicator while loading
-            <ActivityIndicator size="large" color="#0000ff" style={{ flex: 1, justifyContent: "center", alignItems: "center" }} />
+            <ActivityIndicator size="large" color="#0000ff" style={{ flex: 1, justifyContent: "center", alignItems: "center" }}/>
         ) : (
             <View className="flex bg-white px-8 pt-8" style={{borderTopLeftRadius: 50, borderTopRightRadius: 50}}>
                 <FlatList
@@ -55,9 +55,9 @@ export default function Profiles({ navigation }) {
                         return (
                             <View className="form space-y-2 mb-8 border rounded-3xl">
                                 <TouchableOpacity className="flex-row space-x-2.5" onPress={()=> navigation.navigate('HomeScreen')}>
-                                    <Image source={require('../assets/logo.png')} style={{width: 150, height: 150}} />
+                                    <Image source={require('../assets/logo.png')} style={{ width: 150, height: 150 }}/>
 
-                                    <View style={{borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0}}></View>
+                                    <View style={{ borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0 }}></View>
 
                                     <View className="form space-y-2">
                                     <Text className=""></Text>

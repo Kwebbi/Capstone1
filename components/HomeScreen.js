@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Button, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 
-const HomeScreen = () => {
+export default function HomeScreen({ navigation }) {
   // States
   const [newTodo, setNewTodo] = useState('');
   const [todoItems, setTodoItems] = useState([]);
@@ -55,128 +57,142 @@ const HomeScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Banner with Name */}
-      <View style={styles.banner}>
-        <Text style={styles.bannerText}>Banner Name</Text>
-      </View>
+    <ScrollView automaticallyAdjustKeyboardInsets={true}>
+      <View className="flex bg-white" style={{backgroundColor: "#cfe2f3"}}>
+        
+        {/* Banner with Name */}
+        <SafeAreaView className="flex">
+          <View className="flex-row justify-center" style={styles.container}>
+            <TouchableOpacity style={{ position: "absolute", left: 22, top: 25 }} onPress={()=> navigation.navigate('Profiles')}>
+              <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
+            </TouchableOpacity>
 
-      {/* Avatar Section */}
-      <View style={styles.profileSection}>
-        <TouchableOpacity style={styles.avatarBubble}>
-          <Text style={styles.avatarText}>Avatar</Text>
-        </TouchableOpacity>
-        <Text style={styles.nameText}>Avatar Name</Text>
+            <Text className="text-white" style={styles.titleText}>Baby Name</Text>
+          </View>
+        </SafeAreaView>
+        
+        <View className="flex space-y-10 bg-white px-8 pt-8" style={{ borderTopLeftRadius: 50, borderTopRightRadius: 50, position: "relative", top: -30 }}>
+          
+          {/* Avatar Section */}
+          <View style={styles.profileSection}>
+            <View className="flex justify-center">
+              <TouchableOpacity style={styles.avatarBubble}>
+                <Text style={styles.avatarText}>Avatar</Text>
+              </TouchableOpacity>
+              <Text style={styles.nameText}>Avatar Name</Text>
+            </View>
 
-        {/* To-Do List */}
-        <View style={styles.todoList}>
-          <TextInput
-            style={styles.todoInput}
-            onChangeText={setNewTodo}
-            value={newTodo}
-            placeholder="Add new to-do"
-            onSubmitEditing={addTodoItem}
-          />
-          {todoItems.map((item, index) => (
-            <Text key={index} style={styles.todoItem}>• {item}</Text>
-          ))}
+            {/* To-Do List */}
+            <View style={styles.todoList}>
+              <TextInput
+                style={styles.todoInput}
+                onChangeText={setNewTodo}
+                value={newTodo}
+                placeholder="Add new to-do"
+                onSubmitEditing={addTodoItem}
+              />
+              {todoItems.map((item, index) => (
+                <Text key={index} style={styles.todoItem}>• {item}</Text>
+              ))}
+            </View>
+          </View>
+
+          {/* Feeding Button */}
+          <View style={styles.buttonContainer}>
+            <Button title="Feeding" onPress={() => setFeedingModalVisible(true)} />
+            {feedings.length > 0 && (
+              <Text style={styles.recordPreview}>
+                Last Feeding: {feedings[feedings.length - 1].date} at {feedings[feedings.length - 1].time}, {feedings[feedings.length - 1].amount} mL
+              </Text>
+            )}
+          </View>
+
+          {/* Diaper Change Button */}
+          <View style={styles.buttonContainer}>
+            <Button title="Diaper Change" onPress={() => setDiaperModalVisible(true)} />
+            {diaperChanges.length > 0 && (
+              <Text style={styles.recordPreview}>
+                Last Diaper Change: {diaperChanges[diaperChanges.length - 1].type} on {diaperChanges[diaperChanges.length - 1].date} at {diaperChanges[diaperChanges.length - 1].time}
+              </Text>
+            )}
+          </View>
+
+          {/* Show All Records Button */}
+          <View style={styles.buttonContainer}>
+            <Button title="Show All Records" onPress={() => setShowAllRecords(!showAllRecords)} />
+            {showAllRecords && (
+              <>
+                {feedings.map((feeding, index) => (
+                  <Text key={`feeding-${index}`}>Feeding #{index + 1}: {feeding.date} - {feeding.time} - {feeding.amount} mL</Text>
+                ))}
+                {diaperChanges.map((change, index) => (
+                  <Text key={`diaper-${index}`}>Diaper #{index + 1}: {change.type} on {change.date} at {change.time}</Text>
+                ))}
+              </>
+            )}
+          </View>
+
+          {/* Feeding Modal */}
+          <Modal
+            visible={feedingModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setFeedingModalVisible(false)}>
+            <View style={styles.modalView}>
+              <Text>Enter Feeding Details:</Text>
+              <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
+              {isDatePickerVisible && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={selectedDate}
+                  mode="datetime"
+                  display="default"
+                  onChange={onChangeDate}
+                />
+              )}
+              <TextInput
+                style={styles.input}
+                placeholder="Amount in mL"
+                value={feedingAmount}
+                onChangeText={setFeedingAmount}
+                keyboardType="numeric"
+              />
+              <Button title="Save" onPress={handleSaveFeeding} />
+            </View>
+          </Modal>
+
+          {/* Diaper Change Modal */}
+          <Modal
+            visible={diaperModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setDiaperModalVisible(false)}>
+            <View style={styles.modalView}>
+              <Text>Diaper Change Type:</Text>
+              <Picker
+                selectedValue={diaperType}
+                onValueChange={(itemValue, itemIndex) => setDiaperType(itemValue)}
+                style={{width: 200, height: 44}}>
+                <Picker.Item label="Wet" value="Wet" />
+                <Picker.Item label="Dirty" value="Dirty" />
+                <Picker.Item label="Mixed" value="Mixed" />
+                <Picker.Item label="Dry" value="Dry" />
+              </Picker>
+              <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
+              {isDatePickerVisible && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={selectedDate}
+                  mode="datetime"
+                  display="default"
+                  onChange={onChangeDate}
+                />
+              )}
+              <Button title="Save" onPress={handleSaveDiaperChange} />
+            </View>
+          </Modal>
         </View>
       </View>
-
-      {/* Feeding Button */}
-      <View style={styles.buttonContainer}>
-        <Button title="Feeding" onPress={() => setFeedingModalVisible(true)} />
-        {feedings.length > 0 && (
-          <Text style={styles.recordPreview}>
-            Last Feeding: {feedings[feedings.length - 1].date} at {feedings[feedings.length - 1].time}, {feedings[feedings.length - 1].amount} mL
-          </Text>
-        )}
-      </View>
-
-      {/* Diaper Change Button */}
-      <View style={styles.buttonContainer}>
-        <Button title="Diaper Change" onPress={() => setDiaperModalVisible(true)} />
-        {diaperChanges.length > 0 && (
-          <Text style={styles.recordPreview}>
-            Last Diaper Change: {diaperChanges[diaperChanges.length - 1].type} on {diaperChanges[diaperChanges.length - 1].date} at {diaperChanges[diaperChanges.length - 1].time}
-          </Text>
-        )}
-      </View>
-
-      {/* Show All Records Button */}
-      <View style={styles.buttonContainer}>
-        <Button title="Show All Records" onPress={() => setShowAllRecords(!showAllRecords)} />
-        {showAllRecords && (
-          <>
-            {feedings.map((feeding, index) => (
-              <Text key={`feeding-${index}`}>Feeding #{index + 1}: {feeding.date} - {feeding.time} - {feeding.amount} mL</Text>
-            ))}
-            {diaperChanges.map((change, index) => (
-              <Text key={`diaper-${index}`}>Diaper #{index + 1}: {change.type} on {change.date} at {change.time}</Text>
-            ))}
-          </>
-        )}
-      </View>
-
-      {/* Feeding Modal */}
-      <Modal
-        visible={feedingModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setFeedingModalVisible(false)}>
-        <View style={styles.modalView}>
-          <Text>Enter Feeding Details:</Text>
-          <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
-          {isDatePickerVisible && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={selectedDate}
-              mode="datetime"
-              display="default"
-              onChange={onChangeDate}
-            />
-          )}
-          <TextInput
-            style={styles.input}
-            placeholder="Amount in mL"
-            value={feedingAmount}
-            onChangeText={setFeedingAmount}
-            keyboardType="numeric"
-          />
-          <Button title="Save" onPress={handleSaveFeeding} />
-        </View>
-      </Modal>
-
-      {/* Diaper Change Modal */}
-      <Modal
-        visible={diaperModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setDiaperModalVisible(false)}>
-        <View style={styles.modalView}>
-          <Text>Diaper Change Type:</Text>
-          <Picker
-            selectedValue={diaperType}
-            onValueChange={(itemValue, itemIndex) => setDiaperType(itemValue)}
-            style={{width: 200, height: 44}}>
-            <Picker.Item label="Wet" value="Wet" />
-            <Picker.Item label="Dirty" value="Dirty" />
-            <Picker.Item label="Mixed" value="Mixed" />
-            <Picker.Item label="Dry" value="Dry" />
-          </Picker>
-          <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
-          {isDatePickerVisible && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={selectedDate}
-              mode="datetime"
-              display="default"
-              onChange={onChangeDate}
-            />
-          )}
-          <Button title="Save" onPress={handleSaveDiaperChange} />
-        </View>
-      </Modal>
     </ScrollView>
   );
 };
@@ -209,6 +225,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 14,
+    textAlign: 'center',
   },
   nameText: {
     marginTop: 8,
@@ -268,6 +285,10 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 20,
   },
-});
 
-export default HomeScreen;
+  titleText: {
+    color: '#28436d',
+    fontSize: 30,
+    fontWeight: 'bold',
+  },
+});

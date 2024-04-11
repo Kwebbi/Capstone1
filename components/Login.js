@@ -26,11 +26,10 @@ export default function Login({ navigation }) {
   
   return (
     <ScrollView automaticallyAdjustKeyboardInsets={true}>
-      <View className="flex-1 bg-white" style={{backgroundColor: "#cfe2f3"}}>
+      <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
         <SafeAreaView className="flex">
             <View className="flex-row justify-center">
-              <Image source={require('../assets/logo.png')}
-                  style={{width: 225, height: 225}} />
+              <Image source={require('../assets/logo.png')} style={{ width: 225, height: 225 }}/>
             </View>
 
             <View className="flex-row justify-center" style={styles.container}>
@@ -42,7 +41,7 @@ export default function Login({ navigation }) {
             </View>
         </SafeAreaView>
 
-        <View className="flex-1 bg-white px-8 pt-10" style={{borderTopLeftRadius: 50, borderTopRightRadius: 50}}>
+        <View className="flex-1 bg-white px-8 pt-10" style={{ borderTopLeftRadius: 50, borderTopRightRadius: 50 }}>
           <View className="form space-y-2">
           
             <Text className="text-gray-700 ml-2">Email Address</Text>
@@ -64,7 +63,7 @@ export default function Login({ navigation }) {
             </View>
 
             <View className= "flex-row ml-1 mb-3">
-              <Checkbox style={{marginRight: 8}} value={isChecked} onValueChange={setIsChecked} color={isChecked ? "grey" : undefined}/>
+              <Checkbox style={{ marginRight: 8 }} value={isChecked} onValueChange={setIsChecked} color={isChecked ? "grey" : undefined}/>
 
               <Text className="text-gray-500">Remember Me</Text>
 
@@ -90,13 +89,6 @@ export default function Login({ navigation }) {
   );
 }
 
-/*
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
-
-<KeyboardAwareScrollView>
-  <TextInput />
-</KeyboardAwareScrollView>
-*/
 const styles = StyleSheet.create({
 
   welcomeText: {
