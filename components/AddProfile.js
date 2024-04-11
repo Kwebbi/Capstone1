@@ -7,9 +7,6 @@ import { StatusBar } from "expo-status-bar";
 import { ref, push, set } from "firebase/database";
 import { auth, database} from '../config/firebase'
 
-
-
-
 export default function AddProfile({ navigation }) {
 
   const [name, setName] = useState('');
@@ -21,7 +18,6 @@ export default function AddProfile({ navigation }) {
   const [showPicker, setShowPicker] = useState(false);
 
   const [checked, setChecked] = React.useState('first'); //radio buttons
-
 
   function createBaby() {
     const babyRef = ref(database, 'babies/');
@@ -52,7 +48,6 @@ export default function AddProfile({ navigation }) {
   }
 
   return (
-
     <ScrollView automaticallyAdjustKeyboardInsets={true}>
       <View className="flex bg-white" style={{backgroundColor: "#cfe2f3"}}>
         <SafeAreaView className="flex">
@@ -60,60 +55,47 @@ export default function AddProfile({ navigation }) {
               <TouchableOpacity style={{ position: "absolute", left: 22, top: 27 }} onPress={()=> navigation.navigate('Profiles')}>
                 <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
               </TouchableOpacity>
-
+              
             <Text className="text-white mt-5" style={styles.titleText}>Add Profile</Text>
           </View>
         </SafeAreaView>
 
         <View className="flex bg-white px-8 pt-8" style={{borderTopLeftRadius: 50, borderTopRightRadius: 50}}>
+          <View className="flex-row justify-center">
+            <Text className="text-black font-bold mb-5" style={{ fontSize: 25 }}>Baby Info</Text>
+          </View>
 
+          <View className="form space-y-1" style={{ flex: 1, justifyContent: "center"}}>
+            <Text className="flex-end text-gray-700 ml-2">Name</Text>
+            <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
+              value={name} onChangeText={value=> setName(value)} placeholder='Enter name'/>
 
+            <Text className="text-gray-700 ml-2">Date of Birth</Text>
+            <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
+            value={dob} onChangeText={value=> setDOB(value)} placeholder='Enter DOB'/>
 
-
-        <View className="flex-row justify-center">
-        <Text className="text-black" style={{ fontSize: 20 }}>Baby Info</Text>
-      </View>
-
-      <View className="form space-y-1" style={{ flex: 1, justifyContent: "center"}}>
-      <Text className="flex-end text-gray-700 ml-4">Name</Text>
-      <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
-        value={name} onChangeText={value=> setName(value)} placeholder='Enter name'/>
-
-      <Text className="text-gray-700 ml-4">Date of Birth</Text>
-      <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
-      value={dob} onChangeText={value=> setDOB(value)} placeholder='Enter DOB'/>
-
-      <Text className="text-gray-700 ml-4">Gender</Text>
-        <RadioButton.Item
-          label="Male"
-          value="Male"
-          status={ checked === 'Male' ? 'checked' : 'unchecked' }
-          onPress={() => setChecked('Male')}
-        />
-        <RadioButton.Item
-        label="Female"
-          value="Female"
-          status={ checked === 'second' ? 'checked' : 'unchecked' }
-          onPress={() => setChecked('Female')}
-        />
-
-        </View>
+            <Text className="text-gray-700 ml-2">Gender</Text>
+            <RadioButton.Item
+              label="Male"
+              value="Male"
+              status={ checked === 'Male' ? 'checked' : 'unchecked' }
+              onPress={() => setChecked('Male')}
+            />
+            <RadioButton.Item
+              label="Female"
+              value="Female"
+              status={ checked === 'Female' ? 'checked' : 'unchecked' }
+              onPress={() => setChecked('Female')}
+            />
+          </View>
           
-          <TouchableOpacity className="py-1 bg-blue-300 rounded-3xl mb-8">
-            <Text className="font-xl  text-center text-gray-700 text-3xl" onPress={()=> handleOnPress()}>+</Text>
+          <TouchableOpacity className="py-1 bg-blue-300 rounded-3xl mt-5 mb-8">
+            <Text className="font-xl text-center text-gray-700 text-3xl" onPress={()=> handleOnPress()}>+</Text>
           </TouchableOpacity>
         </View>
       </View>
-
-
-
-
-
     </ScrollView>
-
   );
-
-
 } 
 
 const styles = StyleSheet.create({
@@ -157,47 +139,4 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   }
-
 });
-
-
-/*
-
-
-   <ScrollView automaticallyAdjustKeyboardInsets={true}>
-  <View className="flex-1 bg-white">
-      <SafeAreaView style={{backgroundColor: "#cfe2f3", borderBottomLeftRadius: 50, borderBottomRightRadius: 50}}>
-        <View className="flex bg-white px-8 pt-10" style={{backgroundColor: "#cfe2f3", borderBottomLeftRadius: 50, borderBottomRightRadius: 50}}>
-          <Text className="text-white font-xl font-bold text-center" style={{fontSize: 30}}>Add Profile</Text>
-        </View>
-      </SafeAreaView>
-      
-      <View className="flex-row justify-center">
-        <Text className="text-black" style={{ fontSize: 20 }}>Baby Info</Text>
-      </View>
-
-      <View className="form space-y-1" style={{ flex: 1, justifyContent: "center"}}>
-      <Text className="flex-end text-gray-700 ml-4">Name</Text>
-      <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
-        value={name} onChangeText={value=> setName(value)} placeholder='Enter name'/>
-
-      <Text className="text-gray-700 ml-4">Date of Birth</Text>
-      <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
-        value={dob} onChangeText={value=> setDOB(value)} placeholder='Enter DOB'/>
-
-
-
-
-      <TouchableOpacity className="py-3 bg-blue-300 rounded-xl justify-center" >
-
-        <Text className="font-xl font-bold text-center text-gray-700" >Add Baby</Text>
-      </TouchableOpacity>  
-      </View> 
-   
-        
-      
-    </View> 
-
-    </ScrollView>
-
-    */

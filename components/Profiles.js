@@ -5,9 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ref, push, set, query, orderByChild, equalTo, onValue } from "firebase/database";
 import { auth, database} from '../config/firebase'
 
-
 export default function Profiles({ navigation }) {
-  
     const [isLoading, setIsLoading] = useState(true);
 
     //first need to check if the baby exists, and get its ID, then pull data
@@ -108,63 +106,3 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
 });
-
-
-/*
-
- 
-<View className="form space-y-2 mb-8 border rounded-3xl">
-    <View className="flex-row space-x-2.5">
-        <Image source={require('../assets/logo.png')} style={{width: 150, height: 150}} />
-
-        <View style={{borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0}}></View>
-
-        <View className="form space-y-2">
-        <Text className=""></Text>
-        <Text className=""></Text>
-        <Text className="text-white" style={styles.nameText}>Name</Text>
-        <Text className="text-white" style={styles.ageText}>Age</Text>
-        </View>
-
-        <TouchableOpacity style={{ position: "absolute", right: 12, top: 10 }}>
-        <Ionicons name= "pencil" size={27} color= "grey"/>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ position: "absolute", right: 12, bottom: 10 }}>
-        <Ionicons name= "trash" size={27} color= "grey"/>
-        </TouchableOpacity>
-    </View>
-</View>
-
-
-
-
-
-
-
-
-
-<View className="form space-y-2 mb-8 border rounded-3xl">
-    <View className="flex-row space-x-2.5">
-        <Image source={require('../assets/logo.png')} style={{width: 150, height: 150}} />
-
-        <View style={{borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0}}></View>
-
-        <View className="form space-y-2">
-        <Text className=""></Text>
-        <Text className=""></Text>
-        <Text className="text-white" style={styles.nameText}>{item.fullName}</Text>
-        <Text className="text-white" style={styles.ageText}>{item.DOB}</Text>
-        </View>
-
-        <TouchableOpacity style={{ position: "absolute", right: 12, top: 10 }}>
-        <Ionicons name= "pencil" size={27} color= "grey"/>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ position: "absolute", right: 12, bottom: 10 }}>
-        <Ionicons name= "trash" size={27} color= "grey"/>
-        </TouchableOpacity>
-    </View>
-</View>
-
-
-
-*/
