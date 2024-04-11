@@ -54,7 +54,7 @@ export default function Profiles({ navigation }) {
                     renderItem={({ item }) => {
                         return (
                             <View className="form space-y-2 mb-8 border rounded-3xl">
-                                <View className="flex-row space-x-2.5">
+                                <TouchableOpacity className="flex-row space-x-2.5" onPress={()=> navigation.navigate('HomeScreen')}>
                                     <Image source={require('../assets/logo.png')} style={{width: 150, height: 150}} />
 
                                     <View style={{borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0}}></View>
@@ -67,14 +67,13 @@ export default function Profiles({ navigation }) {
                                     </View>
 
                                     <TouchableOpacity style={{ position: "absolute", right: 12, top: 10 }}>
-                                    <Ionicons name= "pencil" size={27} color= "grey"/>
+                                        <Ionicons name= "pencil" size={27} color= "grey"/>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={{ position: "absolute", right: 12, bottom: 10 }}>
-                                    <Ionicons name= "trash" size={27} color= "grey"/>
+                                        <Ionicons name= "trash" size={27} color= "grey"/>
                                     </TouchableOpacity>
-                                </View>
+                                </TouchableOpacity>
                             </View>
-                        
                         )
                     }}
                 />

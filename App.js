@@ -1,7 +1,7 @@
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-//import HomeScreen from './components/HomeScreen';
+import HomeScreen from './components/HomeScreen';
 import Register from './components/Register';
 import Login from './components/Login';
 import AddProfile from './components/AddProfile';
@@ -28,7 +28,12 @@ export default function App() {
                         name="AddProfile"
                         options={{headerShown: false}}
                         component={AddProfile}
-                    />    
+                    />             
+                    <Stack.Screen
+                        name="HomeScreen"
+                        options={{headerShown: false}}
+                        component={HomeScreen}
+                    />        
                 </Stack.Navigator>
             </NavigationContainer>
         );        
