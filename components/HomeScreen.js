@@ -4,8 +4,12 @@ import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import { ref, push, set } from "firebase/database";
+import { auth, database} from '../config/firebase';
 
-export default function HomeScreen({ navigation }) {
+
+
+export default function HomeScreen({route, navigation }) {
   // States
   const [newTodo, setNewTodo] = useState('');
   const [todoItems, setTodoItems] = useState([]);
@@ -18,6 +22,12 @@ export default function HomeScreen({ navigation }) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [feedingModalVisible, setFeedingModalVisible] = useState(false);
   const [diaperModalVisible, setDiaperModalVisible] = useState(false);
+
+
+  
+console.log (route.params);
+const { fullName, babyID } = route.params;
+console.log(fullName);
 
   // Add a new to-do item
   const addTodoItem = () => {
@@ -43,7 +53,34 @@ export default function HomeScreen({ navigation }) {
     };
     setFeedings([...feedings, newFeeding]);
     setFeedingModalVisible(false);
+
+    createFeedingTime();
+
   };
+
+  // Saves feeding times to the database
+  function createFeedingTime() {
+    const feedingTimeRef = ref(database, 'feedingTimes/');
+    const newfeedingTimeRef = push(feedingTimeRef);
+    const feedingTimeKey = newfeedingTimeRef.key;
+
+    // Create the new feeding time entry with a uniquely generated key
+    const newfeedingTime = {
+      feedingTimeID: feedingTimeKey,
+      feedingAmount: 100,
+      feedingDate: "04/16/2024",
+      babyID: babyID,
+
+    };
+
+    // Set the new baby entry in the database and to a catch error in case there is an error
+    set(newfeedingTimeRef, newfeedingTime).then (() => {
+      console.log("Feeding Time was successfully added")
+    }).catch((error) => {
+      console.log(error);
+    })
+  };
+
 
   // Save diaper change record
   const handleSaveDiaperChange = () => {

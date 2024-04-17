@@ -53,8 +53,10 @@ export default function Profiles({ navigation }) {
                     keyExtractor={item => item.babyID}
                     renderItem={({ item }) => {
                         return (
+
                             <View className="form space-y-2 mb-8 border rounded-3xl">
-                                <TouchableOpacity className="flex-row space-x-2.5" onPress={()=> navigation.navigate('HomeScreen')}>
+                                <TouchableOpacity className="flex-row space-x-2.5" onPress={()=> navigation.navigate('HomeScreen', item)}>
+
                                     <Image source={require('../assets/logo.png')} style={{ width: 150, height: 150 }}/>
 
                                     <View style={{ borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0 }}></View>
