@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import { ref, push, set } from "firebase/database";
+import { ref, push, set, query, orderByChild, onValue } from "firebase/database";
 import { auth, database} from '../config/firebase';
 
 
@@ -18,16 +18,50 @@ export default function HomeScreen({route, navigation }) {
   const [showAllRecords, setShowAllRecords] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [feedingAmount, setFeedingAmount] = useState('');
+  const [foodChoice, setFoodChoice] = useState('');
   const [diaperType, setDiaperType] = useState('Wet');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [feedingModalVisible, setFeedingModalVisible] = useState(false);
   const [diaperModalVisible, setDiaperModalVisible] = useState(false);
+  const { fullName, babyID } = route.params;
+  const feedingTimeRef = ref(database, 'feedingTimes/');
 
 
-  
-console.log (route.params);
-const { fullName, babyID } = route.params;
-console.log(fullName);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+    //fetching existing feeding records
+    const allFeedingTimesQuery = useMemo(() => (
+        query(feedingTimeRef, orderByChild('dateTime'))
+    ), [feedingTimeRef]);
+    
+    useEffect(() => {
+        const unsubscribe = onValue(allFeedingTimesQuery, (snapshot) => {
+                if (snapshot.exists()) {
+                  console.log("Feeding Times Found!!!")
+                  let tmp = [];
+                  snapshot.forEach(child => {
+                      console.log(child.key, child.val());
+                      tmp.push(child.val());
+                  });
+                    
+                    //const feedingTimes = snapshot.val();
+                    const feedingTimes = tmp;
+                    // Filter feedingTimes based on the "babyId"
+                    const filteredFeedingTimes = Object.values(feedingTimes).filter(feedingTime => feedingTime.babyID && feedingTime.babyID == babyID);
+                    // Set filtered feedingTimes to state
+                    setFeedings(filteredFeedingTimes);
+                    console.log(filteredFeedingTimes);
+                } else {
+                    console.log("No feedingTimes found");
+                    setFeedings([]); // Reset feedings with empty array
+                }
+                setIsLoading(false); // Set loading state to false
+            }, {
+                // Add appropriate error handling here
+            });
+            return () => unsubscribe();
+    }, []);
 
   // Add a new to-do item
   const addTodoItem = () => {
@@ -47,10 +81,14 @@ console.log(fullName);
   // Save feeding record
   const handleSaveFeeding = () => {
     const newFeeding = {
-      date: selectedDate.toLocaleDateString(),
-      time: selectedDate.toLocaleTimeString(),
-      amount: feedingAmount,
+      feedingAmount: Number(feedingAmount),
+      feedingDate: selectedDate.toLocaleDateString(),
+      feedingTime: selectedDate.toLocaleTimeString(),
+      dateTime: selectedDate.getTime(),
+      babyID: babyID,
+      foodChoice: foodChoice
     };
+
     setFeedings([...feedings, newFeeding]);
     setFeedingModalVisible(false);
 
@@ -60,17 +98,18 @@ console.log(fullName);
 
   // Saves feeding times to the database
   function createFeedingTime() {
-    const feedingTimeRef = ref(database, 'feedingTimes/');
     const newfeedingTimeRef = push(feedingTimeRef);
     const feedingTimeKey = newfeedingTimeRef.key;
 
-    // Create the new feeding time entry with a uniquely generated key
+    // Create the new feeding time entry with a uniquely g6enerated key
     const newfeedingTime = {
       feedingTimeID: feedingTimeKey,
-      feedingAmount: 100,
-      feedingDate: "04/16/2024",
+      feedingAmount: Number(feedingAmount),
+      feedingDate: selectedDate.toLocaleDateString(),
+      feedingTime: selectedDate.toLocaleTimeString(),
+      dateTime: selectedDate.getTime(),
       babyID: babyID,
-
+      foodChoice: foodChoice
     };
 
     // Set the new baby entry in the database and to a catch error in case there is an error
@@ -139,7 +178,7 @@ console.log(fullName);
             <Button title="Feeding" onPress={() => setFeedingModalVisible(true)} />
             {feedings.length > 0 && (
               <Text style={styles.recordPreview}>
-                Last Feeding: {feedings[feedings.length - 1].date} at {feedings[feedings.length - 1].time}, {feedings[feedings.length - 1].amount} mL
+                Last Feeding: {feedings[feedings.length - 1].foodChoice} - {feedings[feedings.length - 1].feedingDate} at {feedings[feedings.length - 1].feedingTime}, {feedings[feedings.length - 1].feedingAmount} mL
               </Text>
             )}
           </View>
@@ -160,7 +199,7 @@ console.log(fullName);
             {showAllRecords && (
               <>
                 {feedings.map((feeding, index) => (
-                  <Text key={`feeding-${index}`}>Feeding #{index + 1}: {feeding.date} - {feeding.time} - {feeding.amount} mL</Text>
+                  <Text key={`feeding-${index}`}>Feeding #{index + 1}: {feeding.feedingDate} - {feeding.feedingTime} - {feeding.feedingAmount} mL - {feeding.foodChoice}</Text>
                 ))}
                 {diaperChanges.map((change, index) => (
                   <Text key={`diaper-${index}`}>Diaper #{index + 1}: {change.type} on {change.date} at {change.time}</Text>
@@ -187,6 +226,12 @@ console.log(fullName);
                   onChange={onChangeDate}
                 />
               )}
+              <TextInput
+                style={styles.input}
+                placeholder="Food Choice Name"
+                value={foodChoice}
+                onChangeText={setFoodChoice}
+              />
               <TextInput
                 style={styles.input}
                 placeholder="Amount in mL"
