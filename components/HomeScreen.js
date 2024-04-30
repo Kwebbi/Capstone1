@@ -101,10 +101,50 @@ useEffect(() => {
     return () => unsubscribe(); // Cleanup on unmount
 }, [babyID]);
 
+  const { fullName, babyID } = route.params;
+  const feedingTimeRef = ref(database, 'feedingTimes/');
+
+
+
+  const [isLoading, setIsLoading] = useState(true);
+
+    //fetching existing feeding records
+    const allFeedingTimesQuery = useMemo(() => (
+        query(feedingTimeRef, orderByChild('dateTime'))
+    ), [feedingTimeRef]);
+    
+    useEffect(() => {
+        const unsubscribe = onValue(allFeedingTimesQuery, (snapshot) => {
+                if (snapshot.exists()) {
+                  console.log("Feeding Times Found!!!")
+                  let tmp = [];
+                  snapshot.forEach(child => {
+                      console.log(child.key, child.val());
+                      tmp.push(child.val());
+                  });
+                    
+                    //const feedingTimes = snapshot.val();
+                    const feedingTimes = tmp;
+                    // Filter feedingTimes based on the "babyId"
+                    const filteredFeedingTimes = Object.values(feedingTimes).filter(feedingTime => feedingTime.babyID && feedingTime.babyID == babyID);
+                    // Set filtered feedingTimes to state
+                    setFeedings(filteredFeedingTimes);
+                    console.log(filteredFeedingTimes);
+                } else {
+                    console.log("No feedingTimes found");
+                    setFeedings([]); // Reset feedings with empty array
+                }
+                setIsLoading(false); // Set loading state to false
+            }, {
+                // Add appropriate error handling here
+            });
+            return () => unsubscribe();
+    }, []);
 
   // Add a new to-do item
   const addTodoItem = () => {
     if (newTodo.trim()) {
+
         const newTodoRef = push(ref(database, 'todoItems'));
         const newTodoKey = newTodoRef.key;
         set(newTodoRef, newTodo.trim()).then(() => {
@@ -129,6 +169,10 @@ useEffect(() => {
     });
 }, []);
 
+      setTodoItems([...todoItems, newTodo]);
+      setNewTodo('');
+    }
+  };
 
   // Handle date change
   const onChangeDate = (event, selectedDate) => {
@@ -166,6 +210,7 @@ useEffect(() => {
     setFeedingModalVisible(false);
 
     createFeedingTime();
+
   };
 
   // Saves feeding times to the database
@@ -173,7 +218,7 @@ useEffect(() => {
     const newfeedingTimeRef = push(feedingTimeRef);
     const feedingTimeKey = newfeedingTimeRef.key;
 
-    // Create the new feeding time entry with a uniquely generated key
+    // Create the new feeding time entry with a uniquely g6enerated key
     const newfeedingTime = {
       feedingTimeID: feedingTimeKey,
       feedingAmount: Number(feedingAmount),
@@ -258,7 +303,25 @@ const handleSaveDiaperChange = () => {
     });
     
 };
+    // Set the new baby entry in the database and to a catch error in case there is an error
+    set(newfeedingTimeRef, newfeedingTime).then (() => {
+      console.log("Feeding Time was successfully added")
+    }).catch((error) => {
+      console.log(error);
+    })
+  };
 
+
+  // Save diaper change record
+  const handleSaveDiaperChange = () => {
+    const newDiaperChange = {
+      date: selectedDate.toLocaleDateString(),
+      time: selectedDate.toLocaleTimeString(),
+      type: diaperType,
+    };
+    setDiaperChanges([...diaperChanges, newDiaperChange]);
+    setDiaperModalVisible(false);
+  };
 
   return (
     <ScrollView automaticallyAdjustKeyboardInsets={true}>
@@ -272,6 +335,7 @@ const handleSaveDiaperChange = () => {
             </TouchableOpacity>
 
             <Text className="text-white" style={styles.titleText}>BabyTracker</Text>
+            <Text className="text-white" style={styles.titleText}>Baby Name</Text>
           </View>
         </SafeAreaView>
         
@@ -284,6 +348,7 @@ const handleSaveDiaperChange = () => {
                 <Text style={styles.avatarText}>Avatar</Text>
               </TouchableOpacity>
               <Text style={styles.nameText}>{fullName}</Text>
+              <Text style={styles.nameText}>Avatar Name</Text>
             </View>
 
             {/* To-Do List */}
@@ -299,6 +364,14 @@ const handleSaveDiaperChange = () => {
             {todoItems.map(todo => (
                 <Text key={todo.id}>{todo.text}</Text>
             ))}
+                onChangeText={setNewTodo}
+                value={newTodo}
+                placeholder="Add new to-do"
+                onSubmitEditing={addTodoItem}
+              />
+              {todoItems.map((item, index) => (
+                <Text key={index} style={styles.todoItem}>• {item}</Text>
+              ))}
             </View>
           </View>
 
@@ -336,6 +409,10 @@ const handleSaveDiaperChange = () => {
                     {/* Show All Records Button */}
                     <View style={styles.buttonContainer}>
             <Button title="Recent Activities" onPress={() => setShowAllRecords(!showAllRecords)} />
+
+          {/* Show All Records Button */}
+          <View style={styles.buttonContainer}>
+            <Button title="Show All Records" onPress={() => setShowAllRecords(!showAllRecords)} />
             {showAllRecords && (
               <>
                 {feedings.map((feeding, index) => (
@@ -459,6 +536,76 @@ const handleSaveDiaperChange = () => {
             </View>
           </Modal>
         </View>
+              </>
+            )}
+          </View>
+
+          {/* Feeding Modal */}
+          <Modal
+            visible={feedingModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setFeedingModalVisible(false)}>
+            <View style={styles.modalView}>
+              <Text>Enter Feeding Details:</Text>
+              <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
+              {isDatePickerVisible && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={selectedDate}
+                  mode="datetime"
+                  display="default"
+                  onChange={onChangeDate}
+                />
+              )}
+              <TextInput
+                style={styles.input}
+                placeholder="Food Choice Name"
+                value={foodChoice}
+                onChangeText={setFoodChoice}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Amount in mL"
+                value={feedingAmount}
+                onChangeText={setFeedingAmount}
+                keyboardType="numeric"
+              />
+              <Button title="Save" onPress={handleSaveFeeding} />
+            </View>
+          </Modal>
+
+          {/* Diaper Change Modal */}
+          <Modal
+            visible={diaperModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setDiaperModalVisible(false)}>
+            <View style={styles.modalView}>
+              <Text>Diaper Change Type:</Text>
+              <Picker
+                selectedValue={diaperType}
+                onValueChange={(itemValue, itemIndex) => setDiaperType(itemValue)}
+                style={{width: 200, height: 44}}>
+                <Picker.Item label="Wet" value="Wet" />
+                <Picker.Item label="Dirty" value="Dirty" />
+                <Picker.Item label="Mixed" value="Mixed" />
+                <Picker.Item label="Dry" value="Dry" />
+              </Picker>
+              <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
+              {isDatePickerVisible && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={selectedDate}
+                  mode="datetime"
+                  display="default"
+                  onChange={onChangeDate}
+                />
+              )}
+              <Button title="Save" onPress={handleSaveDiaperChange} />
+            </View>
+          </Modal>
+        </View>
       </View>
     </ScrollView>
   );
@@ -550,9 +697,16 @@ const styles = StyleSheet.create({
     width: '100%',
     fontSize: 16,
   },
+  },
+  picker: {
+    width: '100%',
+    marginBottom: 20,
+  },
+
   titleText: {
     color: '#28436d',
     fontSize: 30,
     fontWeight: 'bold',
   },
+});
 });
