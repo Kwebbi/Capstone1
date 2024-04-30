@@ -8,6 +8,16 @@ import { auth, database} from '../config/firebase'
 export default function Profiles({ navigation }) {
     const [isLoading, setIsLoading] = useState(true);
 
+    const handleLogout = () => {
+        auth.signOut().then(() => {
+            // Sign-out successful.
+            navigation.navigate('Login'); // Navigate to your login screen
+        }).catch((error) => {
+            // An error happened.
+            console.error(error);
+        });
+    };
+
     //first need to check if the baby exists, and get its ID, then pull data
     const babiesRef = ref(database, 'babies');
     const[myBabies, setMyBabies] = useState([]); // not in use
@@ -41,6 +51,9 @@ export default function Profiles({ navigation }) {
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
             <Text className="text-white mt-5" style={styles.titleText}>Baby Profiles</Text>
+            <TouchableOpacity onPress={handleLogout} style={{ padding: 15 }}>
+                        <Ionicons name="log-out" size={42} color="black" />
+                    </TouchableOpacity>
           </View>
         </SafeAreaView>
         {isLoading ? ( // Check if isLoading is true
@@ -106,4 +119,5 @@ const styles = StyleSheet.create({
     color: '#28436d',
     fontSize: 17,
   },
+});
 });
