@@ -5,10 +5,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { ref, push, set, query, orderByChild, equalTo, onValue } from "firebase/database";
 import { auth, database} from '../config/firebase'
 
-
 export default function Profiles({ navigation }) {
-  
     const [isLoading, setIsLoading] = useState(true);
+
+    const handleLogout = () => {
+        auth.signOut().then(() => {
+            // Sign-out successful.
+            navigation.navigate('Login'); // Navigate to your login screen
+        }).catch((error) => {
+            // An error happened.
+            console.error(error);
+        });
+    };
 
     //first need to check if the baby exists, and get its ID, then pull data
     const babiesRef = ref(database, 'babies');
@@ -39,15 +47,18 @@ export default function Profiles({ navigation }) {
     }, []);
         
     return (
-      <View className="flex bg-white" style={{backgroundColor: "#cfe2f3"}}>
+      <View className="flex bg-white" style={{ backgroundColor: "#cfe2f3" }}>
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
             <Text className="text-white mt-5" style={styles.titleText}>Baby Profiles</Text>
+            <TouchableOpacity onPress={handleLogout} style={{ padding: 15 }}>
+                        <Ionicons name="log-out" size={42} color="black" />
+                    </TouchableOpacity>
           </View>
         </SafeAreaView>
         {isLoading ? ( // Check if isLoading is true
             // Render ActivityIndicator while loading
-            <ActivityIndicator size="large" color="#0000ff" style={{ flex: 1, justifyContent: "center", alignItems: "center" }} />
+            <ActivityIndicator size="large" color="#0000ff" style={{ flex: 1, justifyContent: "center", alignItems: "center" }}/>
         ) : (
             <View className="flex bg-white px-8 pt-8" style={{borderTopLeftRadius: 50, borderTopRightRadius: 50}}>
                 <FlatList
@@ -55,11 +66,13 @@ export default function Profiles({ navigation }) {
                     keyExtractor={item => item.babyID}
                     renderItem={({ item }) => {
                         return (
-                            <View className="form space-y-2 mb-8 border rounded-3xl">
-                                <View className="flex-row space-x-2.5">
-                                    <Image source={require('../assets/logo.png')} style={{width: 150, height: 150}} />
 
-                                    <View style={{borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0}}></View>
+                            <View className="form space-y-2 mb-8 border rounded-3xl">
+                                <TouchableOpacity className="flex-row space-x-2.5" onPress={()=> navigation.navigate('HomeScreen', item)}>
+
+                                    <Image source={require('../assets/logo.png')} style={{ width: 150, height: 150 }}/>
+
+                                    <View style={{ borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0 }}></View>
 
                                     <View className="form space-y-2">
                                     <Text className=""></Text>
@@ -69,14 +82,13 @@ export default function Profiles({ navigation }) {
                                     </View>
 
                                     <TouchableOpacity style={{ position: "absolute", right: 12, top: 10 }}>
-                                    <Ionicons name= "pencil" size={27} color= "grey"/>
+                                        <Ionicons name= "pencil" size={27} color= "grey"/>
                                     </TouchableOpacity>
                                     <TouchableOpacity style={{ position: "absolute", right: 12, bottom: 10 }}>
-                                    <Ionicons name= "trash" size={27} color= "grey"/>
+                                        <Ionicons name= "trash" size={27} color= "grey"/>
                                     </TouchableOpacity>
-                                </View>
+                                </TouchableOpacity>
                             </View>
-                        
                         )
                     }}
                 />
@@ -108,63 +120,3 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
 });
-
-
-/*
-
- 
-<View className="form space-y-2 mb-8 border rounded-3xl">
-    <View className="flex-row space-x-2.5">
-        <Image source={require('../assets/logo.png')} style={{width: 150, height: 150}} />
-
-        <View style={{borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0}}></View>
-
-        <View className="form space-y-2">
-        <Text className=""></Text>
-        <Text className=""></Text>
-        <Text className="text-white" style={styles.nameText}>Name</Text>
-        <Text className="text-white" style={styles.ageText}>Age</Text>
-        </View>
-
-        <TouchableOpacity style={{ position: "absolute", right: 12, top: 10 }}>
-        <Ionicons name= "pencil" size={27} color= "grey"/>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ position: "absolute", right: 12, bottom: 10 }}>
-        <Ionicons name= "trash" size={27} color= "grey"/>
-        </TouchableOpacity>
-    </View>
-</View>
-
-
-
-
-
-
-
-
-
-<View className="form space-y-2 mb-8 border rounded-3xl">
-    <View className="flex-row space-x-2.5">
-        <Image source={require('../assets/logo.png')} style={{width: 150, height: 150}} />
-
-        <View style={{borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0}}></View>
-
-        <View className="form space-y-2">
-        <Text className=""></Text>
-        <Text className=""></Text>
-        <Text className="text-white" style={styles.nameText}>{item.fullName}</Text>
-        <Text className="text-white" style={styles.ageText}>{item.DOB}</Text>
-        </View>
-
-        <TouchableOpacity style={{ position: "absolute", right: 12, top: 10 }}>
-        <Ionicons name= "pencil" size={27} color= "grey"/>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ position: "absolute", right: 12, bottom: 10 }}>
-        <Ionicons name= "trash" size={27} color= "grey"/>
-        </TouchableOpacity>
-    </View>
-</View>
-
-
-
-*/
