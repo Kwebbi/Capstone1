@@ -1,149 +1,135 @@
-/******************************** 
-    This screen is not in use
-********************************
-import React, { Component, useState } from "react";
-import { StyleSheet, Button, View, Text, TouchableOpacity, FlatList, Image } from "react-native";
+import React, { useState, useMemo, useEffect } from 'react';
+import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-import { signOut } from "firebase/auth";
-import { auth } from '../config/firebase'
-
-export default function HomeScreen({ navigation }) {
-  const handleLogout = async ()=>{
-    await signOut(auth);
-  }
-
-  const data = [
-    { id: 1, image: '', username: 'baby1' },
-    { id: 2, image: '', username: 'baby2' },
-    { id: 3, image: '', username: 'baby3' },
-
-  ]
-
-  const [babies, setBabies] = useState(data)
-  return (
-
-    <View className="flex-1 bg-white">
-      <SafeAreaView style={{backgroundColor: "#cfe2f3", borderBottomLeftRadius: 50, borderBottomRightRadius: 50}}>
-        <View className="flex bg-white px-8 pt-10" style={{backgroundColor: "#cfe2f3", borderBottomLeftRadius: 50, borderBottomRightRadius: 50}}>
-          <Text className="text-white font-xl font-bold text-center" style={{fontSize: 30}}>Home</Text>
-        </View>
-      </SafeAreaView>
-
-      <View style={styles.container}>
-      <View style={styles.body}>
-
-
-        <FlatList
-          style={styles.container}
-          enableEmptySections={true}
-          data={babies}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => {
-            return (
-              <TouchableOpacity>
-                <View style={styles.box}>
-                  <Image style={styles.image} source={{ uri: item.image }} />
-                  <Text style={styles.username}>{item.username}</Text>
-                </View> 
-              </TouchableOpacity>
-              
-            )
-          }}
-        />
-      </View>
-      </View>
-      <View style={{ flex: 1, justifyContent: "center" }}>
-          <TouchableOpacity className="py-3 bg-blue-100 rounded-xl" onPress={()=> navigation.navigate('AddProfile')}>
-            <Text className="font-xl font-bold text-center text-gray-700">Add Baby</Text>
-          </TouchableOpacity>
-        </View>
-    </View>
-  );
-}
-
-/*
-      <View style={{ flex: 1, justifyContent: "center" }}>
-          <TouchableOpacity className="py-3 bg-blue-300 rounded-xl" onPress={()=> navigation.navigate('AddProfile')}>
-            <Text className="font-xl font-bold text-center text-gray-700">+</Text>
-          </TouchableOpacity>
-        </View>
-*/
-/*
-const styles = StyleSheet.create({
-
-  image: {
-    width: 60,
-    height: 60,
-  },
-  name: {
-    fontSize: 22,
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
-  body: {
-    padding: 30,
-    backgroundColor: '#ffffff',
-  },
-  box: {
-    padding: 20,
-    marginTop: 5,
-    marginBottom: 5,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    flexDirection: 'row',
-    shadowColor: 'black',
-    shadowOpacity: 0.2,
-    shadowOffset: {
-      height: 1,
-      width: -2,
-    },
-    elevation: 2,
-  },
-  username: {
-    color: '#20B2AA',
-    fontSize: 22,
-    alignSelf: 'center',
-    marginLeft: 10,
-  },
-})
-*/
-import React, { useState } from 'react';
-import {
-  Modal,
-  Text,
-  Button,
-  View,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Platform,
-} from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import { ref, push, set, query, orderByChild, onValue, remove } from "firebase/database";
+import { auth, database } from '../config/firebase';
 
-const HomeScreen = () => {
+export default function HomeScreen({route, navigation }) {
   // States
   const [newTodo, setNewTodo] = useState('');
   const [todoItems, setTodoItems] = useState([]);
   const [feedings, setFeedings] = useState([]);
   const [diaperChanges, setDiaperChanges] = useState([]);
+  const [sleepRecords, setSleepRecords] = useState([]);
   const [showAllRecords, setShowAllRecords] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [feedingAmount, setFeedingAmount] = useState('');
+  const [foodChoice, setFoodChoice] = useState('');
   const [diaperType, setDiaperType] = useState('Wet');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [feedingModalVisible, setFeedingModalVisible] = useState(false);
   const [diaperModalVisible, setDiaperModalVisible] = useState(false);
+  const [sleepModalVisible, setSleepModalVisible] = useState(false);
+  const [isStartPickerVisible, setStartPickerVisibility] = useState(false);
+  const [isEndPickerVisible, setEndPickerVisibility] = useState(false);
+  const [sleepStart, setSleepStart] = useState(new Date());
+  const [sleepEnd, setSleepEnd] = useState(new Date());
+  const { fullName, babyID } = route.params;
+  const feedingTimeRef = ref(database, 'feedingTimes/');
+  const sleepTimeRef = ref(database, 'sleepTimes/');
+  const diaperChangeRef = ref(database, 'diaperChanges/');
+  
+
+  const [isLoading, setIsLoading] = useState(true);
+  
+
+  // Fetching existing feeding records
+  const allFeedingTimesQuery = useMemo(() => (
+      query(feedingTimeRef, orderByChild('dateTime'))
+  ), [feedingTimeRef]);
+  
+  useEffect(() => {
+      const unsubscribe = onValue(allFeedingTimesQuery, (snapshot) => {
+          if (snapshot.exists()) {
+            console.log("Feeding Times Found!!!")
+            let tmp = [];
+            snapshot.forEach(child => {
+                console.log(child.key, child.val());
+                tmp.push(child.val());
+            });
+              
+              //const feedingTimes = snapshot.val();
+              const feedingTimes = tmp;
+              // Filter feedingTimes based on the "babyId"
+              const filteredFeedingTimes = Object.values(feedingTimes).filter(feedingTime => feedingTime.babyID && feedingTime.babyID == babyID);
+              // Set filtered feedingTimes to state
+              setFeedings(filteredFeedingTimes);
+              console.log(filteredFeedingTimes);
+          } else {
+              console.log("No feedingTimes found");
+              setFeedings([]); // Reset feedings with empty array
+          }
+          setIsLoading(false); // Set loading state to false
+      }, {
+          // Add appropriate error handling here
+      });
+      return () => unsubscribe();
+  }, []);
+
+  // Fetching existing diaper change records
+useEffect(() => {
+  const unsubscribe = onValue(diaperChangeRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const diaperChanges = snapshot.val();
+      setDiaperChanges(Object.values(diaperChanges));
+    } else {
+      console.log("No diaper changes found");
+      setDiaperChanges([]); // Reset diaper changes with empty array
+    }
+  }, {
+    // Add appropriate error handling here
+  });
+  return () => unsubscribe();
+}, [babyID]); // Add babyID to the dependency array
+
+  useEffect(() => {
+    const sleepTimesRef = ref(database, 'sleepTimes/');
+    const sleepQuery = query(sleepTimesRef, orderByChild('babyID'));
+
+    const unsubscribe = onValue(sleepQuery, (snapshot) => {
+        const fetchedSleepRecords = [];
+        snapshot.forEach(childSnapshot => {
+            if (childSnapshot.val().babyID === babyID) {
+                fetchedSleepRecords.push(childSnapshot.val());
+            }
+        });
+        setSleepRecords(fetchedSleepRecords);
+    });
+
+    return () => unsubscribe(); // Cleanup on unmount
+}, [babyID]);
+
 
   // Add a new to-do item
   const addTodoItem = () => {
     if (newTodo.trim()) {
-      setTodoItems([...todoItems, newTodo]);
-      setNewTodo('');
+        const newTodoRef = push(ref(database, 'todoItems'));
+        const newTodoKey = newTodoRef.key;
+        set(newTodoRef, newTodo.trim()).then(() => {
+            setTodoItems([...todoItems, { id: newTodoKey, text: newTodo.trim() }]);
+            setNewTodo('');
+        }).catch((error) => {
+            console.error("Error adding todo item: ", error);
+        });
     }
-  };
+};
+
+  useEffect(() => {
+    const todoItemsRef = ref(database, 'todoItems');
+    onValue(todoItemsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            const todoItemsList = Object.keys(data).map(key => ({ id: key, text: data[key] }));
+            setTodoItems(todoItemsList);
+        } else {
+            setTodoItems([]);
+        }
+    });
+}, []);
+
 
   // Handle date change
   const onChangeDate = (event, selectedDate) => {
@@ -152,151 +138,329 @@ const HomeScreen = () => {
     setDatePickerVisibility(false); // Hide the picker
   };
 
+  // Handle sleep start date change
+  const onChangeSleepStart = (event, selectedDate) => {
+    const currentDate = selectedDate || sleepStart;
+    setSleepStart(currentDate);
+    setStartPickerVisibility(false); // Hide the picker
+  };
+
+  // Handle sleep end date change
+  const onChangeSleepEnd = (event, selectedDate) => {
+    const currentDate = selectedDate || sleepEnd;
+    setSleepEnd(currentDate);
+    setEndPickerVisibility(false); // Hide the picker
+  };
+
   // Save feeding record
   const handleSaveFeeding = () => {
     const newFeeding = {
-      date: selectedDate.toLocaleDateString(),
-      time: selectedDate.toLocaleTimeString(),
-      amount: feedingAmount,
+      feedingAmount: Number(feedingAmount),
+      feedingDate: selectedDate.toLocaleDateString(),
+      feedingTime: selectedDate.toLocaleTimeString(),
+      dateTime: selectedDate.getTime(),
+      babyID: babyID,
+      foodChoice: foodChoice
     };
+
     setFeedings([...feedings, newFeeding]);
     setFeedingModalVisible(false);
+
+    createFeedingTime();
+  };
+
+  // Saves feeding times to the database
+  function createFeedingTime() {
+    const newfeedingTimeRef = push(feedingTimeRef);
+    const feedingTimeKey = newfeedingTimeRef.key;
+
+    // Create the new feeding time entry with a uniquely generated key
+    const newfeedingTime = {
+      feedingTimeID: feedingTimeKey,
+      feedingAmount: Number(feedingAmount),
+      feedingDate: selectedDate.toLocaleDateString(),
+      feedingTime: selectedDate.toLocaleTimeString(),
+      dateTime: selectedDate.getTime(),
+      babyID: babyID,
+      foodChoice: foodChoice
+    };
+
+    // Set the new baby entry in the database and to catch error in case there is an error
+    set(newfeedingTimeRef, newfeedingTime).then(() => {
+      console.log("Feeding Time was successfully added");
+    }).catch((error) => {
+      console.log(error);
+    });
   };
 
   // Save diaper change record
-  const handleSaveDiaperChange = () => {
-    const newDiaperChange = {
-      date: selectedDate.toLocaleDateString(),
-      time: selectedDate.toLocaleTimeString(),
-      type: diaperType,
-    };
-    setDiaperChanges([...diaperChanges, newDiaperChange]);
-    setDiaperModalVisible(false);
+const handleSaveDiaperChange = () => {
+  const newDiaperChange = {
+    date: selectedDate.toLocaleDateString(),
+    time: selectedDate.toLocaleTimeString(),
+    type: diaperType,
+    babyID: babyID, // Include the babyID
   };
 
+  setDiaperChanges([...diaperChanges, newDiaperChange]); // Update local state
+
+  // Push to Firebase
+  const newDiaperChangeRef = push(diaperChangeRef);
+  set(newDiaperChangeRef, newDiaperChange).then(() => {
+    console.log("Diaper change saved to Firebase");
+  }).catch((error) => {
+    console.error("Error saving diaper change: ", error);
+  });
+
+  setDiaperModalVisible(false); // Close the modal after saving
+};
+  // Save sleep record
+  const handleSaveSleep = () => {
+    const newSleepRecord = {
+      sleepStart: sleepStart.getTime(), // Store the time as timestamp
+      sleepEnd: sleepEnd.getTime(), // Store the time as timestamp
+      babyID: babyID,
+    };
+
+    setSleepRecords([...sleepRecords, newSleepRecord]);
+    setSleepModalVisible(false);
+
+    // Push to Firebase
+    createSleepTime(newSleepRecord);
+  };
+
+  function createSleepTime(sleepData) {
+    const newSleepTimeRef = push(sleepTimeRef);
+    const sleepTimeKey = newSleepTimeRef.key;
+
+    // Extend sleepData with a unique key
+    const newSleepTime = {
+      ...sleepData,
+      sleepTimeID: sleepTimeKey
+    };
+
+    // Push the new record to Firebase
+    set(newSleepTimeRef, newSleepTime).then(() => {
+      console.log("Sleep Time was successfully added");
+    }).catch((error) => {
+      console.error("Error adding sleep time: ", error);
+    });
+  };
+
+  const handleDeleteSleep = (sleepTimeID) => {
+    const sleepTimeRef = ref(database, `sleepTimes/${sleepTimeID}`);
+    remove(sleepTimeRef)
+    .then(() => {
+        console.log("Sleep time removed from Firebase");
+        setSleepRecords(prevRecords => prevRecords.filter(record => record.sleepTimeID !== sleepTimeID));
+    })
+    .catch(error => {
+        console.error("Failed to remove sleep time: ", error);
+    });
+    
+};
+
+
   return (
-    <ScrollView style={styles.container}>
-      {/* Banner with Name */}
-      <View style={styles.banner}>
-        <Text style={styles.bannerText}>Banner Name</Text>
-      </View>
+    <ScrollView automaticallyAdjustKeyboardInsets={true}>
+      <View className="flex bg-white" style={{backgroundColor: "#cfe2f3"}}>
+        
+        {/* Banner with Name */}
+        <SafeAreaView className="flex">
+          <View className="flex-row justify-center" style={styles.container}>
+            <TouchableOpacity style={{ position: "absolute", left: 22, top: 25 }} onPress={()=> navigation.navigate('Profiles')}>
+              <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
+            </TouchableOpacity>
 
-      {/* Avatar Section */}
-      <View style={styles.profileSection}>
-        <TouchableOpacity style={styles.avatarBubble}>
-          <Text style={styles.avatarText}>Avatar</Text>
-        </TouchableOpacity>
-        <Text style={styles.nameText}>Avatar Name</Text>
+            <Text className="text-white" style={styles.titleText}>BabyTracker</Text>
+          </View>
+        </SafeAreaView>
+        
+        <View className="flex space-y-10 bg-white px-8 pt-8" style={{ borderTopLeftRadius: 50, borderTopRightRadius: 50, position: "relative", top: -30 }}>
+          
+          {/* Avatar Section */}
+          <View style={styles.profileSection}>
+            <View className="flex justify-center">
+              <TouchableOpacity style={styles.avatarBubble}>
+                <Text style={styles.avatarText}>Avatar</Text>
+              </TouchableOpacity>
+              <Text style={styles.nameText}>{fullName}</Text>
+            </View>
 
-        {/* To-Do List */}
-        <View style={styles.todoList}>
-          <TextInput
-            style={styles.todoInput}
-            onChangeText={setNewTodo}
-            value={newTodo}
-            placeholder="Add new to-do"
-            onSubmitEditing={addTodoItem}
-          />
-          {todoItems.map((item, index) => (
-            <Text key={index} style={styles.todoItem}>• {item}</Text>
-          ))}
-        </View>
-      </View>
-
-      {/* Feeding Button */}
-      <View style={styles.buttonContainer}>
-        <Button title="Feeding" onPress={() => setFeedingModalVisible(true)} />
-        {feedings.length > 0 && (
-          <Text style={styles.recordPreview}>
-            Last Feeding: {feedings[feedings.length - 1].date} at {feedings[feedings.length - 1].time}, {feedings[feedings.length - 1].amount} mL
-          </Text>
-        )}
-      </View>
-
-      {/* Diaper Change Button */}
-      <View style={styles.buttonContainer}>
-        <Button title="Diaper Change" onPress={() => setDiaperModalVisible(true)} />
-        {diaperChanges.length > 0 && (
-          <Text style={styles.recordPreview}>
-            Last Diaper Change: {diaperChanges[diaperChanges.length - 1].type} on {diaperChanges[diaperChanges.length - 1].date} at {diaperChanges[diaperChanges.length - 1].time}
-          </Text>
-        )}
-      </View>
-
-      {/* Show All Records Button */}
-      <View style={styles.buttonContainer}>
-        <Button title="Show All Records" onPress={() => setShowAllRecords(!showAllRecords)} />
-        {showAllRecords && (
-          <>
-            {feedings.map((feeding, index) => (
-              <Text key={`feeding-${index}`}>Feeding #{index + 1}: {feeding.date} - {feeding.time} - {feeding.amount} mL</Text>
+            {/* To-Do List */}
+            <View style={styles.todoList}>
+              <TextInput
+                style={styles.todoInput}
+                value={newTodo}
+                onChangeText={setNewTodo}
+                placeholder="Enter todo item"
+            
+              />
+              <Button title="Add Todo" onPress={addTodoItem} />
+            {todoItems.map(todo => (
+                <Text key={todo.id}>{todo.text}</Text>
             ))}
-            {diaperChanges.map((change, index) => (
-              <Text key={`diaper-${index}`}>Diaper #{index + 1}: {change.type} on {change.date} at {change.time}</Text>
-            ))}
-          </>
-        )}
+            </View>
+          </View>
+
+          {/* Feeding Button */}
+          <View style={styles.buttonContainer}>
+            <Button title="Feeding" onPress={() => setFeedingModalVisible(true)} />
+            {feedings.length > 0 && (
+              <Text style={styles.recordPreview}>
+                Last Feeding: {feedings[feedings.length - 1].foodChoice} - {feedings[feedings.length - 1].feedingDate} at {feedings[feedings.length - 1].feedingTime}, {feedings[feedings.length - 1].feedingAmount} mL
+              </Text>
+            )}
+          </View>
+
+          {/* Diaper Change Button */}
+          <View style={styles.buttonContainer}>
+            <Button title="Diaper Change" onPress={() => setDiaperModalVisible(true)} />
+            {diaperChanges.length > 0 && (
+              <Text style={styles.recordPreview}>
+                Last Diaper Change: {diaperChanges[diaperChanges.length - 1].type} on {diaperChanges[diaperChanges.length - 1].date} at {diaperChanges[diaperChanges.length - 1].time}
+              </Text>
+            )}
+          </View>
+          
+
+          {/* Sleep Button */}
+          <View style={styles.buttonContainer}>
+            <Button title="Sleep" onPress={() => setSleepModalVisible(true)} />
+            {sleepRecords.length > 0 && (
+              <Text style={styles.recordPreview}>
+                Last Sleep Record: {new Date(sleepRecords[sleepRecords.length - 1].sleepStart).toLocaleTimeString()} to {new Date(sleepRecords[sleepRecords.length - 1].sleepEnd).toLocaleTimeString()}
+              </Text>
+            )}
+          </View>
+
+                    {/* Show All Records Button */}
+                    <View style={styles.buttonContainer}>
+            <Button title="Recent Activities" onPress={() => setShowAllRecords(!showAllRecords)} />
+            {showAllRecords && (
+              <>
+                {feedings.map((feeding, index) => (
+                  <Text key={`feeding-${index}`}>Feeding #{index + 1}: {feeding.feedingDate} - {feeding.feedingTime} - {feeding.feedingAmount} mL - {feeding.foodChoice}</Text>
+                ))}
+                {diaperChanges.map((change, index) => (
+                  <Text key={`diaper-${index}`}>Diaper #{index + 1}: {change.type} on {change.date} at {change.time}</Text>
+                ))}
+                <View>
+               {sleepRecords.map((record, index) => (
+              <View key={index} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: '' }}>
+            <Text>Sleep #{index + 1} {new Date(record.sleepStart).toLocaleTimeString()} to {new Date(record.sleepEnd).toLocaleTimeString()}</Text>
+            <Button title="Delete" onPress={() => handleDeleteSleep(record.sleepTimeID)} />
+        </View>
+    ))}
+</View>
+
+              </>
+            )}
+          </View>
+
+          {/* Feeding Modal */}
+          <Modal
+            visible={feedingModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setFeedingModalVisible(false)}>
+            <View style={styles.modalView}>
+              <Text>Enter Feeding Details:</Text>
+              <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
+              {isDatePickerVisible && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={selectedDate}
+                  mode="datetime"
+                  display="default"
+                  onChange={onChangeDate}
+                />
+              )}
+              <TextInput
+                style={styles.input}
+                placeholder="Food Choice Name"
+                value={foodChoice}
+                onChangeText={setFoodChoice}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Amount in mL"
+                value={feedingAmount}
+                onChangeText={setFeedingAmount}
+                keyboardType="numeric"
+              />
+              <Button title="Save" onPress={handleSaveFeeding} />
+              <Button title="Cancel" onPress={() => setFeedingModalVisible(false)} />
+            </View>
+          </Modal>
+
+          {/* Diaper Change Modal */}
+          <Modal
+            visible={diaperModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setDiaperModalVisible(false)}>
+            <View style={styles.modalView}>
+              <Text>Diaper Change Type:</Text>
+              <Picker
+                selectedValue={diaperType}
+                onValueChange={(itemValue, itemIndex) => setDiaperType(itemValue)}
+                style={{width: 200, height: 200}}>
+                <Picker.Item label="Wet" value="Wet" />
+                <Picker.Item label="Dirty" value="Dirty" />
+                <Picker.Item label="Mixed" value="Mixed" />
+                <Picker.Item label="Dry" value="Dry" />
+              </Picker>
+              <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
+              {isDatePickerVisible && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={selectedDate}
+                  mode="datetime"
+                  display="default"
+                  onChange={onChangeDate}
+                />
+              )}
+              <Button title="Save" onPress={handleSaveDiaperChange} />
+              <Button title="Cancel" onPress={() => setDiaperModalVisible(false)} />
+            </View>
+          </Modal>
+
+          {/* Sleep Modal */}
+          <Modal
+            visible={sleepModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setSleepModalVisible(false)}>
+            <View style={styles.modalView}>
+              <Text>Enter Sleep Start:</Text>
+              <Button title="Pick Start Time" onPress={() => setStartPickerVisibility(true)} />
+              {isStartPickerVisible && (
+                <DateTimePicker
+                  testID="startDateTimePicker"
+                  value={sleepStart}
+                  mode="datetime"
+                  display="default"
+                  onChange={onChangeSleepStart}
+                />
+              )}
+              <Text>Enter Sleep End:</Text>
+              <Button title="Pick End Time" onPress={() => setEndPickerVisibility(true)} />
+              {isEndPickerVisible && (
+                <DateTimePicker
+                  testID="endDateTimePicker"
+                  value={sleepEnd}
+                  mode="datetime"
+                  display="default"
+                  onChange={onChangeSleepEnd}
+                />
+              )}
+              <Button title="Save Sleep Record" onPress={handleSaveSleep} />
+              <Button title="Cancel" onPress={() => setSleepModalVisible(false)} />
+            </View>
+          </Modal>
+        </View>
       </View>
-
-      {/* Feeding Modal */}
-      <Modal
-        visible={feedingModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setFeedingModalVisible(false)}>
-        <View style={styles.modalView}>
-          <Text>Enter Feeding Details:</Text>
-          <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
-          {isDatePickerVisible && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={selectedDate}
-              mode="datetime"
-              display="default"
-              onChange={onChangeDate}
-            />
-          )}
-          <TextInput
-            style={styles.input}
-            placeholder="Amount in mL"
-            value={feedingAmount}
-            onChangeText={setFeedingAmount}
-            keyboardType="numeric"
-          />
-          <Button title="Save" onPress={handleSaveFeeding} />
-        </View>
-      </Modal>
-
-      {/* Diaper Change Modal */}
-      <Modal
-        visible={diaperModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setDiaperModalVisible(false)}>
-        <View style={styles.modalView}>
-          <Text>Diaper Change Type:</Text>
-          <Picker
-            selectedValue={diaperType}
-            onValueChange={(itemValue, itemIndex) => setDiaperType(itemValue)}
-            style={{width: 200, height: 44}}>
-            <Picker.Item label="Wet" value="Wet" />
-            <Picker.Item label="Dirty" value="Dirty" />
-            <Picker.Item label="Mixed" value="Mixed" />
-            <Picker.Item label="Dry" value="Dry" />
-          </Picker>
-          <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
-          {isDatePickerVisible && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={selectedDate}
-              mode="datetime"
-              display="default"
-              onChange={onChangeDate}
-            />
-          )}
-          <Button title="Save" onPress={handleSaveDiaperChange} />
-        </View>
-      </Modal>
     </ScrollView>
   );
 };
@@ -329,6 +493,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 14,
+    textAlign: 'center',
   },
   nameText: {
     marginTop: 8,
@@ -338,12 +503,14 @@ const styles = StyleSheet.create({
   },
   todoList: {
     marginLeft: 20,
+    fontWeight: 'bold',
     flex: 1,
   },
   todoInput: {
     borderWidth: 1,
     borderColor: '#ddd',
     padding: 10,
+    fontWeight: 'bold',
     marginBottom: 10,
   },
   todoItem: {
@@ -384,14 +551,9 @@ const styles = StyleSheet.create({
     width: '100%',
     fontSize: 16,
   },
-  picker: {
-    width: '100%',
-    marginBottom: 20,
+  titleText: {
+    color: '#28436d',
+    fontSize: 30,
+    fontWeight: 'bold',
   },
 });
-
-export default HomeScreen;
-
-
-
-
