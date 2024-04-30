@@ -64,7 +64,7 @@ export default function HomeScreen({route, navigation }) {
           }
           setIsLoading(false); // Set loading state to false
       }, {
-          // Add appropriate error handling here
+      
       });
       return () => unsubscribe();
   }, []);
@@ -80,7 +80,6 @@ useEffect(() => {
       setDiaperChanges([]); // Reset diaper changes with empty array
     }
   }, {
-    // Add appropriate error handling here
   });
   return () => unsubscribe();
 }, [babyID]); // Add babyID to the dependency array
