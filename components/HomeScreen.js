@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import { ref, onValue } from 'firebase/database';
+import { database } from '../config/firebase';
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ route, navigation }) {
   // States
   const [newTodo, setNewTodo] = useState('');
   const [todoItems, setTodoItems] = useState([]);
@@ -18,6 +20,27 @@ export default function HomeScreen({ navigation }) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [feedingModalVisible, setFeedingModalVisible] = useState(false);
   const [diaperModalVisible, setDiaperModalVisible] = useState(false);
+
+  const [milestonesModalVisible, setMilestonesModalVisible] = useState(false);
+  const { babyId } = route.params; // Get babyId from navigation params
+  const [showMilestones, setShowMilestones] = useState(false);
+  const [milestones, setMilestones] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchMilestones = () => {
+    setLoading(true);
+    const milestonesRef = ref(database, `babies/${babyId}/milestone`);
+    onValue(milestonesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const milestonesArray = Object.values(data); // Use Object.values to get an array of the milestone objects
+        setMilestones(milestonesArray); // Set milestones directly
+      } else {
+        setMilestones([]); // Reset milestones state if no data found
+      }
+      setLoading(false);
+    });
+  };
 
   // Add a new to-do item
   const addTodoItem = () => {
@@ -131,6 +154,41 @@ export default function HomeScreen({ navigation }) {
               </>
             )}
           </View>
+
+          {/* Show Milestones Button*/}
+          <View style={styles.buttonContainer}>
+            <Button title="Show Milestones" onPress={() => {
+              setMilestonesModalVisible(true);
+              fetchMilestones(); // Fetch milestones when opening the modal
+            }} />
+          </View>
+
+          {/* Milestones Modal */}
+          <Modal
+            visible={milestonesModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setMilestonesModalVisible(false)}
+          >
+            <View style={styles.modalView}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Milestones</Text>
+              {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" />
+              ) : (
+                <FlatList
+                  data={milestones}
+                  keyExtractor={(item, index) => index.toString()} // Use index as key
+                  renderItem={({ item }) => (
+                    <View style={{ padding: 10, borderBottomWidth: 1 }}>
+                      <Text>Title: {item.title}</Text>
+                      <Text>Achieved: {item.achieved ? 'Yes' : 'No'}</Text>
+                    </View>
+                  )}
+                />
+              )}
+              <Button title="Close" onPress={() => setMilestonesModalVisible(false)} />
+            </View>
+          </Modal>
 
           {/* Feeding Modal */}
           <Modal
