@@ -6,6 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { ref, onValue } from 'firebase/database';
 import { database } from '../config/firebase';
+import Timeline from 'react-native-timeline-flatlist';
 
 export default function HomeScreen({ route, navigation }) {
   // States
@@ -21,7 +22,6 @@ export default function HomeScreen({ route, navigation }) {
   const [feedingModalVisible, setFeedingModalVisible] = useState(false);
   const [diaperModalVisible, setDiaperModalVisible] = useState(false);
 
-  const [milestonesModalVisible, setMilestonesModalVisible] = useState(false);
   const { babyId } = route.params; // Get babyId from navigation params
   const [showMilestones, setShowMilestones] = useState(false);
   const [milestones, setMilestones] = useState([]);
@@ -33,14 +33,24 @@ export default function HomeScreen({ route, navigation }) {
     onValue(milestonesRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const milestonesArray = Object.values(data); // Use Object.values to get an array of the milestone objects
-        setMilestones(milestonesArray); // Set milestones directly
+        const milestonesArray = Object.values(data);
+        console.log("Milestones fetched: ", milestonesArray); // Log fetched milestones
+        setMilestones(milestonesArray);
       } else {
-        setMilestones([]); // Reset milestones state if no data found
+        console.log("No milestones found."); // No milestones are found
+        setMilestones([]);
       }
       setLoading(false);
     });
   };
+
+  const timelineData = milestones.map((milestone, index) => ({
+    time: `Milestone ${index + 1}`,
+    title: milestone.title,
+    description: milestone.achieved ? 'Achieved' : 'Not Achieved',
+  }));
+  //console.log('Timeline Data:', timelineData);
+
 
   // Add a new to-do item
   const addTodoItem = () => {
@@ -157,38 +167,24 @@ export default function HomeScreen({ route, navigation }) {
 
           {/* Show Milestones Button*/}
           <View style={styles.buttonContainer}>
-            <Button title="Show Milestones" onPress={() => {
-              setMilestonesModalVisible(true);
-              fetchMilestones(); // Fetch milestones when opening the modal
+            <Button title={showMilestones ? "Hide Milestones" : "Show Milestones"} onPress={() => {
+              setShowMilestones(!showMilestones);
+              if (!showMilestones) {
+                fetchMilestones(); // Fetch milestones when showing
+              }
             }} />
           </View>
 
-          {/* Milestones Modal */}
-          <Modal
-            visible={milestonesModalVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setMilestonesModalVisible(false)}
-          >
-            <View style={styles.modalView}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Milestones</Text>
+          {/* Loading and Timeline Display */}
+          {showMilestones && (
+            <View style={styles.timelineContainer}>
               {loading ? (
                 <ActivityIndicator size="large" color="#0000ff" />
               ) : (
-                <FlatList
-                  data={milestones}
-                  keyExtractor={(item, index) => index.toString()} // Use index as key
-                  renderItem={({ item }) => (
-                    <View style={{ padding: 10, borderBottomWidth: 1 }}>
-                      <Text>Title: {item.title}</Text>
-                      <Text>Achieved: {item.achieved ? 'Yes' : 'No'}</Text>
-                    </View>
-                  )}
-                />
+                <Timeline data={timelineData} />
               )}
-              <Button title="Close" onPress={() => setMilestonesModalVisible(false)} />
             </View>
-          </Modal>
+          )}
 
           {/* Feeding Modal */}
           <Modal
