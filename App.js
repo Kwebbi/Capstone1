@@ -6,6 +6,8 @@ import Register from './components/Register';
 import Login from './components/Login';
 import AddProfile from './components/AddProfile';
 import Profiles from './components/Profiles';
+import BabyMilestones from './components/BabyMilestones';
+import MilestoneView from './components/MilestoneView';
 //import EditBaby from './components/EditBaby';
 import { registerRootComponent } from 'expo';
 import useAuth from './hooks/useAuth';
@@ -33,6 +35,16 @@ export default function App() {
                         name="HomeScreen"
                         options={{headerShown: false}}
                         component={HomeScreen}
+                    />
+                    <Stack.Screen 
+                        name="BabyMilestones"
+                        options={{headerShown: false}} 
+                        component={BabyMilestones} 
+                    /> 
+                    <Stack.Screen 
+                        name="MilestoneView"
+                        options={{headerShown: false}} 
+                        component={MilestoneView} 
                     />        
                 </Stack.Navigator>
             </NavigationContainer>
