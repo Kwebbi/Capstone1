@@ -3,9 +3,10 @@ import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, Touchabl
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
 import { ref, push, set, query, orderByChild, onValue, remove } from "firebase/database";
 import { auth, database } from '../config/firebase';
+import { Picker } from '@react-native-picker/picker';
+
 
 export default function HomeScreen({route, navigation }) {
   // States
@@ -31,148 +32,97 @@ export default function HomeScreen({route, navigation }) {
   const feedingTimeRef = ref(database, 'feedingTimes/');
   const sleepTimeRef = ref(database, 'sleepTimes/');
   const diaperChangeRef = ref(database, 'diaperChanges/');
-  
 
   const [isLoading, setIsLoading] = useState(true);
   
-
   // Fetching existing feeding records
   const allFeedingTimesQuery = useMemo(() => (
-      query(feedingTimeRef, orderByChild('dateTime'))
+    query(feedingTimeRef, orderByChild('dateTime'))
   ), [feedingTimeRef]);
   
   useEffect(() => {
-      const unsubscribe = onValue(allFeedingTimesQuery, (snapshot) => {
-          if (snapshot.exists()) {
-            console.log("Feeding Times Found!!!")
-            let tmp = [];
-            snapshot.forEach(child => {
-                console.log(child.key, child.val());
-                tmp.push(child.val());
-            });
-              
-              //const feedingTimes = snapshot.val();
-              const feedingTimes = tmp;
-              // Filter feedingTimes based on the "babyId"
-              const filteredFeedingTimes = Object.values(feedingTimes).filter(feedingTime => feedingTime.babyID && feedingTime.babyID == babyID);
-              // Set filtered feedingTimes to state
-              setFeedings(filteredFeedingTimes);
-              console.log(filteredFeedingTimes);
-          } else {
-              console.log("No feedingTimes found");
-              setFeedings([]); // Reset feedings with empty array
-          }
-          setIsLoading(false); // Set loading state to false
-      }, {
-      
-      });
-      return () => unsubscribe();
-  }, []);
+    const unsubscribe = onValue(allFeedingTimesQuery, (snapshot) => {
+      if (snapshot.exists()) {
+        console.log("Feeding Times Found!!!");
+        let tmp = [];
+        snapshot.forEach(child => {
+          console.log(child.key, child.val());
+          tmp.push(child.val());
+        });
+        
+        // Filter feedingTimes based on the "babyId"
+        const filteredFeedingTimes = Object.values(tmp).filter(feedingTime => feedingTime.babyID && feedingTime.babyID == babyID);
+        // Set filtered feedingTimes to state
+        setFeedings(filteredFeedingTimes);
+        console.log(filteredFeedingTimes);
+      } else {
+        console.log("No feedingTimes found");
+        setFeedings([]); // Reset feedings with empty array
+      }
+      setIsLoading(false); // Set loading state to false
+    });
+
+    return () => unsubscribe();
+  }, [allFeedingTimesQuery]);
 
   // Fetching existing diaper change records
-useEffect(() => {
-  const unsubscribe = onValue(diaperChangeRef, (snapshot) => {
-    if (snapshot.exists()) {
-      const diaperChanges = snapshot.val();
-      setDiaperChanges(Object.values(diaperChanges));
-    } else {
-      console.log("No diaper changes found");
-      setDiaperChanges([]); // Reset diaper changes with empty array
-    }
-  }, {
-  });
-  return () => unsubscribe();
-}, [babyID]); // Add babyID to the dependency array
+  useEffect(() => {
+    const unsubscribe = onValue(diaperChangeRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const diaperChanges = snapshot.val();
+        setDiaperChanges(Object.values(diaperChanges));
+      } else {
+        console.log("No diaper changes found");
+        setDiaperChanges([]); // Reset diaper changes with empty array
+      }
+    });
+    return () => unsubscribe();
+  }, [babyID]); // Add babyID to the dependency array
 
   useEffect(() => {
     const sleepTimesRef = ref(database, 'sleepTimes/');
     const sleepQuery = query(sleepTimesRef, orderByChild('babyID'));
 
     const unsubscribe = onValue(sleepQuery, (snapshot) => {
-        const fetchedSleepRecords = [];
-        snapshot.forEach(childSnapshot => {
-            if (childSnapshot.val().babyID === babyID) {
-                fetchedSleepRecords.push(childSnapshot.val());
-            }
-        });
-        setSleepRecords(fetchedSleepRecords);
+      const fetchedSleepRecords = [];
+      snapshot.forEach(childSnapshot => {
+        if (childSnapshot.val().babyID === babyID) {
+          fetchedSleepRecords.push(childSnapshot.val());
+        }
+      });
+      setSleepRecords(fetchedSleepRecords);
     });
 
     return () => unsubscribe(); // Cleanup on unmount
-}, [babyID]);
-
-  const { fullName, babyID } = route.params;
-  const feedingTimeRef = ref(database, 'feedingTimes/');
-
-
-
-  const [isLoading, setIsLoading] = useState(true);
-
-    //fetching existing feeding records
-    const allFeedingTimesQuery = useMemo(() => (
-        query(feedingTimeRef, orderByChild('dateTime'))
-    ), [feedingTimeRef]);
-    
-    useEffect(() => {
-        const unsubscribe = onValue(allFeedingTimesQuery, (snapshot) => {
-                if (snapshot.exists()) {
-                  console.log("Feeding Times Found!!!")
-                  let tmp = [];
-                  snapshot.forEach(child => {
-                      console.log(child.key, child.val());
-                      tmp.push(child.val());
-                  });
-                    
-                    //const feedingTimes = snapshot.val();
-                    const feedingTimes = tmp;
-                    // Filter feedingTimes based on the "babyId"
-                    const filteredFeedingTimes = Object.values(feedingTimes).filter(feedingTime => feedingTime.babyID && feedingTime.babyID == babyID);
-                    // Set filtered feedingTimes to state
-                    setFeedings(filteredFeedingTimes);
-                    console.log(filteredFeedingTimes);
-                } else {
-                    console.log("No feedingTimes found");
-                    setFeedings([]); // Reset feedings with empty array
-                }
-                setIsLoading(false); // Set loading state to false
-            }, {
-                // Add appropriate error handling here
-            });
-            return () => unsubscribe();
-    }, []);
+  }, [babyID]);
 
   // Add a new to-do item
   const addTodoItem = () => {
     if (newTodo.trim()) {
-
-        const newTodoRef = push(ref(database, 'todoItems'));
-        const newTodoKey = newTodoRef.key;
-        set(newTodoRef, newTodo.trim()).then(() => {
-            setTodoItems([...todoItems, { id: newTodoKey, text: newTodo.trim() }]);
-            setNewTodo('');
-        }).catch((error) => {
-            console.error("Error adding todo item: ", error);
-        });
+      const newTodoRef = push(ref(database, 'todoItems'));
+      const newTodoKey = newTodoRef.key;
+      set(newTodoRef, newTodo.trim()).then(() => {
+        setTodoItems([...todoItems, { id: newTodoKey, text: newTodo.trim() }]);
+        setNewTodo('');
+      }).catch((error) => {
+        console.error("Error adding todo item: ", error);
+      });
     }
-};
+  };
 
   useEffect(() => {
     const todoItemsRef = ref(database, 'todoItems');
-    onValue(todoItemsRef, (snapshot) => {
-        if (snapshot.exists()) {
-            const data = snapshot.val();
-            const todoItemsList = Object.keys(data).map(key => ({ id: key, text: data[key] }));
-            setTodoItems(todoItemsList);
-        } else {
-            setTodoItems([]);
-        }
+    const unsubscribe = onValue(todoItemsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const todoItemsList = Object.keys(data).map(key => ({ id: key, text: data[key] }));
+        setTodoItems(todoItemsList);
+      } else {
+        setTodoItems([]);
+      }
     });
-}, []);
-
-      setTodoItems([...todoItems, newTodo]);
-      setNewTodo('');
-    }
-  };
+    return () => unsubscribe();
+  }, []);
 
   // Handle date change
   const onChangeDate = (event, selectedDate) => {
@@ -208,9 +158,7 @@ useEffect(() => {
 
     setFeedings([...feedings, newFeeding]);
     setFeedingModalVisible(false);
-
     createFeedingTime();
-
   };
 
   // Saves feeding times to the database
@@ -218,7 +166,7 @@ useEffect(() => {
     const newfeedingTimeRef = push(feedingTimeRef);
     const feedingTimeKey = newfeedingTimeRef.key;
 
-    // Create the new feeding time entry with a uniquely g6enerated key
+    // Create the new feeding time entry with a uniquely generated key
     const newfeedingTime = {
       feedingTimeID: feedingTimeKey,
       feedingAmount: Number(feedingAmount),
@@ -238,26 +186,27 @@ useEffect(() => {
   };
 
   // Save diaper change record
-const handleSaveDiaperChange = () => {
-  const newDiaperChange = {
-    date: selectedDate.toLocaleDateString(),
-    time: selectedDate.toLocaleTimeString(),
-    type: diaperType,
-    babyID: babyID, // Include the babyID
+  const handleSaveDiaperChange = () => {
+    const newDiaperChange = {
+      date: selectedDate.toLocaleDateString(),
+      time: selectedDate.toLocaleTimeString(),
+      type: diaperType,
+      babyID: babyID, // Include the babyID
+    };
+
+    setDiaperChanges([...diaperChanges, newDiaperChange]); // Update local state
+
+    // Push to Firebase
+    const newDiaperChangeRef = push(diaperChangeRef);
+    set(newDiaperChangeRef, newDiaperChange).then(() => {
+      console.log("Diaper change saved to Firebase");
+    }).catch((error) => {
+      console.error("Error saving diaper change: ", error);
+    });
+
+    setDiaperModalVisible(false); // Close the modal after saving
   };
 
-  setDiaperChanges([...diaperChanges, newDiaperChange]); // Update local state
-
-  // Push to Firebase
-  const newDiaperChangeRef = push(diaperChangeRef);
-  set(newDiaperChangeRef, newDiaperChange).then(() => {
-    console.log("Diaper change saved to Firebase");
-  }).catch((error) => {
-    console.error("Error saving diaper change: ", error);
-  });
-
-  setDiaperModalVisible(false); // Close the modal after saving
-};
   // Save sleep record
   const handleSaveSleep = () => {
     const newSleepRecord = {
@@ -287,55 +236,31 @@ const handleSaveDiaperChange = () => {
     set(newSleepTimeRef, newSleepTime).then(() => {
       console.log("Sleep Time was successfully added");
     }).catch((error) => {
-      console.error("Error adding sleep time: ", error);
+      console.error("Error saving sleep time: ", error);
     });
   };
 
-  const handleDeleteSleep = (sleepTimeID) => {
-    const sleepTimeRef = ref(database, `sleepTimes/${sleepTimeID}`);
-    remove(sleepTimeRef)
-    .then(() => {
-        console.log("Sleep time removed from Firebase");
-        setSleepRecords(prevRecords => prevRecords.filter(record => record.sleepTimeID !== sleepTimeID));
-    })
-    .catch(error => {
-        console.error("Failed to remove sleep time: ", error);
-    });
-    
-};
-    // Set the new baby entry in the database and to a catch error in case there is an error
-    set(newfeedingTimeRef, newfeedingTime).then (() => {
-      console.log("Feeding Time was successfully added")
+  // Delete todo item
+  const deleteTodoItem = (itemId) => {
+    const itemRef = ref(database, `todoItems/${itemId}`);
+    remove(itemRef).then(() => {
+      console.log("Todo item deleted");
     }).catch((error) => {
-      console.log(error);
-    })
+      console.error("Error deleting todo item: ", error);
+    });
   };
-
-
-  // Save diaper change record
-  const handleSaveDiaperChange = () => {
-    const newDiaperChange = {
-      date: selectedDate.toLocaleDateString(),
-      time: selectedDate.toLocaleTimeString(),
-      type: diaperType,
-    };
-    setDiaperChanges([...diaperChanges, newDiaperChange]);
-    setDiaperModalVisible(false);
-  };
-
   return (
     <ScrollView automaticallyAdjustKeyboardInsets={true}>
-      <View className="flex bg-white" style={{backgroundColor: "#cfe2f3"}}>
+      <View className="flex bg-white" style={{ backgroundColor: "#cfe2f3" }}>
         
         {/* Banner with Name */}
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
-            <TouchableOpacity style={{ position: "absolute", left: 22, top: 25 }} onPress={()=> navigation.navigate('Profiles')}>
-              <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
+            <TouchableOpacity style={{ position: "absolute", left: 22, top: 25 }} onPress={() => navigation.navigate('Profiles')}>
+              <Ionicons name="arrow-back" size={30} color="#28436d" />
             </TouchableOpacity>
 
-            <Text className="text-white" style={styles.titleText}>BabyTracker</Text>
-            <Text className="text-white" style={styles.titleText}>Baby Name</Text>
+            <Text className="text-black" style={styles.titleText}>BabyTracker</Text>
           </View>
         </SafeAreaView>
         
@@ -348,7 +273,6 @@ const handleSaveDiaperChange = () => {
                 <Text style={styles.avatarText}>Avatar</Text>
               </TouchableOpacity>
               <Text style={styles.nameText}>{fullName}</Text>
-              <Text style={styles.nameText}>Avatar Name</Text>
             </View>
 
             {/* To-Do List */}
@@ -358,19 +282,10 @@ const handleSaveDiaperChange = () => {
                 value={newTodo}
                 onChangeText={setNewTodo}
                 placeholder="Enter todo item"
-            
               />
               <Button title="Add Todo" onPress={addTodoItem} />
-            {todoItems.map(todo => (
-                <Text key={todo.id}>{todo.text}</Text>
-            ))}
-                onChangeText={setNewTodo}
-                value={newTodo}
-                placeholder="Add new to-do"
-                onSubmitEditing={addTodoItem}
-              />
-              {todoItems.map((item, index) => (
-                <Text key={index} style={styles.todoItem}>• {item}</Text>
+              {todoItems.map((todo) => (
+                <Text key={todo.id} style={styles.todoItem}>• {todo.text}</Text>
               ))}
             </View>
           </View>
@@ -395,7 +310,6 @@ const handleSaveDiaperChange = () => {
             )}
           </View>
           
-
           {/* Sleep Button */}
           <View style={styles.buttonContainer}>
             <Button title="Sleep" onPress={() => setSleepModalVisible(true)} />
@@ -405,10 +319,6 @@ const handleSaveDiaperChange = () => {
               </Text>
             )}
           </View>
-
-                    {/* Show All Records Button */}
-                    <View style={styles.buttonContainer}>
-            <Button title="Recent Activities" onPress={() => setShowAllRecords(!showAllRecords)} />
 
           {/* Show All Records Button */}
           <View style={styles.buttonContainer}>
@@ -422,14 +332,13 @@ const handleSaveDiaperChange = () => {
                   <Text key={`diaper-${index}`}>Diaper #{index + 1}: {change.type} on {change.date} at {change.time}</Text>
                 ))}
                 <View>
-               {sleepRecords.map((record, index) => (
-              <View key={index} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: '' }}>
-            <Text>Sleep #{index + 1} {new Date(record.sleepStart).toLocaleTimeString()} to {new Date(record.sleepEnd).toLocaleTimeString()}</Text>
-            <Button title="Delete" onPress={() => handleDeleteSleep(record.sleepTimeID)} />
-        </View>
-    ))}
-</View>
-
+                  {sleepRecords.map((record, index) => (
+                    <View key={index} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: '' }}>
+                      <Text>Sleep #{index + 1}: {new Date(record.sleepStart).toLocaleTimeString()} to {new Date(record.sleepEnd).toLocaleTimeString()}</Text>
+                      <Button title="Delete" onPress={() => handleDeleteSleep(record.sleepTimeID)} />
+                    </View>
+                  ))}
+                </View>
               </>
             )}
           </View>
@@ -480,8 +389,8 @@ const handleSaveDiaperChange = () => {
               <Text>Diaper Change Type:</Text>
               <Picker
                 selectedValue={diaperType}
-                onValueChange={(itemValue, itemIndex) => setDiaperType(itemValue)}
-                style={{width: 200, height: 200}}>
+                onValueChange={(itemValue) => setDiaperType(itemValue)}
+                style={{ width: 200, height: 200 }}>
                 <Picker.Item label="Wet" value="Wet" />
                 <Picker.Item label="Dirty" value="Dirty" />
                 <Picker.Item label="Mixed" value="Mixed" />
@@ -536,76 +445,6 @@ const handleSaveDiaperChange = () => {
             </View>
           </Modal>
         </View>
-              </>
-            )}
-          </View>
-
-          {/* Feeding Modal */}
-          <Modal
-            visible={feedingModalVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setFeedingModalVisible(false)}>
-            <View style={styles.modalView}>
-              <Text>Enter Feeding Details:</Text>
-              <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
-              {isDatePickerVisible && (
-                <DateTimePicker
-                  testID="dateTimePicker"
-                  value={selectedDate}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeDate}
-                />
-              )}
-              <TextInput
-                style={styles.input}
-                placeholder="Food Choice Name"
-                value={foodChoice}
-                onChangeText={setFoodChoice}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Amount in mL"
-                value={feedingAmount}
-                onChangeText={setFeedingAmount}
-                keyboardType="numeric"
-              />
-              <Button title="Save" onPress={handleSaveFeeding} />
-            </View>
-          </Modal>
-
-          {/* Diaper Change Modal */}
-          <Modal
-            visible={diaperModalVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setDiaperModalVisible(false)}>
-            <View style={styles.modalView}>
-              <Text>Diaper Change Type:</Text>
-              <Picker
-                selectedValue={diaperType}
-                onValueChange={(itemValue, itemIndex) => setDiaperType(itemValue)}
-                style={{width: 200, height: 44}}>
-                <Picker.Item label="Wet" value="Wet" />
-                <Picker.Item label="Dirty" value="Dirty" />
-                <Picker.Item label="Mixed" value="Mixed" />
-                <Picker.Item label="Dry" value="Dry" />
-              </Picker>
-              <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
-              {isDatePickerVisible && (
-                <DateTimePicker
-                  testID="dateTimePicker"
-                  value={selectedDate}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeDate}
-                />
-              )}
-              <Button title="Save" onPress={handleSaveDiaperChange} />
-            </View>
-          </Modal>
-        </View>
       </View>
     </ScrollView>
   );
@@ -615,14 +454,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-  },
-  banner: {
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  bannerText: {
-    fontSize: 24,
-    fontWeight: 'bold',
   },
   profileSection: {
     flexDirection: 'row',
@@ -650,33 +481,31 @@ const styles = StyleSheet.create({
   todoList: {
     marginLeft: 20,
     fontWeight: 'bold',
-    flex: 1,
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#999',
   },
   todoInput: {
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderRadius: 4,
     padding: 10,
-    fontWeight: 'bold',
     marginBottom: 10,
   },
-  todoItem: {
-    fontSize: 16,
-    marginLeft: 10,
+  recordPreview: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#666',
   },
   buttonContainer: {
-    alignSelf: 'flex-start',
-    marginTop: 20,
-  },
-  recordPreview: {
-    fontSize: 16,
-    marginTop: 5,
+    marginVertical: 10,
   },
   modalView: {
-    marginTop: '50%',
-    marginHorizontal: 20,
+    margin: 20,
     backgroundColor: 'white',
     borderRadius: 20,
-    padding: 35,
+    padding: 50,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -684,29 +513,15 @@ const styles = StyleSheet.create({
       height: 2,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowRadius: 4,
     elevation: 5,
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
+    width: 200,
+    borderColor: '#ccc',
     borderWidth: 1,
-    marginTop: 20,
-    marginBottom: 20,
-    paddingHorizontal: 10,
-    width: '100%',
-    fontSize: 16,
+    borderRadius: 4,
+    padding: 10,
+    marginBottom: 10,
   },
-  },
-  picker: {
-    width: '100%',
-    marginBottom: 20,
-  },
-
-  titleText: {
-    color: '#28436d',
-    fontSize: 30,
-    fontWeight: 'bold',
-  },
-});
 });
