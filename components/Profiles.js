@@ -20,7 +20,7 @@ export default function Profiles({ navigation }) {
 
     //first need to check if the baby exists, and get its ID, then pull data
     const babiesRef = ref(database, 'babies');
-    const[myBabies, setMyBabies] = useState([]); // not in use
+    const[myBabies, setMyBabies] = useState([]);
     console.log("logged in user is: " + auth.currentUser.uid);
     
     const allBabiesQuery = useMemo(() => (
