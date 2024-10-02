@@ -5,39 +5,42 @@ import { useNavigation } from "@react-navigation/native";
 import { auth, database } from '../config/firebase'
 import { Ionicons } from "@expo/vector-icons";
 import { ref, push, set, query, orderByChild, equalTo, onValue, get } from "firebase/database";
-//import database from '@react-native-firebase/database';
 
 export default function ShareBaby({ route, navigation }) {
-    const { fullName, babyID } = route.params;
+    const { fullName, babyID, parents } = route.params; 
     const [email, setEmail] = useState('');
     const [result, setResult] = useState(null);
-    //const [parentData, setParentData] = useState(null); // State to store parent data
-    //const usersRef = ref(database, 'parents/');
 
 
     const handleSubmit = async () => {
+
         if (!email) { //if email field is empty
             Alert.alert("Error", "Email cannot be empty.");
             return;
         }
-
         const parentsRef = ref(database, 'parents');
         const parentsQuery = query(parentsRef, orderByChild('email'));
-
+        
+        //check if the email the user entered exists
         try {
             const snapshot = await get(parentsQuery);
             if (snapshot.exists()) {
-                const parents = snapshot.val();
+                const users = snapshot.val();
 
                 // Convert user input to lowercase
                 const inputEmail = email.toLowerCase();
 
                 // Check if any parent has the matching email
-                console.log("email entered is: " + email);
-                const parent = Object.values(parents).find(parent => parent.email.toLowerCase() === inputEmail);
-                if (parent) {
-                    console.log("found parent id: "+ parent.parentID);
-                    addAlert(parent);
+                const parent = Object.values(users).find(parent => parent.email.toLowerCase() === inputEmail);
+
+                if (parent) { //if parent exists
+                    if(parents.includes(parent.parentID)){ //check if parent is already part of current babies parent list
+                        Alert.alert("User is already shared with this baby.");
+                    }
+                    else { //add alert
+                        addAlert(parent);                            
+                    }   
+
                 } else {
                     Alert.alert("Error", "No user found with that email.");
                     console.log("parent does not exist")
@@ -47,12 +50,13 @@ export default function ShareBaby({ route, navigation }) {
             }
         } catch (error) {
             Alert.alert("Error", "Error fetching data: " + error.message);
-        }
+        } 
     };
 
     
     const addAlert = async (parent) => {
         
+        //pull alert data
         const alertRef = ref(database, 'alert/');
         const alertQuery = query(alertRef);
 
@@ -60,22 +64,21 @@ export default function ShareBaby({ route, navigation }) {
             const snapshot = await get(alertQuery);
             if (snapshot.exists()) {
                 const alerts = snapshot.val();
-                console.log(alerts)
-
-                // Check if any alerts exist with this parenetID and babyID
                 const alertParentIDFound = Object.values(alerts).find(alertParentIDFound => alertParentIDFound.parentID === parent.parentID);
                 const alertBabyIDFound = Object.values(alerts).find(alertBabyIDFound => alertBabyIDFound.babyID === babyID);
                 
+                // Check if any alerts exist with this parentID and babyID
                 if (alertParentIDFound && alertBabyIDFound) {
                     console.log("alert for parentID and babyID pair already exists: " + alertParentIDFound.parentID + " and " + alertBabyIDFound.babyID);
                     Alert.alert("Request has already been sent.");
 
-                } else {
+                } else { //create alert
                     const newAlertRef = push(alertRef);
                     const alertKey = newAlertRef.key;
                     const user = auth.currentUser.email.split('@')[0];
                     console.log("logged in user is: " + user);
-                    // Create the new alert entry with a uniquely generated key
+
+                    // adding new alert entry with a uniquely generated key
                     const newAlert = {
                       parentID: parent.parentID,
                       babyID: babyID,
@@ -83,7 +86,7 @@ export default function ShareBaby({ route, navigation }) {
                       message: "You have a request from " + user + " to share their baby profile. Accept or deny?"
                     };
                 
-                    // Set the new alert entry in the database and to a catch error in case there is an error
+                    // Set the new alert entry in the database and do a catch error in case there is an error
                     set(newAlertRef, newAlert).then (() => {
                       console.log("Alert was successfully added")
                       Alert.alert("Request sent!");
@@ -99,21 +102,6 @@ export default function ShareBaby({ route, navigation }) {
             Alert.alert("Error", "Error fetching data: " + error.message);
         }
     };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     return (
         <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
@@ -146,9 +134,6 @@ export default function ShareBaby({ route, navigation }) {
 
         </View>
     );
-
-
-
 
 
 
