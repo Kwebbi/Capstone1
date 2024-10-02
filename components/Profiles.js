@@ -47,7 +47,7 @@ export default function Profiles({ navigation }) {
     }, []);
         
     return (
-      <View className="flex bg-white" style={{ backgroundColor: "#cfe2f3" }}>
+      <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
             <Text className="text-white mt-5" style={styles.titleText}>Baby Profiles</Text>
@@ -60,7 +60,7 @@ export default function Profiles({ navigation }) {
             // Render ActivityIndicator while loading
             <ActivityIndicator size="large" color="#0000ff" style={{ flex: 1, justifyContent: "center", alignItems: "center" }}/>
         ) : (
-            <View className="flex bg-white px-8 pt-8" style={{borderTopLeftRadius: 50, borderTopRightRadius: 50}}>
+            <View style={styles.mainBody}>
                 <FlatList
                     data={myBabies}
                     keyExtractor={item => item.babyID}
@@ -87,6 +87,9 @@ export default function Profiles({ navigation }) {
                                     <TouchableOpacity style={{ position: "absolute", right: 12, bottom: 10 }}>
                                         <Ionicons name= "trash" size={27} color= "grey"/>
                                     </TouchableOpacity>
+                                    <TouchableOpacity style={{ position: "absolute", right: 130, bottom: 10 }} onPress={()=> navigation.navigate('ShareBaby', item)}>
+                                        <Ionicons name= "share" size={27} color= "grey"/>
+                                    </TouchableOpacity>
                                 </TouchableOpacity>
                             </View>
                         )
@@ -102,6 +105,17 @@ export default function Profiles({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+
+  mainBody: { //for the rounded edges in the main body of each screen
+        flex: 1, // this allows the view to take the remaining space
+        backgroundColor: 'white', 
+        borderTopLeftRadius: 50,
+        borderTopRightRadius: 50,
+        padding: 16,
+        overflow: 'hidden', 
+        paddingHorizontal: 32, 
+        paddingTop: 32, 
+    },
 
   titleText: {
     color: '#28436d',
@@ -120,4 +134,4 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
 });
-});
+
