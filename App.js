@@ -6,7 +6,7 @@ import Register from './components/Register';
 import Login from './components/Login';
 import AddProfile from './components/AddProfile';
 import Profiles from './components/Profiles';
-//import EditBaby from './components/EditBaby';
+import ShareBaby from './components/ShareBaby';
 import { registerRootComponent } from 'expo';
 import useAuth from './hooks/useAuth';
 
@@ -33,7 +33,12 @@ export default function App() {
                         name="HomeScreen"
                         options={{headerShown: false}}
                         component={HomeScreen}
-                    />        
+                    />    
+                    <Stack.Screen
+                        name="ShareBaby"
+                        options={{headerShown: false}}
+                        component={ShareBaby}
+                    />    
                 </Stack.Navigator>
             </NavigationContainer>
         );        
