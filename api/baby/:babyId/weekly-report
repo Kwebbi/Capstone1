@@ -1,0 +1,28 @@
+// Backend logic for weekly report (Node.js with Express)
+app.get('/api/baby/:babyId/weekly-report', async (req, res) => {
+  const babyId = req.params.babyId;
+
+  // Fetch daily logs from database
+  const logs = await getLogsForBaby(babyId);
+
+  // Function to calculate averages
+  const calculateWeeklyAverage = (logs, key) => {
+    const total = logs.reduce((sum, log) => sum + log[key], 0);
+    return (total / logs.length).toFixed(2); // Return average with 2 decimal places
+  };
+
+  // Calculate averages for sleep, feeding, and diaper
+  const sleepAvg = calculateWeeklyAverage(logs, 'sleepHours');
+  const feedingAvg = calculateWeeklyAverage(logs, 'feedingTimes');
+  const diaperAvg = calculateWeeklyAverage(logs, 'diaperChanges');
+
+  // Fetch milestones for the week
+  const milestones = await getMilestonesForBaby(babyId);
+
+  res.json({
+    sleepAvg,
+    feedingAvg,
+    diaperAvg,
+    milestones,
+  });
+});
