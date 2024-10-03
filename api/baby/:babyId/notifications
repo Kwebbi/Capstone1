@@ -1,0 +1,9 @@
+// Backend logic to fetch notifications (Node.js with Express)
+app.get('/api/baby/:babyId/notifications', async (req, res) => {
+  const babyId = req.params.babyId;
+
+  // Fetch notifications from database or storage
+  const notifications = await getNotificationsForBaby(babyId);
+
+  res.json(notifications);
+});
