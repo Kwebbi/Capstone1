@@ -1,0 +1,19 @@
+// Backend logic for sending notifications (Node.js with Express)
+app.post('/api/notify', async (req, res) => {
+  const { babyId, type, message } = req.body;
+
+  // Logic to notify user based on notification type
+  let notificationTitle;
+  if (type === 'report') {
+    notificationTitle = 'Weekly Report Available';
+  } else if (type === 'task') {
+    notificationTitle = 'New To-Do Task';
+  } else if (type === 'schedule') {
+    notificationTitle = 'Schedule Change Alert';
+  }
+
+  // Function to send notification (could use FCM, Push API, or other services)
+  await sendNotificationToUser(babyId, notificationTitle, message);
+
+  res.json({ success: true });
+});
