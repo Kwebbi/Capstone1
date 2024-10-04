@@ -1,10 +1,8 @@
-//MilestoneView.js
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ref, update } from 'firebase/database';
+import { ref, update, remove } from 'firebase/database';
 import { database } from '../config/firebase';
-import { Picker } from '@react-native-picker/picker';
 
 // MilestoneView component
 const MilestoneView = ({ navigation, route }) => {
@@ -14,9 +12,9 @@ const MilestoneView = ({ navigation, route }) => {
     // State to toggle between editing and viewing mode
     const [isEditing, setIsEditing] = useState(false);
     
-    // State for tracking and updating the title, achieved status, and date of the milestone
+    // State for tracking and updating the title, description, and date of the milestone
     const [editedTitle, setEditedTitle] = useState(milestone.title); // Initialized with the existing title
-    const [editedAchieved, setEditedAchieved] = useState(milestone.achieved); // Initialized with the existing achieved status
+    const [editedDescription, setEditedDescription] = useState(milestone.description); // Initialized with the existing description
     const [editedDate, setEditedDate] = useState(milestone.date); // Initialized with the existing date
 
     // Function to switch to edit mode
@@ -31,15 +29,49 @@ const MilestoneView = ({ navigation, route }) => {
 
         // Update milestone fields in Firebase
         update(milestoneRef, {
-            title: editedTitle,     // Update the title
-            achieved: editedAchieved === 'Yes', // Convert "Yes" to true, "No" to false for the achieved status
-            date: editedDate, // Update the date
+            title: editedTitle,
+            description: editedDescription, // Just save the description string
+            date: editedDate,
         }).then(() => {
             setIsEditing(false); // Exit editing mode
-            console.log("Milestone updated successfully:", { title: editedTitle, achieved: editedAchieved, date: editedDate });
+            console.log("Milestone updated successfully:", { title: editedTitle, description: editedDescription, date: editedDate });
         }).catch((error) => {
             console.error("Error updating milestone: ", error); // Log any errors during the update
         });
+    };
+
+    // Function to handle milestone deletion
+    const handleDeleteMilestone = () => {
+        Alert.alert(
+            "Delete Milestone",
+            "Are you sure you want to delete this milestone?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel",
+                },
+                {
+                    text: "Delete",
+                    onPress: () => deleteMilestone(), // Call deleteMilestone if confirmed
+                    style: "destructive",
+                },
+            ],
+            { cancelable: true }
+        );
+    };
+
+    // Function to delete milestone from Firebase
+    const deleteMilestone = () => {
+        const milestoneRef = ref(database, `babies/${babyId}/milestone/${milestoneId}`);
+        
+        remove(milestoneRef)
+            .then(() => {
+                console.log("Milestone deleted successfully");
+                navigation.goBack(); // Navigate back after deletion
+            })
+            .catch((error) => {
+                console.error("Error deleting milestone: ", error); // Log any errors during deletion
+            });
     };
 
     return (
@@ -52,7 +84,7 @@ const MilestoneView = ({ navigation, route }) => {
             </TouchableOpacity>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.titleContainer}>
-                    <Text style={styles.title}>{`${babyName}'s Milestone`}</Text>
+                    <Text style={styles.label}>Title:</Text>
                     {isEditing ? (
                         <TextInput
                             style={styles.input}
@@ -60,23 +92,20 @@ const MilestoneView = ({ navigation, route }) => {
                             onChangeText={setEditedTitle}
                         />
                     ) : (
-                        <Text style={styles.title}>{editedTitle}</Text>
+                        <Text style={styles.value}>{editedTitle}</Text>
                     )}
                 </View>
                 
-                <View style={styles.itemContainer}>
-                    <Text style={styles.label}>Achieved:</Text>
+                <View style={styles.titleContainer}>
+                    <Text style={styles.label}>Description:</Text>
                     {isEditing ? (
-                        <Picker
-                            selectedValue={editedAchieved ? 'Yes' : 'No'} // Show Yes/No for boolean values
-                            style={styles.picker}
-                            onValueChange={(itemValue) => setEditedAchieved(itemValue === 'Yes')} // Update achieved status based on picker selection
-                        >
-                            <Picker.Item label="Yes" value="Yes" />
-                            <Picker.Item label="No" value="No" />
-                        </Picker>
+                        <TextInput
+                            style={styles.input}
+                            value={editedDescription} // Use the description string directly
+                            onChangeText={setEditedDescription} // Update description string directly
+                        />
                     ) : (
-                        <Text style={styles.value}>{milestone.achieved ? 'Yes' : 'No'}</Text>
+                        <Text style={styles.value}>{milestone.description}</Text> // Display the description directly
                     )}
                 </View>
 
@@ -98,6 +127,11 @@ const MilestoneView = ({ navigation, route }) => {
                         <Text style={styles.saveButtonText}>Save Changes</Text>
                     </TouchableOpacity>
                 )}
+
+                {/* Delete Milestone Button */}
+                <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteMilestone}>
+                    <Text style={styles.deleteButtonText}>Delete Milestone</Text>
+                </TouchableOpacity>
             </ScrollView>
         </View>
     );
@@ -130,19 +164,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginBottom: 20,
     },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginVertical: 20,
-        flexShrink: 1,
-        width: '70%',
-    },
-    itemContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 15,
-    },
     label: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -166,6 +187,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     saveButtonText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    deleteButton: {
+        backgroundColor: '#FF3B30',
+        padding: 10,
+        borderRadius: 5,
+        marginTop: 20,
+        alignItems: 'center',
+    },
+    deleteButtonText: {
         color: '#fff',
         fontSize: 16,
     },
