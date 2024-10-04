@@ -14,7 +14,8 @@ const generateRandomId = () => {
 
 // Define the BabyMilestones component
 const BabyMilestones = ({ route }) => {
-    const { babyId, babyName } = route.params;
+    const { fullName, babyID } = route.params;
+
     const [milestones, setMilestones] = useState([]); // State for storing milestones
     const [loading, setLoading] = useState(true); // Loading state
     const [modalVisible, setModalVisible] = useState(false); // State for controlling the modal visibility
@@ -26,7 +27,7 @@ const BabyMilestones = ({ route }) => {
 
     // Effect to fetch milestones from Firebase on component mount
     useEffect(() => {
-        const milestonesRef = ref(database, `babies/${babyId}/milestone`);
+        const milestonesRef = ref(database, `babies/${babyID}/milestone`);
         onValue(milestonesRef, (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
@@ -48,7 +49,7 @@ const BabyMilestones = ({ route }) => {
             }
             setLoading(false); // Stop loading
         });
-    }, [babyId]);
+    }, [babyID]);
 
     // Map milestones to timeline data
     const timelineData = milestones.map((milestone) => ({
@@ -62,16 +63,15 @@ const BabyMilestones = ({ route }) => {
     const handleMilestonePress = (milestone) => {
         navigation.navigate('MilestoneView', { 
             milestone, 
-            milestones,
-            babyId, 
-            babyName, 
+            babyID, 
+            fullName, 
             milestoneId: milestone.milestoneId,
         });
     };
 
     // Function to handle adding a new milestone
     const handleAddMilestone = () => {
-        const newMilestoneRef = ref(database, `babies/${babyId}/milestone`);
+        const newMilestoneRef = ref(database, `babies/${babyID}/milestone`);
         const newMilestone = {
             title: newTitle,
             description: newDescription,
@@ -106,7 +106,7 @@ const BabyMilestones = ({ route }) => {
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                 <Ionicons name="arrow-back" size={24} color="black" />
             </TouchableOpacity>
-            <Text style={styles.title}>{babyName}'s Milestones</Text>
+            <Text style={styles.title}>{fullName}'s Milestones</Text>
 
             {/* Add Milestone Button - Positioned above Timeline */}
             <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>

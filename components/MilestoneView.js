@@ -6,8 +6,8 @@ import { database } from '../config/firebase';
 
 // MilestoneView component
 const MilestoneView = ({ navigation, route }) => {
-    // Extract milestone, babyId, babyName, and milestoneId from route parameters
-    const { milestone, babyId, babyName, milestoneId } = route.params;
+    // Extract milestone, babyID, fullName, and milestoneId from route parameters
+    const { milestone, babyID, fullName, milestoneId } = route.params;
 
     // State to toggle between editing and viewing mode
     const [isEditing, setIsEditing] = useState(false);
@@ -25,7 +25,7 @@ const MilestoneView = ({ navigation, route }) => {
 
     // Function to save changes to Firebase and disable edit mode
     const handleSaveChanges = () => {
-        const milestoneRef = ref(database, `babies/${babyId}/milestone/${milestoneId}`); // Reference to the specific milestone in Firebase
+        const milestoneRef = ref(database, `babies/${babyID}/milestone/${milestoneId}`); // Reference to the specific milestone in Firebase
 
         // Update milestone fields in Firebase
         update(milestoneRef, {
@@ -62,7 +62,7 @@ const MilestoneView = ({ navigation, route }) => {
 
     // Function to delete milestone from Firebase
     const deleteMilestone = () => {
-        const milestoneRef = ref(database, `babies/${babyId}/milestone/${milestoneId}`);
+        const milestoneRef = ref(database, `babies/${babyID}/milestone/${milestoneId}`);
         
         remove(milestoneRef)
             .then(() => {
