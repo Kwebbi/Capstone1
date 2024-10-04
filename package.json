@@ -9,8 +9,10 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@react-native-community/datetimepicker": "^7.6.4",
-    "@react-native-picker/picker": "^2.7.5",
+    "@expo/vector-icons": "^14.0.0",
+    "@react-native-community/checkbox": "^0.5.17",
+    "@react-native-community/datetimepicker": "^7.7.0",
+    "@react-native-picker/picker": "^2.8.1",
     "@react-navigation/native": "^6.1.15",
     "@react-navigation/native-stack": "^6.9.24",
     "@react-navigation/stack": "^6.3.27",
@@ -26,7 +28,8 @@
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-paper": "^5.12.3",
     "react-native-safe-area-context": "4.8.2",
-    "react-native-screens": "~3.29.0"
+    "react-native-screens": "~3.29.0",
+    "react-native-timeline-flatlist": "^0.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
