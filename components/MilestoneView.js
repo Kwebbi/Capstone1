@@ -1,78 +1,112 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ref, update, remove } from 'firebase/database';
+import { ref, update, remove, get } from 'firebase/database';
 import { database } from '../config/firebase';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+// Function to convert date from "MM/DD/YYYY" to "YYYY-MM-DD"
+const convertToISODate = (dateString) => {
+    const [month, day, year] = dateString.split('/');
+    return `${year}-${month}-${day}T00:00:00Z`; // ISO 8601 format
+};
+
+// Function to convert date from "MM/DD/YYYY" to a JavaScript Date object
+const parseDateString = (dateString) => {
+    const [month, day, year] = dateString.split('/');
+    return new Date(year, month - 1, day); // Month is zero-based
+};
+
+// Function to convert Date object back to "MM/DD/YYYY"
+const formatDateString = (date) => {
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+};
 
 // MilestoneView component
 const MilestoneView = ({ navigation, route }) => {
-    // Extract milestone, babyID, fullName, and milestoneId from route parameters
-    const { milestone, babyID, fullName, milestoneId } = route.params;
+    const { milestone, babyID, milestoneId } = route.params;
 
-    // State to toggle between editing and viewing mode
     const [isEditing, setIsEditing] = useState(false);
-    
-    // State for tracking and updating the title, description, and date of the milestone
-    const [editedTitle, setEditedTitle] = useState(milestone.title); // Initialized with the existing title
-    const [editedDescription, setEditedDescription] = useState(milestone.description); // Initialized with the existing description
-    const [editedDate, setEditedDate] = useState(milestone.date); // Initialized with the existing date
+    const [editedTitle, setEditedTitle] = useState(milestone.title);
+    const [editedDescription, setEditedDescription] = useState(milestone.description);
+    const [editedDate, setEditedDate] = useState(parseDateString(milestone.date)); // Convert string to Date
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
-    // Function to switch to edit mode
+    // Fetch milestone data from Firebase
+    const fetchMilestone = async () => {
+        const milestoneRef = ref(database, `babies/${babyID}/milestone/${milestoneId}`);
+        try {
+            const snapshot = await get(milestoneRef);
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                setEditedTitle(data.title);
+                setEditedDescription(data.description);
+                setEditedDate(parseDateString(data.date)); // Convert the fetched date string to Date object
+            } else {
+                console.log("No milestone data available");
+            }
+        } catch (error) {
+            console.error("Error fetching milestone data: ", error);
+        }
+    };
+
     const handleEditPress = () => {
-        setIsEditing(true); // Enable editing mode
-        console.log("Editing mode enabled");
+        setIsEditing(true);
     };
 
-    // Function to save changes to Firebase and disable edit mode
-    const handleSaveChanges = () => {
-        const milestoneRef = ref(database, `babies/${babyID}/milestone/${milestoneId}`); // Reference to the specific milestone in Firebase
-
-        // Update milestone fields in Firebase
-        update(milestoneRef, {
-            title: editedTitle,
-            description: editedDescription, // Just save the description string
-            date: editedDate,
-        }).then(() => {
-            setIsEditing(false); // Exit editing mode
-            console.log("Milestone updated successfully:", { title: editedTitle, description: editedDescription, date: editedDate });
-        }).catch((error) => {
-            console.error("Error updating milestone: ", error); // Log any errors during the update
-        });
+    const handleSaveChanges = async () => {
+        const milestoneRef = ref(database, `babies/${babyID}/milestone/${milestoneId}`);
+        try {
+            await update(milestoneRef, {
+                title: editedTitle,
+                description: editedDescription,
+                date: formatDateString(editedDate), // Save the date as "MM/DD/YYYY" format
+            });
+            setIsEditing(false);
+            await fetchMilestone(); // Fetch the updated milestone
+        } catch (error) {
+            console.error("Error updating milestone: ", error);
+        }
     };
 
-    // Function to handle milestone deletion
     const handleDeleteMilestone = () => {
         Alert.alert(
             "Delete Milestone",
             "Are you sure you want to delete this milestone?",
             [
-                {
-                    text: "Cancel",
-                    style: "cancel",
-                },
-                {
-                    text: "Delete",
-                    onPress: () => deleteMilestone(), // Call deleteMilestone if confirmed
-                    style: "destructive",
-                },
+                { text: "Cancel", style: "cancel" },
+                { text: "Delete", onPress: deleteMilestone, style: "destructive" },
             ],
             { cancelable: true }
         );
     };
 
-    // Function to delete milestone from Firebase
-    const deleteMilestone = () => {
+    const deleteMilestone = async () => {
         const milestoneRef = ref(database, `babies/${babyID}/milestone/${milestoneId}`);
-        
-        remove(milestoneRef)
-            .then(() => {
-                console.log("Milestone deleted successfully");
-                navigation.goBack(); // Navigate back after deletion
-            })
-            .catch((error) => {
-                console.error("Error deleting milestone: ", error); // Log any errors during deletion
-            });
+        try {
+            await remove(milestoneRef);
+            navigation.goBack();
+        } catch (error) {
+            console.error("Error deleting milestone: ", error);
+        }
     };
+
+    const showPicker = () => {
+        setShowDatePicker(true);
+    };
+
+    const onDateChange = (event, selectedDate) => {
+        const currentDate = selectedDate || editedDate;
+        setShowDatePicker(false);
+        setEditedDate(currentDate); // Update the editedDate state
+    };
+
+    useEffect(() => {
+        fetchMilestone(); // Fetch milestone data on mount
+    }, []);
 
     return (
         <View style={styles.container}>
@@ -101,24 +135,33 @@ const MilestoneView = ({ navigation, route }) => {
                     {isEditing ? (
                         <TextInput
                             style={styles.input}
-                            value={editedDescription} // Use the description string directly
-                            onChangeText={setEditedDescription} // Update description string directly
+                            value={editedDescription}
+                            onChangeText={setEditedDescription}
                         />
                     ) : (
-                        <Text style={styles.value}>{milestone.description}</Text> // Display the description directly
+                        <Text style={styles.value}>{editedDescription}</Text>
                     )}
                 </View>
 
                 <View style={styles.titleContainer}>
                     <Text style={styles.label}>Date:</Text>
                     {isEditing ? (
-                        <TextInput
-                            style={styles.input}
-                            value={editedDate}
-                            onChangeText={setEditedDate}
-                        />
+                        <>
+                            <TouchableOpacity onPress={showPicker}>
+                                <Text style={styles.value}>{editedDate.toLocaleDateString()}</Text>
+                            </TouchableOpacity>
+                            {showDatePicker && (
+                                <DateTimePicker
+                                    value={editedDate}
+                                    mode="date"
+                                    is24Hour={true}
+                                    display="default"
+                                    onChange={onDateChange}
+                                />
+                            )}
+                        </>
                     ) : (
-                        <Text style={styles.value}>{milestone.date}</Text>
+                        <Text style={styles.value}>{editedDate.toLocaleDateString()}</Text>
                     )}
                 </View>
 
@@ -128,7 +171,6 @@ const MilestoneView = ({ navigation, route }) => {
                     </TouchableOpacity>
                 )}
 
-                {/* Delete Milestone Button */}
                 <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteMilestone}>
                     <Text style={styles.deleteButtonText}>Delete Milestone</Text>
                 </TouchableOpacity>
