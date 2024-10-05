@@ -120,16 +120,16 @@ const BabyMilestones = ({ route }) => {
                 <Timeline
                     data={timelineData}
                     circleSize={20}
-                    circleColor="black"
-                    lineColor="gray"
+                    circleColor='rgb(45,156,219)'
+                    lineColor='rgb(45,156,219)'
+                    timeStyle={{textAlign: 'center', backgroundColor:'#ff9797', color:'white', padding:5, borderRadius:13}}
                     timeContainerStyle={{ minWidth: 52 }}
                     descriptionStyle={{ color: 'gray' }}
                     innerCircle={'dot'}
                     options={{
                         style: { paddingTop: 5 },
                         removeClippedSubviews: false
-                    }}
-                    columnFormat='two-column'
+                    }}        
                     separator={true}
                     renderDetail={renderDetail}
                 />
