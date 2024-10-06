@@ -48,6 +48,7 @@ export default function App() {
                         name="ShareRequests"
                         options={{headerShown: false}}
                         component={ShareRequests}
+                    />
                     <Stack.Screen 
                         name="BabyMilestones"
                         options={{headerShown: false}} 
