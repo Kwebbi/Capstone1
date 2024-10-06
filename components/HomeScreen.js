@@ -251,8 +251,8 @@ export default function HomeScreen({ route, navigation }) {
   };
 
   return (
-    <ScrollView automaticallyAdjustKeyboardInsets={true}>
-      <View className="flex bg-white" style={{ backgroundColor: "#cfe2f3" }}>
+    <ScrollView automaticallyAdjustKeyboardInsets={true}  style={{ backgroundColor: "#cfe2f3" }}>
+      <View className="flex" style={{ backgroundColor: "#cfe2f3" }}>
         
         {/* Banner with Name */}
         <SafeAreaView className="flex">
@@ -261,11 +261,11 @@ export default function HomeScreen({ route, navigation }) {
               <Ionicons name="arrow-back" size={30} color="#28436d" />
             </TouchableOpacity>
 
-            <Text className="text-black" style={styles.titleText}>BabyTracker</Text>
+            <Text style={styles.titleText}>{fullName}</Text>
           </View>
         </SafeAreaView>
         
-        <View className="flex space-y-10 bg-white px-8 pt-8" style={{ borderTopLeftRadius: 50, borderTopRightRadius: 50, position: "relative", top: -30 }}>
+        <View className="flex space-y-10 bg-white px-8 pt-8" style={{ borderRadius: 50, position: "relative", top: -30 }}>
           
           {/* Avatar Section */}
           <View style={styles.profileSection}>
@@ -464,15 +464,21 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  titleText: {
+    fontSize: 30,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: 'white',
+  },
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   avatarBubble: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: '#ccc',
     justifyContent: 'center',
     alignItems: 'center',

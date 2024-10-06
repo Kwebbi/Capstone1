@@ -1,9 +1,7 @@
 import React, { Component, useState } from "react";
-import { Button, View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, ScrollView, Image, Modal, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { Button, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Platform } from "react-native";
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { RadioButton } from 'react-native-paper';
-import { StatusBar } from "expo-status-bar";
 import { ref, push, set } from "firebase/database";
 import { auth, database} from '../config/firebase'
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -65,12 +63,12 @@ export default function AddProfile({ navigation }) {
           <View className="form space-y-1" style={{ flex: 1, justifyContent: "center"}}>
 
             {/* Name */}
-            <Text className="flex-end text-gray-700 font-bold">Name</Text>
+            <Text className="flex-end text-gray-700">Name</Text>
             <TextInput className="p-4 bg-gray-100 text-gray-700 mb-3" 
               value={name} onChangeText={value=> setName(value)} placeholder='Enter name'/>
 
             {/* DOB */}
-            <Text className="text-gray-700 font-bold">Date of Birth</Text>
+            <Text className="text-gray-700">Date of Birth</Text>
             <TouchableOpacity onPress={() => setShowPicker(true)}>
               <Text
                 className="p-4 bg-gray-100 text-gray-700 mb-3">
@@ -84,24 +82,28 @@ export default function AddProfile({ navigation }) {
                   mode="date"
                   display="spinner"
                   onChange={(event, date) => {
+                    if (Platform.OS === 'android') { // Android automatically has confirm button
+                      setShowPicker(false);
+                    }
                     if (date) {
                       setDOB(date); // Set selected date from date picker
                       setDOBSelected(true);
                     }
                   }}
                 />
-                <Button
-                  title = "Done"
-                  onPress={() => {
-                    setShowPicker(false);
-                    setDOB(dob);
-                  }}
-                />
+                {Platform.OS === 'ios' && ( // manually add confirmation button for iOS
+                  <Button
+                    title="Done"
+                    onPress={() => {
+                      setShowPicker(false);
+                    }}
+                  />
+                )}
               </View>
             )}
 
             {/* Gender */}
-            <Text className="text-gray-700 ml-2 font-bold mb-3">Gender</Text>
+            <Text className="text-gray-700 mb-3">Gender</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
               {/* Male Radio Button */}
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
