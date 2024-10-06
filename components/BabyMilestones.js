@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, ActivityIndicator, StyleSheet, TouchableOpacity, Modal, TextInput, Button } from 'react-native';
+import { Text, View, ActivityIndicator, StyleSheet, TouchableOpacity, Modal, TextInput, Button, Platform } from 'react-native';
 import { ref, onValue, push } from 'firebase/database';
 import { database } from '../config/firebase';
 import Timeline from 'react-native-timeline-flatlist';
@@ -97,6 +97,7 @@ const BabyMilestones = ({ route }) => {
 
     return (
         <View style={styles.container}>
+            <View style={{ height: 15 }} />
             {/* Back button to navigate to previous screen */}
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                 <Ionicons name="arrow-back" size={24} color="black" />
@@ -144,30 +145,45 @@ const BabyMilestones = ({ route }) => {
                             placeholder="Title"
                             value={newTitle}
                             onChangeText={setNewTitle}
+                            placeholderTextColor="#c2c2c2"
                         />
                         <TextInput
                             style={styles.input}
                             placeholder="Description"
                             value={newDescription}
                             onChangeText={setNewDescription}
+                            placeholderTextColor="#c2c2c2"
                         />
                         {/* Date Picker */}
                         <TouchableOpacity onPress={() => setShowDatePicker(true)}>
                             <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
                         </TouchableOpacity>
                         {showDatePicker && (
-                            <DateTimePicker
-                                value={selectedDate}
-                                mode="date"
-                                display="default"
-                                onChange={(event, date) => {
-                                    setShowDatePicker(false);
-                                    if (date) {
-                                        setSelectedDate(date); // Set selected date from date picker
-                                        console.log("Selected date:", date.toLocaleDateString()); // Log the selected date
-                                    }
-                                }}
-                            />
+                            <View>
+                                <DateTimePicker
+                                    value={selectedDate}
+                                    mode="date"
+                                    display="spinner"
+                                    onChange={(event, date) => {
+                                        if (Platform.OS === 'android') { // Android automatically has confirm button
+                                            setShowDatePicker(false);
+                                        }
+                                        if (date) {
+                                            setSelectedDate(date); // Set selected date from date picker
+                                            console.log("Selected date:", date.toLocaleDateString()); // Log the selected date
+                                        }
+                                    }}
+                                    textColor="black"
+                                />
+                                {Platform.OS === 'ios' && ( // manually add confirmation button for iOS
+                                    <Button
+                                        title="Done"
+                                        onPress={() => {
+                                            setShowDatePicker(false);
+                                        }}
+                                    />
+                                 )}
+                            </View>
                         )}
                         <Button title="Add Milestone" onPress={handleAddMilestone} />
                         <View style={{ height: 15 }} />
@@ -185,7 +201,7 @@ const styles = StyleSheet.create({
     },
     backButton: {
         position: 'absolute',
-        top: 40,
+        top: 57,
         left: 20,
         zIndex: 1,
     },

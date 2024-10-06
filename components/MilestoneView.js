@@ -94,10 +94,6 @@ const MilestoneView = ({ navigation, route }) => {
         }
     };
 
-    const showPicker = () => {
-        setShowDatePicker(true);
-    };
-
     const onDateChange = (event, selectedDate) => {
         const currentDate = selectedDate || editedDate;
         setShowDatePicker(false);
@@ -147,14 +143,15 @@ const MilestoneView = ({ navigation, route }) => {
                     <Text style={styles.label}>Date:</Text>
                     {isEditing ? (
                         <>
-                            <TouchableOpacity onPress={showPicker}>
-                                <Text style={styles.date}>{editedDate.toLocaleDateString()}</Text>
-                            </TouchableOpacity>
+                            {!showDatePicker && (
+                                <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                                    <Text style={styles.date}>{editedDate.toLocaleDateString()}</Text>
+                                </TouchableOpacity>
+                            )}
                             {showDatePicker && (
                                 <DateTimePicker
                                     value={editedDate}
                                     mode="date"
-                                    is24Hour={true}
                                     display="default"
                                     onChange={onDateChange}
                                 />

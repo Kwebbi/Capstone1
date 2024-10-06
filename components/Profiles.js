@@ -244,7 +244,7 @@ export default function Profiles({ navigation }) {
                         )
                     }}
                 />
-                <TouchableOpacity className="py-1 bg-blue-300 rounded-3xl mb-8">
+                <TouchableOpacity className="py-1 bg-blue-300 rounded-3xl mt-6 mb-6">
                     <Text className="font-xl  text-center text-gray-700 text-3xl" onPress={()=> navigation.navigate('AddProfile')}>+</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Settings', { alerts: myAlerts })} style={styles.settingsButton}>
@@ -303,4 +303,3 @@ const styles = StyleSheet.create({
     marginLeft: -10
   }
 });
-
