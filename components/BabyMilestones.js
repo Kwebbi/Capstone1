@@ -33,8 +33,8 @@ const BabyMilestones = ({ route }) => {
 
                 // Sort milestones by date
                 milestonesArray.sort((a, b) => {
-                    const dateA = new Date(a.date.split('/').reverse().join('-'));
-                    const dateB = new Date(b.date.split('/').reverse().join('-'));
+                    const dateA = new Date(a.date.split('/').join('-'));
+                    const dateB = new Date(b.date.split('/').join('-'));
                     return dateA - dateB;
                 });
 
@@ -89,7 +89,7 @@ const BabyMilestones = ({ route }) => {
 
     // Function to render timeline item detail
     const renderDetail = (rowData) => (
-        <TouchableOpacity onPress={rowData.onPress} style={styles.timelineItem}>
+        <TouchableOpacity onPress={rowData.onPress}>
             <Text style={styles.title}>{rowData.title}</Text>
             <Text style={styles.description}>{rowData.description}</Text>
         </TouchableOpacity>
@@ -115,12 +115,12 @@ const BabyMilestones = ({ route }) => {
                 <Timeline
                     data={timelineData}
                     circleSize={20}
+                    innerCircle={'dot'}
                     circleColor='rgb(45,156,219)'
                     lineColor='rgb(45,156,219)'
                     timeStyle={{textAlign: 'center', backgroundColor:'#ff9797', color:'white', padding:5, borderRadius:13}}
-                    timeContainerStyle={{ minWidth: 52 }}
+                    timeContainerStyle={{ minWidth: 100 }}
                     descriptionStyle={{ color: 'gray' }}
-                    innerCircle={'dot'}
                     options={{
                         style: { paddingTop: 5 },
                         removeClippedSubviews: false
@@ -170,6 +170,7 @@ const BabyMilestones = ({ route }) => {
                             />
                         )}
                         <Button title="Add Milestone" onPress={handleAddMilestone} />
+                        <View style={{ height: 15 }} />
                         <Button title="Cancel" onPress={() => setModalVisible(false)} color="red" />
                     </View>
                 </View>
@@ -204,11 +205,6 @@ const styles = StyleSheet.create({
     addButtonText: {
         color: '#fff',
         fontSize: 16,
-    },
-    timelineItem: {
-        padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
     },
     description: {
         color: 'gray',

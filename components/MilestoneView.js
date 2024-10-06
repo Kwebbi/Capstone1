@@ -74,8 +74,8 @@ const MilestoneView = ({ navigation, route }) => {
 
     const handleDeleteMilestone = () => {
         Alert.alert(
-            "Delete Milestone",
-            "Are you sure you want to delete this milestone?",
+            "Delete Milestone?",
+            "This will permanently delete the current milestone",
             [
                 { text: "Cancel", style: "cancel" },
                 { text: "Delete", onPress: deleteMilestone, style: "destructive" },
@@ -148,7 +148,7 @@ const MilestoneView = ({ navigation, route }) => {
                     {isEditing ? (
                         <>
                             <TouchableOpacity onPress={showPicker}>
-                                <Text style={styles.value}>{editedDate.toLocaleDateString()}</Text>
+                                <Text style={styles.date}>{editedDate.toLocaleDateString()}</Text>
                             </TouchableOpacity>
                             {showDatePicker && (
                                 <DateTimePicker
@@ -182,7 +182,7 @@ const MilestoneView = ({ navigation, route }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        padding: 25,
     },
     backButton: {
         position: 'absolute',
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     },
     titleContainer: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'space-between',
         marginBottom: 20,
     },
@@ -212,14 +212,24 @@ const styles = StyleSheet.create({
     },
     value: {
         fontSize: 18,
-        marginRight: 10,
+        paddingRight: 10,
+        paddingLeft: 10,
+        width: '70%',
+        textAlign: 'right',
+    },
+    date: {
+        fontSize: 18,
+        paddingRight: 10,
+        paddingLeft: 10,
+        textAlign: 'right',
     },
     input: {
         borderWidth: 1,
         borderColor: '#ccc',
         padding: 5,
         width: '60%',
-        marginRight: 10,
+        paddingRight: 10,
+        borderRadius: 10,
     },
     saveButton: {
         backgroundColor: '#007BFF',
