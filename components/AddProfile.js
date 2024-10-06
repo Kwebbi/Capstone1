@@ -10,16 +10,11 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function AddProfile({ navigation }) {
 
-  const [name, setName] = useState(''); // State for selecting name
-  const [dob, setDOB] = useState(new Date()); // State for selecting date of birth
-  const [dobSelected, setDOBSelected] = useState(false); // State for showing the inputted date of birth
-  const [showPicker, setShowPicker] = useState(false); // State for showing the date picker
-  
-  const [date, setDate] = useState(new Date())
-  const [open, setOpen] = useState(false) //open and close modal
-
-
-  const [checked, setChecked] = React.useState('first'); //radio buttons
+  const [name, setName] = useState(''); // name
+  const [dob, setDOB] = useState(new Date()); // date of birth
+  const [dobSelected, setDOBSelected] = useState(false); // has date of birth been selected
+  const [showPicker, setShowPicker] = useState(false); // state for showing the date picker
+  const [gender, setGender] = React.useState('first'); // gender radio buttons
 
   function createBaby() {
     const babyRef = ref(database, 'babies/');
@@ -31,7 +26,7 @@ export default function AddProfile({ navigation }) {
       fullName: name,
       DOB: dob.toLocaleDateString(),
       babyID: babyKey,
-      Gender: checked,
+      Gender: gender,
       parents: [auth.currentUser.uid]
     };
 
@@ -70,15 +65,15 @@ export default function AddProfile({ navigation }) {
           <View className="form space-y-1" style={{ flex: 1, justifyContent: "center"}}>
 
             {/* Name */}
-            <Text className="flex-end text-gray-700 ml-2">Name</Text>
-            <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
+            <Text className="flex-end text-gray-700 font-bold">Name</Text>
+            <TextInput className="p-4 bg-gray-100 text-gray-700 mb-3" 
               value={name} onChangeText={value=> setName(value)} placeholder='Enter name'/>
 
             {/* DOB */}
-            <Text className="text-gray-700 ml-2">Date of Birth</Text>
+            <Text className="text-gray-700 font-bold">Date of Birth</Text>
             <TouchableOpacity onPress={() => setShowPicker(true)}>
               <Text
-                className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3">
+                className="p-4 bg-gray-100 text-gray-700 mb-3">
                 {dobSelected ? (dob.toLocaleDateString()) : (<Text className="text-gray-400 opacity-60">Enter DOB</Text>)}
               </Text>
             </TouchableOpacity>
@@ -106,19 +101,50 @@ export default function AddProfile({ navigation }) {
             )}
 
             {/* Gender */}
-            <Text className="text-gray-700 ml-2">Gender</Text>
-            <RadioButton.Item
-              label="Male"
-              value="Male"
-              status={ checked === 'Male' ? 'checked' : 'unchecked' }
-              onPress={() => setChecked('Male')}
-            />
-            <RadioButton.Item
-              label="Female"
-              value="Female"
-              status={ checked === 'Female' ? 'checked' : 'unchecked' }
-              onPress={() => setChecked('Female')}
-            />
+            <Text className="text-gray-700 ml-2 font-bold mb-3">Gender</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+              {/* Male Radio Button */}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity
+                  onPress={() => setGender('Male')}
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
+                    borderWidth: 2,
+                    borderColor: gender === 'Male' ? '#8ec3ff' : 'gray',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  {gender === 'Male' && (
+                    <View style={styles.selectedRadio}/>
+                  )}
+                </TouchableOpacity>
+                <Text style={{ marginLeft: 8 }}>Male</Text>
+              </View>
+              
+              {/* Female Radio Button */}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity
+                  onPress={() => setGender('Female')}
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
+                    borderWidth: 2,
+                    borderColor: gender === 'Female' ? '#8ec3ff' : 'gray',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  {gender === 'Female' && (
+                    <View style={styles.selectedRadio}/>
+                  )}
+                </TouchableOpacity>
+                <Text style={{ marginLeft: 8 }}>Female</Text>
+              </View>
+            </View>
           </View>
           
           <TouchableOpacity className="py-1 bg-blue-300 rounded-3xl mt-5 mb-8">
@@ -147,6 +173,13 @@ const styles = StyleSheet.create({
   ageText: {
     color: '#28436d',
     fontSize: 17,
+  },
+
+  selectedRadio: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#8ec3ff',
   },
 
   centeredView: {
