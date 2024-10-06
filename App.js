@@ -8,6 +8,10 @@ import AddProfile from './components/AddProfile';
 import Profiles from './components/Profiles';
 import ShareBaby from './components/ShareBaby';
 import ShareRequests from './components/ShareRequests';
+import BabyMilestones from './components/BabyMilestones';
+import MilestoneView from './components/MilestoneView';
+import Settings from './components/Settings';
+//import EditBaby from './components/EditBaby';
 import { registerRootComponent } from 'expo';
 import useAuth from './hooks/useAuth';
 
@@ -44,6 +48,20 @@ export default function App() {
                         name="ShareRequests"
                         options={{headerShown: false}}
                         component={ShareRequests}
+                    <Stack.Screen 
+                        name="BabyMilestones"
+                        options={{headerShown: false}} 
+                        component={BabyMilestones} 
+                    /> 
+                    <Stack.Screen 
+                        name="MilestoneView"
+                        options={{headerShown: false}} 
+                        component={MilestoneView} 
+                    /> 
+                    <Stack.Screen
+                        name="Settings"
+                        options={{ headerShown: true, title: 'Settings' }}
+                        component={Settings}
                     />
                 </Stack.Navigator>
             </NavigationContainer>

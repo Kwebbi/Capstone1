@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -7,8 +7,7 @@ import { ref, push, set, query, orderByChild, onValue, remove } from "firebase/d
 import { auth, database } from '../config/firebase';
 import { Picker } from '@react-native-picker/picker';
 
-
-export default function HomeScreen({route, navigation }) {
+export default function HomeScreen({ route, navigation }) {
   // States
   const [newTodo, setNewTodo] = useState('');
   const [todoItems, setTodoItems] = useState([]);
@@ -28,12 +27,13 @@ export default function HomeScreen({route, navigation }) {
   const [isEndPickerVisible, setEndPickerVisibility] = useState(false);
   const [sleepStart, setSleepStart] = useState(new Date());
   const [sleepEnd, setSleepEnd] = useState(new Date());
-  const { fullName, babyID } = route.params;
   const feedingTimeRef = ref(database, 'feedingTimes/');
   const sleepTimeRef = ref(database, 'sleepTimes/');
   const diaperChangeRef = ref(database, 'diaperChanges/');
 
   const [isLoading, setIsLoading] = useState(true);
+
+  const { fullName, babyID } = route.params; //Get baby info from navigation params
   
   // Fetching existing feeding records
   const allFeedingTimesQuery = useMemo(() => (
@@ -249,6 +249,7 @@ export default function HomeScreen({route, navigation }) {
       console.error("Error deleting todo item: ", error);
     });
   };
+
   return (
     <ScrollView automaticallyAdjustKeyboardInsets={true}>
       <View className="flex bg-white" style={{ backgroundColor: "#cfe2f3" }}>
@@ -341,6 +342,14 @@ export default function HomeScreen({route, navigation }) {
                 </View>
               </>
             )}
+          </View>
+
+          {/* Show Milestones Button*/}
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Show Milestones"
+              onPress={() => navigation.navigate('BabyMilestones', { fullName, babyID })} // Navigate to BabyMilestones
+            />
           </View>
 
           {/* Feeding Modal */}

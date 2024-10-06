@@ -92,7 +92,6 @@ export default function Profiles({ navigation }) {
                 addAlert();
                 setIsLoading(false); // Set loading state to false
             }, {
-                // Add appropriate error handling here
             });
             return () => unsubscribe();
     }, []);
@@ -149,9 +148,6 @@ export default function Profiles({ navigation }) {
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
             <Text className="text-white mt-5" style={styles.titleText}>Baby Profiles</Text>
-            <TouchableOpacity onPress={handleLogout} style={{ padding: 15 }}>
-                        <Ionicons name="log-out" size={42} color="black" />
-                    </TouchableOpacity>
           </View>
         </SafeAreaView>
         {isLoading ? ( // Check if isLoading is true
@@ -218,6 +214,10 @@ export default function Profiles({ navigation }) {
                 <TouchableOpacity className="py-1 bg-blue-300 rounded-3xl mb-8">
                     <Text className="font-xl  text-center text-gray-700 text-3xl" onPress={()=> navigation.navigate('AddProfile')}>+</Text>
                 </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('Settings')} style={styles.settingsButton}>
+            <Ionicons name="settings" size={42} color="black" />
+            <Ionicons name="person" size={42} color="black" style={styles.personIcon} />
+        </TouchableOpacity>
             </View>
         )}
       </View>
@@ -260,5 +260,14 @@ const styles = StyleSheet.create({
     color: '#28436d',
     fontSize: 17,
   },
+    settingsButton: {
+    flexDirection: 'row', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    padding: 10
+  },
+  personIcon: {
+    marginLeft: -10
+  }
 });
 
