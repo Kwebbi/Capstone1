@@ -7,11 +7,6 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-// Utility function to generate a random ID
-const generateRandomId = () => {
-    return Math.random().toString(36).substring(2, 15); // Generates a random alphanumeric ID
-};
-
 // Define the BabyMilestones component
 const BabyMilestones = ({ route }) => {
     const { fullName, babyID } = route.params;
