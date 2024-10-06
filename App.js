@@ -9,6 +9,7 @@ import Profiles from './components/Profiles';
 import ShareBaby from './components/ShareBaby';
 import BabyMilestones from './components/BabyMilestones';
 import MilestoneView from './components/MilestoneView';
+import Settings from './components/Settings';
 //import EditBaby from './components/EditBaby';
 import { registerRootComponent } from 'expo';
 import useAuth from './hooks/useAuth';
@@ -51,7 +52,12 @@ export default function App() {
                         name="MilestoneView"
                         options={{headerShown: false}} 
                         component={MilestoneView} 
-                    />        
+                    /> 
+                    <Stack.Screen
+                        name="Settings"
+                        options={{ headerShown: true, title: 'Settings' }}
+                        component={Settings}
+                    />
                 </Stack.Navigator>
             </NavigationContainer>
         );        
