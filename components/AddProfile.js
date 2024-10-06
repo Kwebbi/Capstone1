@@ -1,21 +1,23 @@
 import React, { Component, useState } from "react";
-import { Button, View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, ScrollView, Image, Modal } from "react-native";
+import { Button, View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, ScrollView, Image, Modal, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { RadioButton } from 'react-native-paper';
 import { StatusBar } from "expo-status-bar";
 import { ref, push, set } from "firebase/database";
 import { auth, database} from '../config/firebase'
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function AddProfile({ navigation }) {
 
-  const [name, setName] = useState('');
-  const [dob, setDOB] = useState('');
+  const [name, setName] = useState(''); // State for selecting name
+  const [dob, setDOB] = useState(new Date()); // State for selecting date of birth
+  const [dobSelected, setDOBSelected] = useState(false); // State for showing the inputted date of birth
+  const [showPicker, setShowPicker] = useState(false); // State for showing the date picker
   
   const [date, setDate] = useState(new Date())
   const [open, setOpen] = useState(false) //open and close modal
 
-  const [showPicker, setShowPicker] = useState(false);
 
   const [checked, setChecked] = React.useState('first'); //radio buttons
 
@@ -27,7 +29,7 @@ export default function AddProfile({ navigation }) {
     // Create the new baby entry with a uniquely generated key
     const newBaby = {
       fullName: name,
-      DOB: dob,
+      DOB: dob.toLocaleDateString(),
       babyID: babyKey,
       Gender: checked,
       parents: [auth.currentUser.uid]
@@ -66,14 +68,44 @@ export default function AddProfile({ navigation }) {
           </View>
 
           <View className="form space-y-1" style={{ flex: 1, justifyContent: "center"}}>
+
+            {/* Name */}
             <Text className="flex-end text-gray-700 ml-2">Name</Text>
             <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
               value={name} onChangeText={value=> setName(value)} placeholder='Enter name'/>
 
+            {/* DOB */}
             <Text className="text-gray-700 ml-2">Date of Birth</Text>
-            <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
-            value={dob} onChangeText={value=> setDOB(value)} placeholder='Enter DOB'/>
+            <TouchableOpacity onPress={() => setShowPicker(true)}>
+              <Text
+                className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3">
+                {dobSelected ? (dob.toLocaleDateString()) : (<Text className="text-gray-400 opacity-60">Enter DOB</Text>)}
+              </Text>
+            </TouchableOpacity>
+            {showPicker && (
+              <View>  
+                <DateTimePicker
+                  value={dob}
+                  mode="date"
+                  display="spinner"
+                  onChange={(event, date) => {
+                    if (date) {
+                      setDOB(date); // Set selected date from date picker
+                      setDOBSelected(true);
+                    }
+                  }}
+                />
+                <Button
+                  title = "Done"
+                  onPress={() => {
+                    setShowPicker(false);
+                    setDOB(dob);
+                  }}
+                />
+              </View>
+            )}
 
+            {/* Gender */}
             <Text className="text-gray-700 ml-2">Gender</Text>
             <RadioButton.Item
               label="Male"
