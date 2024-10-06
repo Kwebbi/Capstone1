@@ -24,6 +24,38 @@ export default function Profiles({ navigation }) {
     };
 
 
+    // Function to set up listener for alerts
+    const addAlert = () => {
+        const alertRef = ref(database, 'alert/');
+        const alertQuery = query(alertRef, orderByChild('parentID'));
+
+        // Set up a listener
+        const unsubscribe = onValue(alertQuery, (snapshot) => {
+            if (snapshot.exists()) {
+                const alerts = snapshot.val();
+                const filteredAlerts = Object.values(alerts).filter(a => a.parentID === auth.currentUser.uid);
+
+                // Update state with filtered alerts
+                setMyAlerts(filteredAlerts);
+            } else {
+                setMyAlerts([]); // No alerts found
+            }
+        }, (error) => {
+            console.log("Error fetching data: ", error.message);
+        });
+
+        // Cleanup listener on unmount
+        return unsubscribe; // Return the unsubscribe function
+    };
+
+    // Use useEffect to call addAlert when the component mounts
+    useEffect(() => {
+        const unsubscribe = addAlert(); // Start listening for changes
+        return () => unsubscribe();
+    }, []);
+
+
+/*
     //storing alerts for user if any exist
     const addAlert = async () => {
         const alertRef = ref(database, 'alert/');
@@ -46,7 +78,7 @@ export default function Profiles({ navigation }) {
         } catch (error) {
             console.log("Error", "Error fetching data: " + error.message);
         } 
-    }; 
+    };  */
 
 
 
@@ -90,6 +122,7 @@ export default function Profiles({ navigation }) {
                     setMyBabies([]); // Reset babies state if no data found
                 }
                 addAlert();
+                console.log("alergs were cqlledadsf");
                 setIsLoading(false); // Set loading state to false
             }, {
             });
@@ -214,7 +247,7 @@ export default function Profiles({ navigation }) {
                 <TouchableOpacity className="py-1 bg-blue-300 rounded-3xl mb-8">
                     <Text className="font-xl  text-center text-gray-700 text-3xl" onPress={()=> navigation.navigate('AddProfile')}>+</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('Settings')} style={styles.settingsButton}>
+                <TouchableOpacity onPress={() => navigation.navigate('Settings', { alerts: myAlerts })} style={styles.settingsButton}>
             <Ionicons name="settings" size={42} color="black" />
             <Ionicons name="person" size={42} color="black" style={styles.personIcon} />
         </TouchableOpacity>

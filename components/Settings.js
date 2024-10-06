@@ -1,11 +1,14 @@
 // Imports
-import React from 'react';
+import React, { useState } from "react";
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { auth } from '../config/firebase';
 import { Ionicons } from "@expo/vector-icons";
 
  // Navigates to login Screen
-const Settings = ({ navigation }) => {
+const Settings = ({ route, navigation }) => {
+
+    const [alerts, setAlerts] = useState(route.params.alerts); //pass alerts from profile screen
+
     const handleLogout = () => {
         auth.signOut().then(() => {
             navigation.navigate('Login');
@@ -27,9 +30,6 @@ const Settings = ({ navigation }) => {
         console.log('Appearance clicked');
     };
 
-    const handlePendingShareRequest = () => {
-        console.log('Pending Share Request clicked');
-    };
 
     const handleHelpSupport = () => {
         console.log('Help & Support clicked');
@@ -60,7 +60,7 @@ const Settings = ({ navigation }) => {
                 </View>
             </TouchableOpacity>
             {/*Pending Share Request Button */}
-            <TouchableOpacity onPress={handlePendingShareRequest} style={styles.logoutButton}>
+            <TouchableOpacity onPress={() => navigation.navigate('ShareRequests', { alerts })} style={styles.logoutButton}>
                 <View style={styles.logoutContent}>
                     <Ionicons name="share" size={42} color="black" />
                     <Text style={styles.logoutButtonText}>Pending Share Request</Text>
