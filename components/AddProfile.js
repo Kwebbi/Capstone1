@@ -49,7 +49,7 @@ export default function AddProfile({ navigation }) {
 
   return (
     <ScrollView automaticallyAdjustKeyboardInsets={true}>
-      <View className="flex bg-white" style={{ backgroundColor: "#cfe2f3" }}>
+      <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
               <TouchableOpacity style={{ position: "absolute", left: 22, top: 27 }} onPress={()=> navigation.navigate('Profiles')}>
@@ -60,7 +60,7 @@ export default function AddProfile({ navigation }) {
           </View>
         </SafeAreaView>
 
-        <View className="flex bg-white px-8 pt-8" style={{ borderTopLeftRadius: 50, borderTopRightRadius: 50 }}>
+        <View style={styles.mainBody}>
           <View className="flex-row justify-center">
             <Text className="text-black font-bold mb-5" style={{ fontSize: 25 }}>Baby Info</Text>
           </View>
@@ -99,6 +99,19 @@ export default function AddProfile({ navigation }) {
 } 
 
 const styles = StyleSheet.create({
+
+
+  mainBody: { //for the rounded edges in the main body of each screen
+    flex: 1, // this allows the view to take the remaining space
+    backgroundColor: 'white', 
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+    padding: 16,
+    overflow: 'hidden', 
+    paddingHorizontal: 32, 
+    paddingTop: 32, 
+  },
+
 
   titleText: {
     color: '#28436d',

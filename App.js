@@ -7,6 +7,7 @@ import Login from './components/Login';
 import AddProfile from './components/AddProfile';
 import Profiles from './components/Profiles';
 import ShareBaby from './components/ShareBaby';
+import ShareRequests from './components/ShareRequests';
 import { registerRootComponent } from 'expo';
 import useAuth from './hooks/useAuth';
 
@@ -39,6 +40,11 @@ export default function App() {
                         options={{headerShown: false}}
                         component={ShareBaby}
                     />    
+                    <Stack.Screen
+                        name="ShareRequests"
+                        options={{headerShown: false}}
+                        component={ShareRequests}
+                    />
                 </Stack.Navigator>
             </NavigationContainer>
         );        
