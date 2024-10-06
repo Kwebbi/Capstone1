@@ -6,18 +6,27 @@ import { auth, database } from '../config/firebase'
 import { Ionicons } from "@expo/vector-icons";
 import { ref, push, set, query, orderByChild, equalTo, onValue, get } from "firebase/database";
 
+
 export default function ShareBaby({ route, navigation }) {
-    const { fullName, babyID, parents } = route.params; 
+    const { fullName, babyID, caretakers } = route.params; 
     const [email, setEmail] = useState('');
     const [result, setResult] = useState(null);
 
 
     const handleSubmit = async () => {
-
         if (!email) { //if email field is empty
             Alert.alert("Error", "Email cannot be empty.");
             return;
         }
+        
+        const inputEmail = email.toLowerCase(); // Convert user input to lowercase
+        const currentUserEmail = auth.currentUser?.email?.toLowerCase();
+        if (currentUserEmail && inputEmail === currentUserEmail) {
+            Alert.alert("Error", "Cannot share a profile with the current user.");
+            return;
+        }
+
+
         const parentsRef = ref(database, 'parents');
         const parentsQuery = query(parentsRef, orderByChild('email'));
         
@@ -27,20 +36,22 @@ export default function ShareBaby({ route, navigation }) {
             if (snapshot.exists()) {
                 const users = snapshot.val();
 
-                // Convert user input to lowercase
-                const inputEmail = email.toLowerCase();
+                //const inputEmail = email.toLowerCase(); // Convert user input to lowercase
 
                 // Check if any parent has the matching email
                 const parent = Object.values(users).find(parent => parent.email.toLowerCase() === inputEmail);
 
                 if (parent) { //if parent exists
-                    if(parents.includes(parent.parentID)){ //check if parent is already part of current babies parent list
+                    
+                    if (!Array.isArray(caretakers)) {
+                        addAlert(parent);
+                    }
+                    else if(caretakers.includes(parent.parentID)){ //check if parent is already part of current babies caretaker list
                         Alert.alert("User is already shared with this baby.");
                     }
                     else { //add alert
                         addAlert(parent);                            
                     }   
-
                 } else {
                     Alert.alert("Error", "No user found with that email.");
                     console.log("parent does not exist")
@@ -76,14 +87,13 @@ export default function ShareBaby({ route, navigation }) {
                     const newAlertRef = push(alertRef);
                     const alertKey = newAlertRef.key;
                     const user = auth.currentUser.email.split('@')[0];
-                    console.log("logged in user is: " + user);
 
                     // adding new alert entry with a uniquely generated key
                     const newAlert = {
                       parentID: parent.parentID,
                       babyID: babyID,
                       alertID: alertKey,
-                      message: "You have a request from " + user + " to share their baby profile. Accept or deny?"
+                      message: user + " has added you as a caretaker for " + fullName
                     };
                 
                     // Set the new alert entry in the database and do a catch error in case there is an error
