@@ -34,6 +34,8 @@ export default function HomeScreen({ route, navigation }) {
   const sleepTimeRef = ref(database, 'sleepTimes/');
   const diaperChangeRef = ref(database, 'diaperChanges/');
   const commentRef = ref(database, 'comments/');
+  const userId = auth.currentUser.uid;
+  const todoItemsRef = ref(database, `todoItems/${userId}/${babyID}/`);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -134,33 +136,53 @@ export default function HomeScreen({ route, navigation }) {
     return () => unsubscribe(); // Cleanup on unmount
   }, [babyID]);
 
-  // Add a new to-do item
-  const addTodoItem = () => {
-    if (newTodo.trim()) {
-      const newTodoRef = push(ref(database, 'todoItems'));
-      const newTodoKey = newTodoRef.key;
-      set(newTodoRef, newTodo.trim()).then(() => {
-        setTodoItems([...todoItems, { id: newTodoKey, text: newTodo.trim() }]);
-        setNewTodo('');
-      }).catch((error) => {
-        console.error("Error adding todo item: ", error);
-      });
-    }
-  };
-
+  // Fetch to-do items
   useEffect(() => {
-    const todoItemsRef = ref(database, 'todoItems');
     const unsubscribe = onValue(todoItemsRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        const todoItemsList = Object.keys(data).map(key => ({ id: key, text: data[key] }));
-        setTodoItems(todoItemsList);
+        const todoList = Object.keys(data).map((key) => ({
+          id: key,
+          text: data[key],
+        }));
+        setTodoItems(todoList);
       } else {
         setTodoItems([]);
       }
+      setIsLoading(false);
     });
-    return () => unsubscribe();
-  }, []);
+
+    return () => unsubscribe(); // Cleanup on unmount
+  }, [todoItemsRef]);
+
+  // Function to add a todo item
+  const addTodoItem = async () => {
+    if (!newTodo.trim()) return;
+
+    try {
+      const todoRef = ref(database, `todoItems/${userId}/${babyID}`);
+      const newTodoRef = push(todoRef);
+      await set(newTodoRef, {
+        text: newTodo,
+        timestamp: Date.now(),
+      });
+      setTodoItems((prevItems) => [...prevItems, { id: newTodoRef.key, text: newTodo }]);
+      setNewTodo('');
+    } catch (error) {
+      console.error("Error adding Todo Item: ", error);
+    }
+  };
+
+  const deleteTodoItem = (itemId) => {
+    const itemRef = ref(database, `todoItems/${userId}/${babyID}/${itemId}`);
+    remove(itemRef)
+      .then(() => {
+        setTodoItems((prevItems) => prevItems.filter(item => item.id !== itemId));
+      })
+      .catch((error) => {
+        console.error("Error deleting todo:", error);
+      });
+  };
 
   // Handle date change
   const onChangeDate = (event, selectedDate) => {
@@ -318,16 +340,6 @@ export default function HomeScreen({ route, navigation }) {
       console.log("Sleep Time was successfully added");
     }).catch((error) => {
       console.error("Error saving sleep time: ", error);
-    });
-  };
-
-  // Delete todo item
-  const deleteTodoItem = (itemId) => {
-    const itemRef = ref(database, `todoItems/${itemId}`);
-    remove(itemRef).then(() => {
-      console.log("Todo item deleted");
-    }).catch((error) => {
-      console.error("Error deleting todo item: ", error);
     });
   };
 
