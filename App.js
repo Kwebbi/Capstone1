@@ -12,7 +12,6 @@ import MilestoneView from "./components/MilestoneView"
 import Settings from "./components/Settings"
 import WeeklyReport from "./components/WeeklyReport"
 //import EditBaby from './components/EditBaby';
-import { registerRootComponent } from "expo"
 import useAuth from "./hooks/useAuth"
 
 const Stack = createNativeStackNavigator()
