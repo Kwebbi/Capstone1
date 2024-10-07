@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator, FlatList } from 'react-native';
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -23,15 +23,21 @@ export default function HomeScreen({ route, navigation }) {
   const [feedingModalVisible, setFeedingModalVisible] = useState(false);
   const [diaperModalVisible, setDiaperModalVisible] = useState(false);
   const [sleepModalVisible, setSleepModalVisible] = useState(false);
+  const [commentSectionModalVisible, setCommentSectionModalVisible] = useState(false);
   const [isStartPickerVisible, setStartPickerVisibility] = useState(false);
   const [isEndPickerVisible, setEndPickerVisibility] = useState(false);
   const [sleepStart, setSleepStart] = useState(new Date());
   const [sleepEnd, setSleepEnd] = useState(new Date());
+  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState([]);
   const feedingTimeRef = ref(database, 'feedingTimes/');
   const sleepTimeRef = ref(database, 'sleepTimes/');
   const diaperChangeRef = ref(database, 'diaperChanges/');
+  const commentRef = ref(database, 'comments/');
 
   const [isLoading, setIsLoading] = useState(true);
+
+  //setComments([{user:"john@gmail.com", babyID: 123456, text: "Juan David is a Shitty Baby, he pukes all the time"}, {user:"john@gmail.com", babyID: 123456, text: "Juan David is a Shitty Baby, he pukes all the time"}]);
 
   const { fullName, babyID } = route.params; //Get baby info from navigation params
   
@@ -39,6 +45,11 @@ export default function HomeScreen({ route, navigation }) {
   const allFeedingTimesQuery = useMemo(() => (
     query(feedingTimeRef, orderByChild('dateTime'))
   ), [feedingTimeRef]);
+
+  const allCommentsQuery = useMemo(() => (
+    query(commentRef/*, orderByChild('dateTime')*/)
+  ),  [commentRef]);
+  
   
   useEffect(() => {
     const unsubscribe = onValue(allFeedingTimesQuery, (snapshot) => {
@@ -46,7 +57,7 @@ export default function HomeScreen({ route, navigation }) {
         console.log("Feeding Times Found!!!");
         let tmp = [];
         snapshot.forEach(child => {
-          console.log(child.key, child.val());
+          //console.log(child.key, child.val());
           tmp.push(child.val());
         });
         
@@ -54,7 +65,7 @@ export default function HomeScreen({ route, navigation }) {
         const filteredFeedingTimes = Object.values(tmp).filter(feedingTime => feedingTime.babyID && feedingTime.babyID == babyID);
         // Set filtered feedingTimes to state
         setFeedings(filteredFeedingTimes);
-        console.log(filteredFeedingTimes);
+        //console.log(filteredFeedingTimes);
       } else {
         console.log("No feedingTimes found");
         setFeedings([]); // Reset feedings with empty array
@@ -63,7 +74,34 @@ export default function HomeScreen({ route, navigation }) {
     });
 
     return () => unsubscribe();
-  }, [allFeedingTimesQuery]);
+  }, []);
+
+  //Retrieving Comments from DB
+  useEffect(() => {
+    
+    const unsubscribe = onValue(allCommentsQuery, (snapshot) => {
+      if (snapshot.exists()) {
+        console.log("Comments found in DB!!!");
+        let tmp = [];
+        snapshot.forEach(child => {
+          //console.log(child.key, child.val());
+          tmp.push(child.val());
+        });
+        
+        // Filter Comments based on the "babyId"
+        const filteredComments = Object.values(tmp).filter(comment => comment.babyID && comment.babyID == babyID);
+        // Set filtered feedingTimes to state
+        setComments(filteredComments);
+        //console.log(filteredComments);
+      } else {
+        console.log("No Comments found");
+        setComments([]); // Reset comments with empty array
+      }
+      setIsLoading(false); // Set loading state to false
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Fetching existing diaper change records
   useEffect(() => {
@@ -144,6 +182,49 @@ export default function HomeScreen({ route, navigation }) {
     setSleepEnd(currentDate);
     setEndPickerVisibility(false); // Hide the picker
   };
+
+  //Save comment record
+  const handleSaveComment = () => {
+
+    const newComment = {
+      text: comment,
+      user: auth.currentUser.email,
+      commentDate: (new Date()).toLocaleDateString(),
+      dateTime: (new Date()).getTime(),
+      babyID: babyID
+    };
+
+    setComments([...comments, newComment]);
+    setComment('');
+    console.log("Comment Saved!");
+    //console.log(comments);
+
+    createComment();
+  };
+
+  // Saves comments to the database
+  function createComment() {
+    const newCommentRef = push(commentRef);
+    const commentKey = newCommentRef.key;
+
+    // Create the new comment entry with a uniquely generated key
+    const newComment = {
+      commentId: commentKey,
+      text: comment,
+      user: auth.currentUser.email,
+      commentDate: (new Date()).toLocaleDateString(),
+      dateTime: (new Date()).getTime(),
+      babyID: babyID
+    };
+
+    // Set the new baby entry in the database and to catch error in case there is an error
+    set(newCommentRef, newComment).then(() => {
+      console.log("New Comment was successfully added");
+    }).catch((error) => {
+      console.log(error);
+    });
+  };
+
 
   // Save feeding record
   const handleSaveFeeding = () => {
@@ -453,7 +534,47 @@ export default function HomeScreen({ route, navigation }) {
               <Button title="Cancel" onPress={() => setSleepModalVisible(false)} />
             </View>
           </Modal>
+            
+          <Button mode="contained" title="Comment Section" onPress={() => setCommentSectionModalVisible(!commentSectionModalVisible)}></Button>
+          
+          {/* Comment Section Modal */}
+          <Modal
+            visible={commentSectionModalVisible}
+            onRequestClose={() => setCommentSectionModalVisible(false)}>
+            <View style={styles.commentSection}>
+            {/* Comment Input Field */}
+            
+            <TextInput
+              style={styles.commentInput}
+              label="Add a comment"
+              value={comment}
+              onChangeText={text => setComment(text)}
+              mode="outlined"
+              placeholder='Enter your comment here...'
+            />
+            
+            {/* Submit Button */}
+            <Button mode="contained" title="Post" onPress={handleSaveComment}></Button>
+
+            {/* Display list of comments */}
+            <FlatList
+              data={comments}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.comment}>
+                  <Text style={styles.user}>User: {item.user}</Text>
+                  <Text>Date: {item.commentDate}</Text>
+                  <Text>{item.text}</Text>
+                </View>
+              )}
+              ListEmptyComponent={<Text>No comments yet.</Text>}
+            />
+            <Button title="Go Back to HomeScreen" onPress={() => setCommentSectionModalVisible(false)}></Button>
+          </View>
+          </Modal>
         </View>
+
+        
       </View>
     </ScrollView>
   );
@@ -539,4 +660,40 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
+  comment: {
+    margin: 2,
+    fontWeight: 'bold',
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#999',
+    width: 300
+  },
+  commentInput: {
+    width: 310,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 4,
+    padding: 10,
+    marginBottom: 10,
+    marginTop: 10,
+    height: 80
+  },
+  commentSection :{
+    backgroundColor: 'white',
+    padding: 10,
+    margin: 20,
+    marginTop: 100,
+    borderRadius: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    height: 500,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  }
 });
