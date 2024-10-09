@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import HomeScreen from "./components/HomeScreen"
@@ -13,51 +14,58 @@ import Settings from "./components/Settings"
 import WeeklyReport from "./components/WeeklyReport"
 //import EditBaby from './components/EditBaby';
 import useAuth from "./hooks/useAuth"
+import { PermissionsAndroid } from "react-native"
 
 const Stack = createNativeStackNavigator()
 
 export default function App() {
   const { user } = useAuth()
 
-  //copied directly from the docs.
-   const requestUserPermission = async () => {
-     const authStatus = await messaging().requestPermission()
-     const enabled =
-       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-       authStatus === messaging.AuthorizationStatus.PROVISIONAL
+  const requestUserPermissionAndroid = () => {
+     PermissionsAndroid.request(
+       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+     )
+  }
 
-     if (enabled) {
-       console.log("Notification permission status:", authStatus)
-       return true
-     } else {
-       console.log("Notification permission not granted")
-       return false
-     }
-   }
+  const requestUserPermission = async () => {
+    const authStatus = await messaging().requestPermission()
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL
 
-   const getToken = async () => {
-     try {
-       const fcmToken = await messaging().getToken()
-       if (fcmToken) {
-         console.log("Your Firebase Cloud Messaging Token is:", fcmToken)
-       } else {
-         console.log("Failed to get FCM token")
-       }
-     } catch (error) {
-       console.error("Error in getting FCM token:", error)
-     }
-   }
+    if (enabled) {
+      console.log("Notification permission status:", authStatus)
+      return true
+    } else {
+      console.log("Notification permission not granted")
+      return false
+    }
+  }
 
-   useEffect(() => {
-     const init = async () => {
-       const permissionGranted = await requestUserPermission()
-       if (permissionGranted) {
-         await getToken()
-       }
-     }
+  const getToken = async () => {
+    try {
+      const fcmToken = await messaging().getToken()
+      if (fcmToken) {
+        console.log("Your Firebase Cloud Messaging Token is:", fcmToken)
+      } else {
+        console.log("Failed to get FCM token")
+      }
+    } catch (error) {
+      console.error("Error in getting FCM token:", error)
+    }
+  }
 
-     init()
-   }, [])
+  useEffect(() => {
+    const init = async () => {
+      const permissionGranted = await requestUserPermission()
+      const permissionGrantedAndroid = requestUserPermissionAndroid()
+      if (permissionGranted || permissionGrantedAndroid) {
+        await getToken()
+      }
+    }
+
+    init()
+  }, [])
   if (user) {
     return (
       <NavigationContainer>
