@@ -344,22 +344,29 @@ export default function HomeScreen({ route, navigation }) {
   };
 
   return (
-    <ScrollView automaticallyAdjustKeyboardInsets={true}  style={{ backgroundColor: "#cfe2f3" }}>
+    <ScrollView
+      automaticallyAdjustKeyboardInsets={true}
+      style={{ backgroundColor: "#cfe2f3" }}
+    >
       <View className="flex" style={{ backgroundColor: "#cfe2f3" }}>
-        
         {/* Banner with Name */}
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
-            <TouchableOpacity style={{ position: "absolute", left: 22, top: 25 }} onPress={() => navigation.navigate('Profiles')}>
+            <TouchableOpacity
+              style={{ position: "absolute", left: 22, top: 25 }}
+              onPress={() => navigation.navigate("Profiles")}
+            >
               <Ionicons name="arrow-back" size={30} color="#28436d" />
             </TouchableOpacity>
 
             <Text style={styles.titleText}>{fullName}</Text>
           </View>
         </SafeAreaView>
-        
-        <View className="flex space-y-10 bg-white px-8 pt-8" style={{ borderRadius: 50, position: "relative", top: -30 }}>
-          
+
+        <View
+          className="flex space-y-10 bg-white px-8 pt-8"
+          style={{ borderRadius: 50, position: "relative", top: -30 }}
+        >
           {/* Avatar Section */}
           <View style={styles.profileSection}>
             <View className="flex justify-center">
@@ -379,57 +386,102 @@ export default function HomeScreen({ route, navigation }) {
               />
               <Button title="Add Todo" onPress={addTodoItem} />
               {todoItems.map((todo) => (
-                <Text key={todo.id} style={styles.todoItem}>• {todo.text}</Text>
+                <Text key={todo.id} style={styles.todoItem}>
+                  • {todo.text}
+                </Text>
               ))}
             </View>
           </View>
 
           {/* Feeding Button */}
           <View style={styles.buttonContainer}>
-            <Button title="Feeding" onPress={() => setFeedingModalVisible(true)} />
+            <Button
+              title="Feeding"
+              onPress={() => setFeedingModalVisible(true)}
+            />
             {feedings.length > 0 && (
               <Text style={styles.recordPreview}>
-                Last Feeding: {feedings[feedings.length - 1].foodChoice} - {feedings[feedings.length - 1].feedingDate} at {feedings[feedings.length - 1].feedingTime}, {feedings[feedings.length - 1].feedingAmount} mL
+                Last Feeding: {feedings[feedings.length - 1].foodChoice} -{" "}
+                {feedings[feedings.length - 1].feedingDate} at{" "}
+                {feedings[feedings.length - 1].feedingTime},{" "}
+                {feedings[feedings.length - 1].feedingAmount} mL
               </Text>
             )}
           </View>
 
           {/* Diaper Change Button */}
           <View style={styles.buttonContainer}>
-            <Button title="Diaper Change" onPress={() => setDiaperModalVisible(true)} />
+            <Button
+              title="Diaper Change"
+              onPress={() => setDiaperModalVisible(true)}
+            />
             {diaperChanges.length > 0 && (
               <Text style={styles.recordPreview}>
-                Last Diaper Change: {diaperChanges[diaperChanges.length - 1].type} on {diaperChanges[diaperChanges.length - 1].date} at {diaperChanges[diaperChanges.length - 1].time}
+                Last Diaper Change:{" "}
+                {diaperChanges[diaperChanges.length - 1].type} on{" "}
+                {diaperChanges[diaperChanges.length - 1].date} at{" "}
+                {diaperChanges[diaperChanges.length - 1].time}
               </Text>
             )}
           </View>
-          
+
           {/* Sleep Button */}
           <View style={styles.buttonContainer}>
             <Button title="Sleep" onPress={() => setSleepModalVisible(true)} />
             {sleepRecords.length > 0 && (
               <Text style={styles.recordPreview}>
-                Last Sleep Record: {new Date(sleepRecords[sleepRecords.length - 1].sleepStart).toLocaleTimeString()} to {new Date(sleepRecords[sleepRecords.length - 1].sleepEnd).toLocaleTimeString()}
+                Last Sleep Record:{" "}
+                {new Date(
+                  sleepRecords[sleepRecords.length - 1].sleepStart
+                ).toLocaleTimeString()}{" "}
+                to{" "}
+                {new Date(
+                  sleepRecords[sleepRecords.length - 1].sleepEnd
+                ).toLocaleTimeString()}
               </Text>
             )}
           </View>
 
           {/* Show All Records Button */}
           <View style={styles.buttonContainer}>
-            <Button title="Show All Records" onPress={() => setShowAllRecords(!showAllRecords)} />
+            <Button
+              title="Show All Records"
+              onPress={() => setShowAllRecords(!showAllRecords)}
+            />
             {showAllRecords && (
               <>
                 {feedings.map((feeding, index) => (
-                  <Text key={`feeding-${index}`}>Feeding #{index + 1}: {feeding.feedingDate} - {feeding.feedingTime} - {feeding.feedingAmount} mL - {feeding.foodChoice}</Text>
+                  <Text key={`feeding-${index}`}>
+                    Feeding #{index + 1}: {feeding.feedingDate} -{" "}
+                    {feeding.feedingTime} - {feeding.feedingAmount} mL -{" "}
+                    {feeding.foodChoice}
+                  </Text>
                 ))}
                 {diaperChanges.map((change, index) => (
-                  <Text key={`diaper-${index}`}>Diaper #{index + 1}: {change.type} on {change.date} at {change.time}</Text>
+                  <Text key={`diaper-${index}`}>
+                    Diaper #{index + 1}: {change.type} on {change.date} at{" "}
+                    {change.time}
+                  </Text>
                 ))}
                 <View>
                   {sleepRecords.map((record, index) => (
-                    <View key={index} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: '' }}>
-                      <Text>Sleep #{index + 1}: {new Date(record.sleepStart).toLocaleTimeString()} to {new Date(record.sleepEnd).toLocaleTimeString()}</Text>
-                      <Button title="Delete" onPress={() => handleDeleteSleep(record.sleepTimeID)} />
+                    <View
+                      key={index}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "",
+                      }}
+                    >
+                      <Text>
+                        Sleep #{index + 1}:{" "}
+                        {new Date(record.sleepStart).toLocaleTimeString()} to{" "}
+                        {new Date(record.sleepEnd).toLocaleTimeString()}
+                      </Text>
+                      <Button
+                        title="Delete"
+                        onPress={() => handleDeleteSleep(record.sleepTimeID)}
+                      />
                     </View>
                   ))}
                 </View>
@@ -437,11 +489,22 @@ export default function HomeScreen({ route, navigation }) {
             )}
           </View>
 
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Weekly Report"
+              onPress={() =>
+                navigation.navigate("WeeklyReport", { fullName, babyID })
+              }
+            />
+          </View>
+
           {/* Show Milestones Button*/}
           <View style={styles.buttonContainer}>
             <Button
               title="Show Milestones"
-              onPress={() => navigation.navigate('BabyMilestones', { fullName, babyID })} // Navigate to BabyMilestones
+              onPress={() =>
+                navigation.navigate("BabyMilestones", { fullName, babyID })
+              } // Navigate to BabyMilestones
             />
           </View>
 
@@ -450,10 +513,14 @@ export default function HomeScreen({ route, navigation }) {
             visible={feedingModalVisible}
             animationType="slide"
             transparent={true}
-            onRequestClose={() => setFeedingModalVisible(false)}>
+            onRequestClose={() => setFeedingModalVisible(false)}
+          >
             <View style={styles.modalView}>
               <Text>Enter Feeding Details:</Text>
-              <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
+              <Button
+                title="Pick Date & Time"
+                onPress={() => setDatePickerVisibility(true)}
+              />
               {isDatePickerVisible && (
                 <DateTimePicker
                   testID="dateTimePicker"
@@ -477,7 +544,10 @@ export default function HomeScreen({ route, navigation }) {
                 keyboardType="numeric"
               />
               <Button title="Save" onPress={handleSaveFeeding} />
-              <Button title="Cancel" onPress={() => setFeedingModalVisible(false)} />
+              <Button
+                title="Cancel"
+                onPress={() => setFeedingModalVisible(false)}
+              />
             </View>
           </Modal>
 
@@ -486,19 +556,24 @@ export default function HomeScreen({ route, navigation }) {
             visible={diaperModalVisible}
             animationType="slide"
             transparent={true}
-            onRequestClose={() => setDiaperModalVisible(false)}>
+            onRequestClose={() => setDiaperModalVisible(false)}
+          >
             <View style={styles.modalView}>
               <Text>Diaper Change Type:</Text>
               <Picker
                 selectedValue={diaperType}
                 onValueChange={(itemValue) => setDiaperType(itemValue)}
-                style={{ width: 200, height: 200 }}>
+                style={{ width: 200, height: 200 }}
+              >
                 <Picker.Item label="Wet" value="Wet" />
                 <Picker.Item label="Dirty" value="Dirty" />
                 <Picker.Item label="Mixed" value="Mixed" />
                 <Picker.Item label="Dry" value="Dry" />
               </Picker>
-              <Button title="Pick Date & Time" onPress={() => setDatePickerVisibility(true)} />
+              <Button
+                title="Pick Date & Time"
+                onPress={() => setDatePickerVisibility(true)}
+              />
               {isDatePickerVisible && (
                 <DateTimePicker
                   testID="dateTimePicker"
@@ -509,7 +584,10 @@ export default function HomeScreen({ route, navigation }) {
                 />
               )}
               <Button title="Save" onPress={handleSaveDiaperChange} />
-              <Button title="Cancel" onPress={() => setDiaperModalVisible(false)} />
+              <Button
+                title="Cancel"
+                onPress={() => setDiaperModalVisible(false)}
+              />
             </View>
           </Modal>
 
@@ -518,10 +596,14 @@ export default function HomeScreen({ route, navigation }) {
             visible={sleepModalVisible}
             animationType="slide"
             transparent={true}
-            onRequestClose={() => setSleepModalVisible(false)}>
+            onRequestClose={() => setSleepModalVisible(false)}
+          >
             <View style={styles.modalView}>
               <Text>Enter Sleep Start:</Text>
-              <Button title="Pick Start Time" onPress={() => setStartPickerVisibility(true)} />
+              <Button
+                title="Pick Start Time"
+                onPress={() => setStartPickerVisibility(true)}
+              />
               {isStartPickerVisible && (
                 <DateTimePicker
                   testID="startDateTimePicker"
@@ -532,7 +614,10 @@ export default function HomeScreen({ route, navigation }) {
                 />
               )}
               <Text>Enter Sleep End:</Text>
-              <Button title="Pick End Time" onPress={() => setEndPickerVisibility(true)} />
+              <Button
+                title="Pick End Time"
+                onPress={() => setEndPickerVisibility(true)}
+              />
               {isEndPickerVisible && (
                 <DateTimePicker
                   testID="endDateTimePicker"
@@ -543,53 +628,68 @@ export default function HomeScreen({ route, navigation }) {
                 />
               )}
               <Button title="Save Sleep Record" onPress={handleSaveSleep} />
-              <Button title="Cancel" onPress={() => setSleepModalVisible(false)} />
+              <Button
+                title="Cancel"
+                onPress={() => setSleepModalVisible(false)}
+              />
             </View>
           </Modal>
-            
-          <Button mode="contained" title="Comment Section" onPress={() => setCommentSectionModalVisible(!commentSectionModalVisible)}></Button>
-          
+
+          <Button
+            mode="contained"
+            title="Comment Section"
+            onPress={() =>
+              setCommentSectionModalVisible(!commentSectionModalVisible)
+            }
+          ></Button>
+
           {/* Comment Section Modal */}
           <Modal
             visible={commentSectionModalVisible}
-            onRequestClose={() => setCommentSectionModalVisible(false)}>
+            onRequestClose={() => setCommentSectionModalVisible(false)}
+          >
             <View style={styles.commentSection}>
-            {/* Comment Input Field */}
-            
-            <TextInput
-              style={styles.commentInput}
-              label="Add a comment"
-              value={comment}
-              onChangeText={text => setComment(text)}
-              mode="outlined"
-              placeholder='Enter your comment here...'
-            />
-            
-            {/* Submit Button */}
-            <Button mode="contained" title="Post" onPress={handleSaveComment}></Button>
+              {/* Comment Input Field */}
 
-            {/* Display list of comments */}
-            <FlatList
-              data={comments}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.comment}>
-                  <Text style={styles.user}>User: {item.user}</Text>
-                  <Text>Date: {item.commentDate}</Text>
-                  <Text>{item.text}</Text>
-                </View>
-              )}
-              ListEmptyComponent={<Text>No comments yet.</Text>}
-            />
-            <Button title="Go Back to HomeScreen" onPress={() => setCommentSectionModalVisible(false)}></Button>
-          </View>
+              <TextInput
+                style={styles.commentInput}
+                label="Add a comment"
+                value={comment}
+                onChangeText={(text) => setComment(text)}
+                mode="outlined"
+                placeholder="Enter your comment here..."
+              />
+
+              {/* Submit Button */}
+              <Button
+                mode="contained"
+                title="Post"
+                onPress={handleSaveComment}
+              ></Button>
+
+              {/* Display list of comments */}
+              <FlatList
+                data={comments}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                  <View style={styles.comment}>
+                    <Text style={styles.user}>User: {item.user}</Text>
+                    <Text>Date: {item.commentDate}</Text>
+                    <Text>{item.text}</Text>
+                  </View>
+                )}
+                ListEmptyComponent={<Text>No comments yet.</Text>}
+              />
+              <Button
+                title="Go Back to HomeScreen"
+                onPress={() => setCommentSectionModalVisible(false)}
+              ></Button>
+            </View>
           </Modal>
         </View>
-
-        
       </View>
     </ScrollView>
-  );
+  )
 };
 
 const styles = StyleSheet.create({
