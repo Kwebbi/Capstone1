@@ -200,6 +200,13 @@ export default function Profiles({ navigation }) {
                         </TouchableOpacity>
                     )}
                 </View>
+                    <View style={{ padding: 10 }}>
+                    {myBabies.length < 1 && (
+                            <Text style={{ fontSize: 18, color: '#28436d', fontWeight: 'bold', textAlign: 'center' }}>
+                                You have no baby profiles. Add one below!
+                            </Text>
+                        )}
+                    </View>
                 <FlatList
                     data={myBabies}
                     keyExtractor={item => item.babyID}
