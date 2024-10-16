@@ -118,12 +118,6 @@ const WeeklyReport = ({ route }) => {
     prepareDailyReports()
   }, [feedings, diaperChanges, sleepRecords, prepareDailyReports])
 
-  // console.log(sleepRecords)
-  // console.log(diaperChanges)
-
-  // console.log(feedings)
-  console.log(getLastWeekDates())
-
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -142,11 +136,11 @@ const WeeklyReport = ({ route }) => {
             >{`${day.dayName} (${day.date})`}</Text>
 
             <Text style={styles.dayDetail}>
-              Feeding:
+              Feeding: {""}
               {day.feeding.length > 0 ? (
                 day.feeding.map((el, idx) => (
                   <Text key={idx}>
-                    {el.foodChoice} {el.feedingAmount} ml at {el.feedingTime},
+                    {el.foodChoice} {el.feedingAmount} ml at {el.feedingTime}, {""}
                   </Text>
                 ))
               ) : (
@@ -155,13 +149,14 @@ const WeeklyReport = ({ route }) => {
             </Text>
 
             <Text style={styles.dayDetail}>
-              Sleep Records:
+              Sleep Records: {""}
               {day.sleep.length > 0 ? (
                 day.sleep.map((el, idx) => (
                   <Text key={idx}>
                     {`Sleep from ${formatTimestampToDDMMYY(
                       el.sleepStart
                     )} to ${formatTimestampToDDMMYY(el.sleepEnd)}`}
+                    {""}
                   </Text>
                 ))
               ) : (
@@ -170,11 +165,11 @@ const WeeklyReport = ({ route }) => {
             </Text>
 
             <Text style={styles.dayDetail}>
-              Diaper Changes:
+              Diaper Changes: {""}
               {day.diapers.length > 0 ? (
                 day.diapers.map((el, idx) => (
                   <Text key={idx}>
-                    {el.type} at {el.time},
+                    {el.type} at {el.time}, {""}
                   </Text>
                 ))
               ) : (
