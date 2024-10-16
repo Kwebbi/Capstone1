@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import {
   Text,
   View,
@@ -23,7 +23,7 @@ const getLastWeekDates = () => {
     const day = date.getDate().toString()
     const year = date.getFullYear().toString()
 
-    const formattedDate = `${month}/${day}/${year}`
+    const formattedDate = `${day}/${month}/${year}`
 
     lastWeekDates.push({
       date,
@@ -35,12 +35,12 @@ const getLastWeekDates = () => {
   return lastWeekDates.reverse()
 }
 
-const formatTimestampToMMDDYY = (timestamp) => {
+const formatTimestampToDDMMYY = (timestamp) => {
   const date = new Date(timestamp)
   const month = date.getMonth() + 1
   const day = date.getDate()
-  const year = date.getFullYear().toString().slice(-2) 
-  return `${month}/${day}/${year}`
+  const year = date.getFullYear()
+  return `${day}/${month}/${year}`
 }
 
 const WeeklyReport = ({ route }) => {
@@ -56,70 +56,73 @@ const WeeklyReport = ({ route }) => {
   const diaperChangeRef = ref(database, "diaperChanges/")
   const sleepTimeRef = ref(database, "sleepTimes/")
 
-  const fetchFeedings = () => {
+  const fetchData = useCallback(() => {
     const allFeedingTimesQuery = query(feedingTimeRef, orderByChild("dateTime"))
-    const unsubscribe = onValue(allFeedingTimesQuery, (snapshot) => {
+    onValue(allFeedingTimesQuery, (snapshot) => {
       if (snapshot.exists()) {
         const feedingsArray = Object.values(snapshot.val()).filter(
           (feeding) => feeding.babyID === babyID
         )
         setFeedings(feedingsArray)
+      } else {
+        setFeedings([])
       }
-      setIsLoading(false)
     })
-    return () => unsubscribe()
-  }
 
-  const fetchDiaperChanges = () => {
-    const unsubscribe = onValue(diaperChangeRef, (snapshot) => {
+    onValue(diaperChangeRef, (snapshot) => {
       if (snapshot.exists()) {
         const diaperChangesArray = Object.values(snapshot.val()).filter(
           (change) => change.babyID === babyID
         )
         setDiaperChanges(diaperChangesArray)
+      } else {
+        setDiaperChanges([])
       }
     })
-    return () => unsubscribe()
-  }
 
-  const fetchSleepRecords = () => {
-    const unsubscribe = onValue(sleepTimeRef, (snapshot) => {
-      const fetchedSleepRecords = []
-      snapshot.forEach((childSnapshot) => {
-        if (childSnapshot.val().babyID === babyID) {
-          fetchedSleepRecords.push(childSnapshot.val())
-        }
-      })
-      setSleepRecords(fetchedSleepRecords)
+    onValue(sleepTimeRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const sleepArray = Object.values(snapshot.val()).filter(
+          (sleep) => sleep.babyID === babyID
+        )
+        setSleepRecords(sleepArray)
+      } else {
+        setSleepRecords([])
+      }
     })
-    return () => unsubscribe()
-  }
+  }, [babyID])
 
-
-  useEffect(() => {
-    const unsubscribeFeedings = fetchFeedings()
-    const unsubscribeDiapers = fetchDiaperChanges()
-    const unsubscribeSleep = fetchSleepRecords()
-
+  const prepareDailyReports = useCallback(() => {
     const lastWeekDates = getLastWeekDates()
 
-    const initialDailyReports = lastWeekDates.map((day) => ({
+    const reports = lastWeekDates.map((day) => ({
       date: day.label,
       dayName: day.dayName,
-      feeding: 0,
-      sleep: 0,
-      diapers: 0,
+      feeding: feedings.filter((f) => f.feedingDate === day.label),
+      diapers: diaperChanges.filter((d) => d.date === day.label),
+      sleep: sleepRecords.filter(
+        (s) =>
+          formatTimestampToDDMMYY(s.sleepStart) === day.label ||
+          formatTimestampToDDMMYY(s.sleepEnd) === day.label
+      ),
     }))
 
-    setDailyReports(initialDailyReports)
+    setDailyReports(reports)
+  }, [feedings, diaperChanges, sleepRecords])
 
-    return () => {
-      unsubscribeFeedings()
-      unsubscribeDiapers()
-      unsubscribeSleep()
-    }
-  }, [])
-  console.log(sleepRecords)
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  useEffect(() => {
+    prepareDailyReports()
+  }, [feedings, diaperChanges, sleepRecords, prepareDailyReports])
+
+  // console.log(sleepRecords)
+  // console.log(diaperChanges)
+
+  // console.log(feedings)
+  console.log(getLastWeekDates())
 
   return (
     <View style={styles.container}>
@@ -137,41 +140,46 @@ const WeeklyReport = ({ route }) => {
             <Text
               style={styles.dayTitle}
             >{`${day.dayName} (${day.date})`}</Text>
+
             <Text style={styles.dayDetail}>
               Feeding:
-              {feedings
-                .filter((el) => el.feedingDate === day.date)
-                .map((el) => (
-                  <Text>
+              {day.feeding.length > 0 ? (
+                day.feeding.map((el, idx) => (
+                  <Text key={idx}>
                     {el.foodChoice} {el.feedingAmount} ml at {el.feedingTime},
                   </Text>
-                ))}
+                ))
+              ) : (
+                <Text> No feeding data </Text>
+              )}
             </Text>
+
             <Text style={styles.dayDetail}>
               Sleep Records:
-              {sleepRecords
-                .filter(
-                  (el) =>
-                    formatTimestampToMMDDYY(el.sleepStart) === day.date ||
-                    formatTimestampToMMDDYY(el.sleepEnd) === day.date
-                ) // Filter records matching the current day
-                .map((el, index) => (
-                  <Text key={index}>
-                    {` Sleep from ${formatTimestampToMMDDYY(
+              {day.sleep.length > 0 ? (
+                day.sleep.map((el, idx) => (
+                  <Text key={idx}>
+                    {`Sleep from ${formatTimestampToDDMMYY(
                       el.sleepStart
-                    )} to ${formatTimestampToMMDDYY(el.sleepEnd)} `}
+                    )} to ${formatTimestampToDDMMYY(el.sleepEnd)}`}
                   </Text>
-                ))}
+                ))
+              ) : (
+                <Text> No sleep data </Text>
+              )}
             </Text>
+
             <Text style={styles.dayDetail}>
               Diaper Changes:
-              {diaperChanges
-                .filter((el) => el.date === day.date)
-                .map((el) => (
-                  <Text>
+              {day.diapers.length > 0 ? (
+                day.diapers.map((el, idx) => (
+                  <Text key={idx}>
                     {el.type} at {el.time},
                   </Text>
-                ))}
+                ))
+              ) : (
+                <Text> No diaper change data </Text>
+              )}
             </Text>
           </View>
         ))}
@@ -205,6 +213,7 @@ const styles = StyleSheet.create({
     color: "#28436d",
     marginVertical: 20,
     textAlign: "center",
+    paddingLeft: 20,
   },
   dayContainer: {
     marginVertical: 10,
