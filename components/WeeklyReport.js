@@ -2,14 +2,19 @@ import React, { useEffect, useState, useCallback } from "react"
 import {
   Text,
   View,
+  Alert,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Button,
 } from "react-native"
 import { ref, onValue, query, orderByChild } from "firebase/database"
 import { database } from "../config/firebase"
 import { useNavigation } from "@react-navigation/native"
 import { Ionicons } from "@expo/vector-icons"
+import * as Notifications from "expo-notifications"
+
+const {cancelAllScheduledNotificationsAsync}  = Notifications
 
 const getLastWeekDates = () => {
   const currentDate = new Date()
@@ -43,6 +48,19 @@ const formatTimestampToDDMMYY = (timestamp) => {
   return `${day}/${month}/${year}`
 }
 
+const getNextSunday = () => {
+  const now = new Date()
+  const nextSunday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + ((7 - now.getDay()) % 7),
+    9,
+    0,
+    0
+  )
+  return nextSunday
+}
+
 const WeeklyReport = ({ route }) => {
   const { fullName, babyID } = route.params
   const [dailyReports, setDailyReports] = useState([])
@@ -55,6 +73,27 @@ const WeeklyReport = ({ route }) => {
   const feedingTimeRef = ref(database, "feedingTimes/")
   const diaperChangeRef = ref(database, "diaperChanges/")
   const sleepTimeRef = ref(database, "sleepTimes/")
+
+  async function scheduleWeeklyNotification() {
+    await cancelAllScheduledNotificationsAsync()
+    const nextSunday = getNextSunday()
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Weekly Report Ready 📋",
+        body: "Your child's weekly report is ready!",
+        sound: "default",
+        data: { screen: "WeeklyReport" },
+      },
+      trigger: {
+        date: nextSunday,
+        repeats: true,
+      },
+    })
+    Alert.alert(
+      "Schedule a notification for every Sunday at 9:00 AM for Weekly Report."
+    )
+  }
 
   const fetchData = useCallback(() => {
     const allFeedingTimesQuery = query(feedingTimeRef, orderByChild("dateTime"))
@@ -140,7 +179,8 @@ const WeeklyReport = ({ route }) => {
               {day.feeding.length > 0 ? (
                 day.feeding.map((el, idx) => (
                   <Text key={idx}>
-                    {el.foodChoice} {el.feedingAmount} ml at {el.feedingTime}, {""}
+                    {el.foodChoice} {el.feedingAmount} ml at {el.feedingTime},{" "}
+                    {""}
                   </Text>
                 ))
               ) : (
@@ -179,6 +219,10 @@ const WeeklyReport = ({ route }) => {
           </View>
         ))}
       </ScrollView>
+      <Button
+        title="Schedule Weekly Notification"
+        onPress={scheduleWeeklyNotification}
+      />
     </View>
   )
 }
