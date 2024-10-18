@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native"
 import { Ionicons } from "@expo/vector-icons"
 import * as Notifications from "expo-notifications"
 
-const {cancelAllScheduledNotificationsAsync}  = Notifications
+const { cancelAllScheduledNotificationsAsync } = Notifications
 
 const getLastWeekDates = () => {
   const currentDate = new Date()
@@ -48,19 +48,6 @@ const formatTimestampToDDMMYY = (timestamp) => {
   return `${day}/${month}/${year}`
 }
 
-const getNextSunday = () => {
-  const now = new Date()
-  const nextSunday = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() + ((7 - now.getDay()) % 7),
-    9,
-    0,
-    0
-  )
-  return nextSunday
-}
-
 const WeeklyReport = ({ route }) => {
   const { fullName, babyID } = route.params
   const [dailyReports, setDailyReports] = useState([])
@@ -75,24 +62,29 @@ const WeeklyReport = ({ route }) => {
   const sleepTimeRef = ref(database, "sleepTimes/")
 
   async function scheduleWeeklyNotification() {
-    await cancelAllScheduledNotificationsAsync()
-    const nextSunday = getNextSunday()
-
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Weekly Report Ready 📋",
-        body: "Your child's weekly report is ready!",
-        sound: "default",
-        data: { screen: "WeeklyReport" },
-      },
-      trigger: {
-        date: nextSunday,
-        repeats: true,
-      },
-    })
-    Alert.alert(
-      "Schedule a notification for every Sunday at 9:00 AM for Weekly Report."
-    )
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Weekly Report Ready 📋",
+          body: "Your child's weekly report is ready!",
+          sound: "default",
+          data: { screen: "WeeklyReport" }, 
+        },
+        trigger: {
+          weekday: 7, 
+          hour: 9,
+          minute: 0,
+          repeats: true,
+        },
+      })
+      Alert.alert(
+        "Notification Scheduled",
+        "Weekly report notification set for every Sunday at 9:00 AM."
+      )
+    } catch (error) {
+      console.error("Error scheduling notification:", error)
+      Alert.alert("Error", "Failed to schedule notification.")
+    }
   }
 
   const fetchData = useCallback(() => {
