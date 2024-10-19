@@ -1,6 +1,7 @@
-import { useEffect } from "react"
+import { Alert } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
+// import { firebase } from "@react-native-firebase/app"
 import HomeScreen from "./components/HomeScreen"
 import Register from "./components/Register"
 import Login from "./components/Login"
@@ -14,58 +15,50 @@ import Settings from "./components/Settings"
 import WeeklyReport from "./components/WeeklyReport"
 //import EditBaby from './components/EditBaby';
 import useAuth from "./hooks/useAuth"
-import { PermissionsAndroid } from "react-native"
-
 const Stack = createNativeStackNavigator()
+import * as Notifications from "expo-notifications"
+import * as Device from "expo-device"
 
 export default function App() {
   const { user } = useAuth()
 
-  const requestUserPermissionAndroid = () => {
-     PermissionsAndroid.request(
-       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-     )
-  }
+  async function requestNotificationPermissions() {
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync()
+      let finalStatus = existingStatus
 
-  const requestUserPermission = async () => {
-    const authStatus = await messaging().requestPermission()
-    const enabled =
-      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      authStatus === messaging.AuthorizationStatus.PROVISIONAL
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync()
+        finalStatus = status
+      }
 
-    if (enabled) {
-      console.log("Notification permission status:", authStatus)
+      if (finalStatus !== "granted") {
+        Alert.alert(
+          "Permission required",
+          "Please enable notifications in settings."
+        )
+        return false
+      }
+
+      console.log("Notification permissions granted.")
       return true
     } else {
-      console.log("Notification permission not granted")
+      Alert.alert("Must use a physical device for notifications.")
       return false
     }
   }
 
-  const getToken = async () => {
-    try {
-      const fcmToken = await messaging().getToken()
-      if (fcmToken) {
-        console.log("Your Firebase Cloud Messaging Token is:", fcmToken)
-      } else {
-        console.log("Failed to get FCM token")
-      }
-    } catch (error) {
-      console.error("Error in getting FCM token:", error)
-    }
-  }
+  requestNotificationPermissions()
 
-  useEffect(() => {
-    const init = async () => {
-      const permissionGranted = await requestUserPermission()
-      const permissionGrantedAndroid = requestUserPermissionAndroid()
-      if (permissionGranted || permissionGrantedAndroid) {
-        await getToken()
-      }
-    }
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  })
 
-    init()
-  }, [])
   if (user) {
     return (
       <NavigationContainer>
