@@ -29,10 +29,12 @@ import {
 } from "firebase/database"
 import { auth, database } from "../config/firebase"
 import { Picker } from "@react-native-picker/picker"
+import * as Notifications from "expo-notifications"
 
 export default function HomeScreen({ route, navigation }) {
   // States
   const [newTodo, setNewTodo] = useState("")
+  const [sendNotification, setSendNotification] = useState(false)
   const [todoItems, setTodoItems] = useState([])
   const [feedings, setFeedings] = useState([])
   const [diaperChanges, setDiaperChanges] = useState([])
@@ -134,6 +136,20 @@ export default function HomeScreen({ route, navigation }) {
   }, [])
 
   useEffect(() => {
+    if (sendNotification) {
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: "New Todo Added 📝",
+          body: `Your new todo ${newTodo} has been added!`,
+          sound: "default",
+        },
+        trigger: null
+      })
+    }
+    return () => setSendNotification(false)
+  }, [sendNotification])
+
+  useEffect(() => {
     const unsubscribe = onValue(diaperChangeRef, (snapshot) => {
       if (snapshot.exists()) {
         const diaperChanges = Object.values(snapshot.val()).filter(
@@ -195,10 +211,10 @@ export default function HomeScreen({ route, navigation }) {
         text: newTodo,
         timestamp: Date.now(),
       })
-      setNewTodo("")
     } catch (error) {
       console.error("Error adding Todo Item: ", error)
     }
+    setSendNotification(true)
   }
 
   // Function to delete a todo item

@@ -50,6 +50,15 @@ export default function App() {
   }
 
   requestNotificationPermissions()
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  })
+
   if (user) {
     return (
       <NavigationContainer>
