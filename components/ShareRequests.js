@@ -8,25 +8,24 @@ import Dialog from "react-native-dialog";
 
 export default function ShareRequests({ route, navigation }) {
     const [isLoading, setIsLoading] = useState(true);
-    //const { alerts } = route.params;
     const [alerts, setAlerts] = useState(route.params.alerts);
     const [visible, setVisible] = useState(false); //for dialog
+    const [selectedAlert, setSelectedAlert] = useState(null);
+    
 
-
-
-    const deleteAlert = (itemId) => {
-        console.log("alert id: " + itemId);
-        const itemRef = ref(database, `alert/${itemId}`);
+    const deleteAlert = () => {
+        console.log("alert id: " + selectedAlert.alertID);
+        const itemRef = ref(database, `alert/${selectedAlert.alertID}`);
         remove(itemRef).then(() => {
-            setAlerts((prevAlerts) => prevAlerts.filter(alert => alert.alertID !== itemId));
+            setAlerts((prevAlerts) => prevAlerts.filter(alert => alert.alertID !== selectedAlert.alertID));
             console.log("alert deleted");
         }).catch((error) => {
             console.error("Error deleting alert: ", error);
         }); 
     };
 
-    const addCaretakersToBaby = (babyID, newCaretaker) => {
-        const babyRef = ref(database, `babies/${babyID}`);
+    const addCaretakersToBaby = () => {
+        const babyRef = ref(database, `babies/${selectedAlert.babyID}`);
     
         //get the current caretakers
         get(babyRef)
@@ -36,7 +35,7 @@ export default function ShareRequests({ route, navigation }) {
                     const currentCaretakers = currentData.caretakers || []; // Default to empty array if caretakers doesn't exist
                     
                     // Add the new caretaker to the array
-                    const updatedCaretakers = [...currentCaretakers, newCaretaker];
+                    const updatedCaretakers = [...currentCaretakers, selectedAlert.parentID];
                     
                     // Update the baby record
                     update(babyRef, {
@@ -55,24 +54,28 @@ export default function ShareRequests({ route, navigation }) {
             });
     };
 
-    const showDialog = () => {
-      setVisible(true);
-    };
   
+    const showDialog = (alert) => {
+        setSelectedAlert(alert);
+        console.log(alert.message);
+        console.log(alert);
+        setVisible(true);
+    };
+
+
     const handleCancel = () => {
       setVisible(false);
     };
   
-    const handleAccept = (parentID, babyID, alertID) => {
-      addCaretakersToBaby(babyID, parentID);
-      deleteAlert(alertID);
+    const handleAccept = () => {
+      addCaretakersToBaby();
+      deleteAlert();
       setVisible(false);
     };
 
-    const handleDeny = (itemId) => {
-        deleteAlert(itemId)
+    const handleDeny = () => {
+        deleteAlert()
         setVisible(false);
-        navigation.navigate('ShareRequests', alerts);
     };
 
     return (
@@ -101,22 +104,25 @@ export default function ShareRequests({ route, navigation }) {
                 data={alerts}
                 keyExtractor={item => item.alertID}
                 renderItem={({ item }) => {
-                    const name = item.message.split("for")[1]?.trim();
                     return (
                         <View className="flex-1 mt-4">
                             <View style={{ borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0 }}></View>
                                 <View>
                                     <TouchableOpacity style={{ backgroundColor: '#fef9c3', padding: 10, borderRadius: 15 }}>
-                                        <Text className="text-xsm" onPress={showDialog}>{item.message}</Text>
-                                    </TouchableOpacity>
+                                        <Text className="text-xsm" onPress={() => showDialog(item)}>{item.message}</Text>
+                                    </TouchableOpacity>    
                                     <Dialog.Container visible={visible}>
                                         <Dialog.Title>Pending Request</Dialog.Title>
                                         <Dialog.Description>
-                                        Do you want to be added as a caretaker for {name}?
+                                        {selectedAlert ? (
+                                            <>Do you want to be added as a caretaker for {selectedAlert.message.split("for")[1]?.trim()}?</>
+                                        ) : (
+                                            <>Loading...</>
+                                        )}
                                         </Dialog.Description>
                                         <Dialog.Button label="Cancel" onPress={handleCancel} />
-                                        <Dialog.Button label="Accept" onPress={() => handleAccept(item.parentID, item.babyID, item.alertID)} />
-                                        <Dialog.Button label="Deny" onPress={() => handleDeny(item.alertID)} />
+                                        <Dialog.Button label="Accept" onPress={handleAccept} />
+                                        <Dialog.Button label="Deny" onPress={handleDeny} />
                                     </Dialog.Container>
                                 </View>
                         </View>
