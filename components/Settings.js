@@ -63,7 +63,7 @@ const Settings = ({ navigation }) => {
             <TouchableOpacity onPress={handlePendingShareRequest} style={styles.logoutButton}>
                 <View style={styles.logoutContent}>
                     <Ionicons name="share" size={42} color="black" />
-                    <Text style={styles.logoutButtonText}>Pending Share Request</Text>
+                    <Text style={styles.logoutButtonText}>Pending Share Requests</Text>
                 </View>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleHelpSupport} style={styles.logoutButton}>

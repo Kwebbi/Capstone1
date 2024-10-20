@@ -347,8 +347,10 @@ export default function HomeScreen({ route, navigation }) {
           {/* Show Milestones Button*/}
           <View style={styles.buttonContainer}>
             <Button
-              title="Show Milestones"
-              onPress={() => navigation.navigate('BabyMilestones', { fullName, babyID })} // Navigate to BabyMilestones
+              title="Milestones"
+              onPress={() =>
+                navigation.navigate("BabyMilestones", { fullName, babyID })
+              }
             />
           </View>
 
