@@ -14,8 +14,6 @@ import { useNavigation } from "@react-navigation/native"
 import { Ionicons } from "@expo/vector-icons"
 import * as Notifications from "expo-notifications"
 
-const { cancelAllScheduledNotificationsAsync } = Notifications
-
 const getLastWeekDates = () => {
   const currentDate = new Date()
   const lastWeekDates = []
@@ -58,6 +56,16 @@ function convertTimestamp(timestamp) {
   return date.toLocaleString("en-US", options)
 }
 
+const isDateEqual = (date1, date2) => {
+  const [day1, month1, year1] = date1.split("/").map(Number)
+  const [day2, month2, year2] = date2.split("/").map(Number)
+
+  return (
+    (day1 === day2 && month1 === month2 && year1 === year2) ||
+    (day1 === month2 && month1 === day2 && year1 === year2)
+  )
+}
+
 const WeeklyReport = ({ route }) => {
   const { fullName, babyID } = route.params
   const [dailyReports, setDailyReports] = useState([])
@@ -78,10 +86,10 @@ const WeeklyReport = ({ route }) => {
           title: "Weekly Report Ready 📋",
           body: "Your child's weekly report is ready!",
           sound: "default",
-          data: { screen: "WeeklyReport" }, 
+          data: { screen: "WeeklyReport" },
         },
         trigger: {
-          weekday: 7, 
+          weekday: 7,
           hour: 9,
           minute: 0,
           repeats: true,
@@ -139,12 +147,12 @@ const WeeklyReport = ({ route }) => {
     const reports = lastWeekDates.map((day) => ({
       date: day.label,
       dayName: day.dayName,
-      feeding: feedings.filter((f) => f.feedingDate === day.label),
-      diapers: diaperChanges.filter((d) => d.date === day.label),
+      feeding: feedings.filter((f) => isDateEqual(f.feedingDate, day.label)),
+      diapers: diaperChanges.filter((d) => isDateEqual(d.date, day.label)),
       sleep: sleepRecords.filter(
         (s) =>
-          formatTimestampToDDMMYY(s.sleepStart) === day.label ||
-          formatTimestampToDDMMYY(s.sleepEnd) === day.label
+          isDateEqual(formatTimestampToDDMMYY(s.sleepStart), day.label) ||
+          isDateEqual(formatTimestampToDDMMYY(s.sleepEnd), day.label)
       ),
     }))
 
@@ -197,7 +205,7 @@ const WeeklyReport = ({ route }) => {
                   <Text key={idx}>
                     {`Sleep from ${convertTimestamp(
                       el.sleepStart
-                    )} to ${convertTimestamp(el.sleepEnd)}, `} 
+                    )} to ${convertTimestamp(el.sleepEnd)}, `}
                   </Text>
                 ))
               ) : (
