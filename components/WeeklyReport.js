@@ -48,6 +48,16 @@ const formatTimestampToDDMMYY = (timestamp) => {
   return `${day}/${month}/${year}`
 }
 
+function convertTimestamp(timestamp) {
+  const date = new Date(timestamp)
+  const options = {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }
+  return date.toLocaleString("en-US", options)
+}
+
 const WeeklyReport = ({ route }) => {
   const { fullName, babyID } = route.params
   const [dailyReports, setDailyReports] = useState([])
@@ -185,10 +195,9 @@ const WeeklyReport = ({ route }) => {
               {day.sleep.length > 0 ? (
                 day.sleep.map((el, idx) => (
                   <Text key={idx}>
-                    {`Sleep from ${formatTimestampToDDMMYY(
+                    {`Sleep from ${convertTimestamp(
                       el.sleepStart
-                    )} to ${formatTimestampToDDMMYY(el.sleepEnd)}`}
-                    {""}
+                    )} to ${convertTimestamp(el.sleepEnd)}, `} 
                   </Text>
                 ))
               ) : (
