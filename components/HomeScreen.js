@@ -568,7 +568,7 @@ export default function HomeScreen({ route, navigation }) {
           {/* Show Milestones Button*/}
           <View style={styles.buttonContainer}>
             <Button
-              title="Show Milestones"
+              title="Milestones"
               onPress={() =>
                 navigation.navigate("BabyMilestones", { fullName, babyID })
               }
