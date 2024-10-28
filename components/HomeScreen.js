@@ -250,7 +250,7 @@ export default function HomeScreen({ route, navigation }) {
   const handleSaveComment = () => {
     const newComment = {
       text: comment,
-      user: auth.currentUser.email,
+      user: auth.currentUser.email.split('@')[0],
       commentDate: new Date().toLocaleDateString(),
       dateTime: new Date().getTime(),
       babyID: babyID,
@@ -273,7 +273,7 @@ export default function HomeScreen({ route, navigation }) {
     const newComment = {
       commentId: commentKey,
       text: comment,
-      user: auth.currentUser.email,
+      user: auth.currentUser.email.split('@')[0],
       commentDate: new Date().toLocaleDateString(),
       dateTime: new Date().getTime(),
       babyID: babyID,
