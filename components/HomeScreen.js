@@ -556,6 +556,7 @@ export default function HomeScreen({ route, navigation }) {
             )}
           </View>
 
+          {/* Show Weekly Report Button*/}
           <View style={styles.buttonContainer}>
             <Button
               title="Weekly Report"
@@ -574,6 +575,57 @@ export default function HomeScreen({ route, navigation }) {
               }
             />
           </View>
+
+          {/* Show Comments Button*/}
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Comment Section"
+              onPress={() =>
+                setCommentSectionModalVisible(!commentSectionModalVisible)
+              }
+            />
+          </View>
+
+          {/* Comment Section Modal */}
+          <Modal
+            visible={commentSectionModalVisible}
+            onRequestClose={() => setCommentSectionModalVisible(false)}
+          >
+            <View style={styles.commentSection}>
+              {/* Comment Input Field */}
+              <TextInput
+                style={styles.commentInput}
+                label="Add a comment"
+                value={comment}
+                onChangeText={(text) => setComment(text)}
+                mode="outlined"
+                placeholder="Enter your comment here..."
+              />
+              {/* Submit Button */}
+              <Button
+                mode="contained"
+                title="Post"
+                onPress={handleSaveComment}
+              ></Button>
+              {/* Display list of comments */}
+              <FlatList
+                data={comments}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                  <View style={styles.comment}>
+                    <Text style={styles.user}>User: {item.user}</Text>
+                    <Text>Date: {item.commentDate}</Text>
+                    <Text>{item.text}</Text>
+                  </View>
+                )}
+                ListEmptyComponent={<Text>No comments yet.</Text>}
+              />
+              <Button
+                title="Go Back to HomeScreen"
+                onPress={() => setCommentSectionModalVisible(false)}
+              ></Button>
+            </View>
+          </Modal>
 
           {/* Feeding Modal */}
           <Modal
