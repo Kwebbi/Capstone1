@@ -1,13 +1,17 @@
 // Imports
 import React, { useState } from "react";
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Modal, Switch } from 'react-native';
 import { auth } from '../config/firebase';
 import { Ionicons } from "@expo/vector-icons";
 
  // Navigates to login Screen
 const Settings = ({ route, navigation }) => {
-
-    const [alerts, setAlerts] = useState(route.params.alerts); //pass alerts from profile screen
+ 
+    const [alerts, setAlerts] = useState(route.params.alerts);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [appearanceModalVisible, setAppearanceModalVisible] = useState(false);
+    const [isEnabled, setIsEnabled] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(false);
 
     const handleLogout = () => {
         auth.signOut().then(() => {
@@ -23,11 +27,11 @@ const Settings = ({ route, navigation }) => {
     };
 
     const handleNotifications = () => {
-        console.log('Notifications clicked');
+         setModalVisible(true);
     };
 
     const handleAppearance = () => {
-        console.log('Appearance clicked');
+        setAppearanceModalVisible(true);
     };
 
 
@@ -39,6 +43,9 @@ const Settings = ({ route, navigation }) => {
         console.log('About clicked');
     };
 
+    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    const toggleDarkMode = () => setIsDarkMode(previousState => !previousState);
+ 
     return (
         <View style={styles.container}>
             <TouchableOpacity onPress={handleAccount} style={styles.logoutButton}>
@@ -63,7 +70,7 @@ const Settings = ({ route, navigation }) => {
             <TouchableOpacity onPress={() => navigation.navigate('ShareRequests', { alerts })} style={styles.logoutButton}>
                 <View style={styles.logoutContent}>
                     <Ionicons name="share" size={42} color="black" />
-                    <Text style={styles.logoutButtonText}>Pending Share Request</Text>
+                    <Text style={styles.logoutButtonText}>Pending Share Requests</Text>
                 </View>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleHelpSupport} style={styles.logoutButton}>
@@ -85,7 +92,59 @@ const Settings = ({ route, navigation }) => {
                     <Text style={styles.logoutButtonText}>Sign out</Text>
                 </View>
             </TouchableOpacity>
+             {/* Notification Modal */}
+            <Modal
+                transparent={true}
+                animationType="slide"
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Alert Notifications</Text>
+                        <View style={styles.switchContainer}>
+                            <Text>{isEnabled ? "Enabled" : "Disabled"}</Text>
+                            <Switch
+                                trackColor={{ false: "#767577", true: "#cfe2f3" }}
+                                thumbColor={isEnabled ? "black" : "black"}
+                                onValueChange={toggleSwitch}
+                                value={isEnabled}
+                            />
+                        </View>
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                            <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Appearance Modal */}
+            <Modal
+                transparent={true}
+                animationType="slide"
+                visible={appearanceModalVisible}
+                onRequestClose={() => setAppearanceModalVisible(false)}
+            >
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Appearance</Text>
+                        <View style={styles.switchContainer}>
+                            <Text>{isDarkMode ? "Dark Mode" : "Light Mode"}</Text>
+                            <Switch
+                                trackColor={{ false: "#767577", true: "#cfe2f3" }}
+                                thumbColor={isDarkMode ? "black" : "black"}
+                                onValueChange={toggleDarkMode}
+                                value={isDarkMode}
+                            />
+                        </View>
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setAppearanceModalVisible(false)}>
+                            <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
+        
     );
 };
 
@@ -116,6 +175,40 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize: 32,
         marginLeft: 10,
+    },
+ modalBackground: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContainer: {
+        width: 300,
+        padding: 20,
+        backgroundColor: "white",
+        borderRadius: 10,
+        alignItems: "center",
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
+    switchContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        width: "100%",
+        marginBottom: 20,
+    },
+    closeButton: {
+        backgroundColor: "#cfe2f3",
+        padding: 10,
+        borderRadius: 5,
+    },
+    closeButtonText: {
+        color: "black",
+        fontWeight: "bold",
     },
 });
 

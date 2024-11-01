@@ -25,8 +25,10 @@ export default function Login({ navigation }) {
   }  
   
   return (
-    <ScrollView automaticallyAdjustKeyboardInsets={true}>
-      <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
+    <ScrollView automaticallyAdjustKeyboardInsets={true}
+      style={{ backgroundColor: "#cfe2f3" }}
+    >
+      <View className="flex" style={{ backgroundColor: "#cfe2f3" }}>
         <SafeAreaView className="flex">
             <View className="flex-row justify-center">
               <Image source={require('../assets/logo.png')} style={{ width: 225, height: 225 }}/>
@@ -41,7 +43,7 @@ export default function Login({ navigation }) {
             </View>
         </SafeAreaView>
 
-        <View className="flex-1 bg-white px-8 pt-10" style={{ borderTopLeftRadius: 50, borderTopRightRadius: 50 }}>
+        <View className="flex-1 bg-white px-8 pt-10" style={{ borderRadius: 50 }}>
           <View className="form space-y-2">
           
             <Text className="text-gray-700 ml-2">Email Address</Text>
