@@ -54,35 +54,6 @@ export default function Profiles({ navigation }) {
         return () => unsubscribe();
     }, []);
 
-
-/*
-    //storing alerts for user if any exist
-    const addAlert = async () => {
-        const alertRef = ref(database, 'alert/');
-        const alertQuery = query(alertRef, orderByChild('parentID'));
-        try {
-             
-            const snapshot = await get(alertQuery);
-            
-            if (snapshot.exists()) {
-                const alerts = snapshot.val();
-                const filteredAlerts = Object.values(alerts).filter(a => a.parentID === auth.currentUser.uid);
-
-                // Check if any alerts exist for this user
-                if (filteredAlerts) {
-                    setMyAlerts(filteredAlerts);
-                } else { 
-                    setMyAlerts([]);
-                } 
-            }
-        } catch (error) {
-            console.log("Error", "Error fetching data: " + error.message);
-        } 
-    };  */
-
-
-
-
     //check if the baby exists, and get its ID, then pull data
     const babiesRef = ref(database, 'babies');
     const[myBabies, setMyBabies] = useState([]);
@@ -226,10 +197,11 @@ export default function Profiles({ navigation }) {
                                     <Text className="text-white" style={styles.nameText}>{item.fullName}</Text>
                                     <Text className="text-white" style={styles.ageText}>{item.DOB}</Text>
                                     </View>
-
-                                    <TouchableOpacity style={{ position: "absolute", right: 12, top: 10 }}>
+                                    {!item.isCaretaker && (
+                                    <TouchableOpacity style={{ position: "absolute", right: 12, top: 10 }} onPress={()=> navigation.navigate('EditBaby', item)}>
                                         <Ionicons name= "pencil" size={27} color= "grey"/>
                                     </TouchableOpacity>
+                                    )}
                                     <TouchableOpacity style={{ position: "absolute", right: 12, bottom: 10 }} onPress={() => showDialog(item)}>
                                         <Ionicons name= "trash" size={27} color= "grey"/>
                                     </TouchableOpacity>

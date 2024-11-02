@@ -82,6 +82,9 @@ export default function ShareRequests({ route, navigation }) {
       <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
+          <TouchableOpacity style={{ position: "absolute", left: 22, top: 27 }} onPress={()=> navigation.navigate('Profiles')}>
+                <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
+              </TouchableOpacity>
             <Text className="text-white mt-5" style={styles.titleText}>Pending Share Requests</Text>
 
           </View>
