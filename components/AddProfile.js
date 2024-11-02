@@ -43,7 +43,7 @@ export default function AddProfile({ navigation }) {
   }
 
   return (
-    <ScrollView automaticallyAdjustKeyboardInsets={true}>
+    <ScrollView automaticallyAdjustKeyboardInsets={true} style={{ backgroundColor: 'white' }}>
       <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
