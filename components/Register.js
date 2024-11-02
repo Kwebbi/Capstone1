@@ -1,6 +1,6 @@
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import React, { Component, useState } from "react";
-import { StyleSheet, View, TouchableOpacity, Image, Text, TextInput, ScrollView, Platform } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Image, Text, TextInput, ScrollView, Alert } from "react-native";
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
 import { ref, set } from "firebase/database";
 import { auth, database } from '../config/firebase'
@@ -30,7 +30,8 @@ export default function Register({ navigation }) {
 
   const handleSubmit = async ()=>{
     if (!isValidPassword) {
-      console.log('got error!');
+      console.log('password must be 8+ chars');
+      Alert.alert("Password must be at least 8 characters long.")
     }
     else {
       if (email && password) {
@@ -40,14 +41,15 @@ export default function Register({ navigation }) {
         }
         catch (err) {
           console.log('got error: ', err.message);
+          Alert.alert("Invalid email.")
         }
       }
     }
   }
 
   return (
-    <ScrollView automaticallyAdjustKeyboardInsets={true}>
-      <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
+    <ScrollView automaticallyAdjustKeyboardInsets={true} style={{ backgroundColor: "#cfe2f3" }}>
+      <View className="flex bg-white" style={{ backgroundColor: "#cfe2f3" }}>
         <SafeAreaView className="flex">
             <View className="flex-row justify-center">
               <Image source={require('../assets/logo.png')} style={{ width: 225, height: 225 }}/>
@@ -58,7 +60,7 @@ export default function Register({ navigation }) {
             </View>
         </SafeAreaView>
 
-        <View className="flex-1 bg-white px-8 pt-8" style={{borderTopLeftRadius: 50, borderTopRightRadius: 50}}>
+        <View className="flex-1 bg-white px-8 pt-8" style={{borderRadius: 50}}>
           <View className="form space-y-1">
             <Text className="text-gray-700 ml-2">Full Name</Text>
             <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 

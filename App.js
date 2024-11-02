@@ -14,6 +14,7 @@ import MilestoneView from "./components/MilestoneView"
 import Settings from "./components/Settings"
 import WeeklyReport from "./components/WeeklyReport"
 import EditBaby from './components/EditBaby';
+import About from './components/About';
 import useAuth from "./hooks/useAuth"
 const Stack = createNativeStackNavigator()
 import * as Notifications from "expo-notifications"
@@ -105,13 +106,18 @@ export default function App() {
           />
           <Stack.Screen
             name="Settings"
-            options={{ headerShown: true, title: "Settings" }}
+            options={{ headerShown: false, title: "Settings" }}
             component={Settings}
           />
           <Stack.Screen
             name="EditBaby"
             options={{ headerShown: false }}
             component={EditBaby}
+          />
+          <Stack.Screen
+            name="About"
+            options={{ headerShown: false }}
+            component={About}
           />
         </Stack.Navigator>
       </NavigationContainer>

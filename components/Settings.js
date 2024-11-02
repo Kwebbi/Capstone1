@@ -1,13 +1,15 @@
 // Imports
 import React, { useState } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Modal, Switch } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Modal, Switch, ScrollView } from 'react-native';
 import { auth } from '../config/firebase';
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
  // Navigates to login Screen
 const Settings = ({ route, navigation }) => {
  
-    const [alerts, setAlerts] = useState(route.params.alerts);
+    const [alerts, setAlerts] = useState(route.params?.alerts || null);//const [alerts, setAlerts] = useState(route.params.alerts);
     const [modalVisible, setModalVisible] = useState(false);
     const [appearanceModalVisible, setAppearanceModalVisible] = useState(false);
     const [isEnabled, setIsEnabled] = useState(false);
@@ -47,6 +49,19 @@ const Settings = ({ route, navigation }) => {
     const toggleDarkMode = () => setIsDarkMode(previousState => !previousState);
  
     return (
+    <ScrollView automaticallyAdjustKeyboardInsets={true}
+        style={{ backgroundColor: "#cfe2f3" }}
+        >
+        <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
+            <SafeAreaView style={{ flex: 0 }}>
+                <View className="flex-row justify-center" style={styles.container}>
+                    <TouchableOpacity style={{ position: "absolute", left: 22, top: 50 }} onPress={()=> navigation.navigate('Profiles')}>
+                    <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
+                    </TouchableOpacity>
+                    <Text className="text-white mt-5" style={styles.titleText}>Settings</Text>
+                </View>
+            </SafeAreaView>
+
         <View style={styles.container}>
             <TouchableOpacity onPress={handleAccount} style={styles.logoutButton}>
                 <View style={styles.logoutContent}>
@@ -79,7 +94,7 @@ const Settings = ({ route, navigation }) => {
                     <Text style={styles.logoutButtonText}>Help & Support</Text>
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleAbout} style={styles.logoutButton}>
+            <TouchableOpacity onPress={() => navigation.navigate('About')} style={styles.logoutButton}>
                 <View style={styles.logoutContent}>
                     <Ionicons name="information-circle" size={42} color="black" />
                     <Text style={styles.logoutButtonText}>About</Text>
@@ -144,6 +159,8 @@ const Settings = ({ route, navigation }) => {
                 </View>
             </Modal>
         </View>
+        </View>
+        </ScrollView>
         
     );
 };
@@ -156,6 +173,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#cfe2f3',
         padding: 20,
+    },
+    titleText: {
+        color: '#28436d',
+        fontSize: 35,
+        fontWeight: 'bold',
     },
     title: {
         fontSize: 32,
