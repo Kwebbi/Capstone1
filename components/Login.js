@@ -1,29 +1,111 @@
-import React, { Component, useState } from "react";
-import { StyleSheet, View, TouchableOpacity, Image, Text, TextInput, Platform, ScrollView } from "react-native";
+import React, { Component, useState, useEffect } from "react";
+import { StyleSheet, View, TouchableOpacity, Image, Text, TextInput, Modal, ScrollView, Button, Alert } from "react-native";
 import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail, getAuth } from "firebase/auth";
 import { auth } from '../config/firebase';
 import { Ionicons } from "@expo/vector-icons";
 import Checkbox from 'expo-checkbox';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  
+  const [modalVisible, setModalVisible] = useState(false);
+
+
+
+  useEffect(() => {
+    // Check if email is stored in AsyncStorage
+    const getStoredEmail = async () => {
+      const storedEmail = await AsyncStorage.getItem('rememberedEmail');
+      if (storedEmail) {
+        setEmail(storedEmail);
+        setIsChecked(true);
+      }
+    };
+    getStoredEmail();
+  }, []);
+
+
   const handleSubmit = async ()=>{
     if (email && password) {
       try {
         await signInWithEmailAndPassword(auth, email, password);
+        if (isChecked) {
+          await AsyncStorage.setItem('rememberedEmail', email);
+          console.log("Remember me checked!");
+        } else {
+          await AsyncStorage.removeItem('rememberedEmail');
+        }
       }
       catch (err) {
         console.log('got error: ', err.message);
+        Alert.alert("Invalid email or password.")
       }
+  
     }
+
   }  
   
+  const resetPassword = (email) => {
+    const auth = getAuth();
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        Alert.alert('Password reset email sent!');
+      })
+      .catch((error) => {
+        Alert.alert("Invalid email.");
+      });
+  };
+
+  const ForgotPasswordModal = ({ visible, onClose }) => {
+    const [email, setEmail] = useState('');
+  
+    const handlePasswordReset = () => {
+      if (!email) {
+        Alert.alert('Please enter your email address');
+        return;
+      }
+      resetPassword(email); 
+      onClose(); 
+    };
+  
+    return (
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <View style={styles.overlay}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.title}>Reset Password</Text>
+          <Text style={styles.instructions}>
+            Enter your email address. If the email is an existing user, you will receive a password reset link.
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <Button title="Send Reset Email" onPress={handlePasswordReset} />
+          <Button title="Cancel" onPress={onClose} color="#808080" />
+        </View>
+      </View>
+    </Modal>
+    );
+  };
+
+
+
+
+
   return (
     <ScrollView automaticallyAdjustKeyboardInsets={true}
       style={{ backgroundColor: "#cfe2f3" }}
@@ -69,9 +151,17 @@ export default function Login({ navigation }) {
 
               <Text className="text-gray-500">Remember Me</Text>
 
-              <TouchableOpacity style={{ position: "absolute", right: 6 }}>
+              <TouchableOpacity
+                style={{ position: "absolute", right: 6 }}
+                onPress={() => setModalVisible(true)}
+              >
                 <Text className="text-gray-500">Forgot password?</Text>
               </TouchableOpacity>
+
+              <ForgotPasswordModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+              />
             </View>
 
             <TouchableOpacity onPress={handleSubmit} className="py-3 bg-blue-300 rounded-xl">
@@ -104,7 +194,44 @@ const styles = StyleSheet.create({
     fontFamily: 'lucida grande',
     fontSize: 20,
   },
-});
 
-//style={{alignItems: "center", backgroundColor: "#ffffff"}}
-//style={{borderTopLeftRadius: 50, borderTopRightFadius: 50}}>
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+  },
+  modalContainer: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    elevation: 5,
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  instructions: {
+    fontSize: 14,
+    marginBottom: 15,
+    textAlign: 'center',
+    color: '#555',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
+  },
+
+
+
+});
