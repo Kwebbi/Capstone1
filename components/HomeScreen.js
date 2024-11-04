@@ -359,10 +359,11 @@ const onChangeSleepEndTime = (event, selectedTime) => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "white" }}>
+
+    
+    <View style={{ flex: 1, backgroundColor: "#cfe2f3" }}>
 
       {/* Top Header */}
-      <SafeAreaView>
         <View style={{ ...styles.headerContainer, backgroundColor: "#cfe2f3" }}>
           <TouchableOpacity
             style={styles.backButton}
@@ -370,14 +371,14 @@ const onChangeSleepEndTime = (event, selectedTime) => {
           >
             <Ionicons name="arrow-back" size={30} color="#28436d" />
           </TouchableOpacity>
+
           <Text style={styles.titleText}>Activity Log</Text>
         </View>
-      </SafeAreaView>
 
       {/* Scrollable Content */}
       <ScrollView
         automaticallyAdjustKeyboardInsets={true}
-        style={{ backgroundColor: "#cfe2f3" }}
+        style={{ backgroundColor: "white" }}
       >
         <View className="flex space-y-5 bg-white px-8 pt-8">
           <View style={styles.profileSection}>
@@ -690,10 +691,10 @@ const onChangeSleepEndTime = (event, selectedTime) => {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
     height: 80,
     padding: 20,
+    marginTop: 40
   },
   backButton: {
     position: 'absolute',
