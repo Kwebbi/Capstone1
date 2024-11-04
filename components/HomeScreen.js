@@ -418,7 +418,9 @@ export default function HomeScreen({ route, navigation }) {
 
           {/* To-Do List */}
           <View style={styles.todoList}>
-            <Button title="Add Todo" onPress={addTodoItem} />
+            <TouchableOpacity style={{ backgroundColor: "#cfe2f3", padding: 5 }} onPress={addTodoItem}>
+              <Text style={styles.todoButtonText}>Add Todo</Text>
+            </TouchableOpacity>
             <TextInput
               style={styles.todoInput}
               value={newTodo}
@@ -436,14 +438,14 @@ export default function HomeScreen({ route, navigation }) {
           </View>
         </View>
 
-        <View style={{ height: 1.5, backgroundColor: 'black' }} />
+        <View style={{ height: 1.8, backgroundColor: 'black' }} />
 
         {/* Feeding Button */}
         <TouchableOpacity className="flex-row space-x-7" onPress={()=> setFeedingModalVisible(true)}>
-            <Image source={require('../assets/feedingIcon.png')} style={{ width: 70, height: 70, marginTop: 8 }}/>
+            <Image source={require('../assets/feedingIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#ff5c0a' }}/>
 
             <View className="flex-1">
-            <Text style={styles.dataText}>Feeding</Text>
+            <Text style={[styles.dataText, { color: '#ff5c0a' }]}>Feeding</Text>
               {feedings.length > 0 && (
                 <Text style={styles.recordPreview}>
                   Last Feeding: {feedings[feedings.length - 1].foodChoice} -{" "}
@@ -459,10 +461,10 @@ export default function HomeScreen({ route, navigation }) {
 
         {/* Diaper Change Button */}
         <TouchableOpacity className="flex-row space-x-7" onPress={()=> setDiaperModalVisible(true)}>
-            <Image source={require('../assets/diaperIcon.png')} style={{ width: 70, height: 70, marginTop: 8 }}/>
+            <Image source={require('../assets/diaperIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#98FF98' }}/>
 
             <View className="flex-1">
-            <Text style={styles.dataText}>Diaper</Text>
+            <Text style={[styles.dataText, { color: '#98FF98' }]}>Diaper</Text>
             {diaperChanges.length > 0 && (
               <Text style={styles.recordPreview}>
                 Last Diaper Change:{" "}
@@ -478,10 +480,10 @@ export default function HomeScreen({ route, navigation }) {
 
         {/* Sleep Button */}
         <TouchableOpacity className="flex-row space-x-7" onPress={()=> setSleepModalVisible(true)}>
-            <Image source={require('../assets/sleepIcon.png')} style={{ width: 70, height: 70, marginTop: 8 }}/>
+            <Image source={require('../assets/sleepIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#adadff' }}/>
 
             <View className="flex-1">
-            <Text style={styles.dataText}>Sleep</Text>
+            <Text style={[styles.dataText, { color: '#adadff' }]}>Sleep</Text>
             {sleepRecords.length > 0 && (
               <Text style={styles.recordPreview}>
                 Last Sleep Record:{" "}
@@ -758,6 +760,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderColor: "#999",
   },
+  todoButtonText: {
+    color: '#28436d',
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
   todoInput: {
     borderColor: "#ccc",
     borderWidth: 1,
@@ -768,7 +776,7 @@ const styles = StyleSheet.create({
   recordPreview: {
     marginTop: 8,
     fontSize: 14,
-    color: "#666",
+    color: "#303030",
   },
   buttonContainer: {
     marginVertical: 10,
