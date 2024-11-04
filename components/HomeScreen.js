@@ -359,12 +359,10 @@ const onChangeSleepEndTime = (event, selectedTime) => {
   };
 
   return (
-
-    
     <View style={{ flex: 1, backgroundColor: "#cfe2f3" }}>
 
       {/* Top Header */}
-        <View style={{ ...styles.headerContainer, backgroundColor: "#cfe2f3" }}>
+        <View style={{ ...styles.topHeader, backgroundColor: "#cfe2f3" }}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.navigate("Profiles")}
@@ -685,16 +683,38 @@ const onChangeSleepEndTime = (event, selectedTime) => {
           </Modal>
         </View>
       </ScrollView>
+          {/* Bottom Bar */}
+          <View style={styles.bottomBar}>
+            <TouchableOpacity style={styles.bottomButton}>
+              <Ionicons name="home" size={30} color="#28436d" />
+              <Text style={styles.bottomButtonText}>Home</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.bottomButton}>
+              <Ionicons name="calendar" size={30} color="#28436d" />
+              <Text style={styles.bottomButtonText}>Report</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.bottomButton}>
+              <Ionicons name="trophy" size={30} color="#28436d" />
+              <Text style={styles.bottomButtonText}>Milestones</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.bottomButton}>
+              <Ionicons name="chatbubbles" size={30} color="#28436d" />
+              <Text style={styles.bottomButtonText}>Comments</Text>
+            </TouchableOpacity>
+          </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  headerContainer: {
+  topHeader: {
     alignItems: 'center',
     height: 80,
     padding: 20,
-    marginTop: 40
+    marginTop: 40,
   },
   backButton: {
     position: 'absolute',
@@ -796,12 +816,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
   },
-
   todoItem: {
     fontSize: 16,
     flex: 1,
   },
-
   deleteIcon: {
     marginLeft: 10,
   },
@@ -817,5 +835,20 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginVertical: 5,
     marginHorizontal: 10,
+  },
+  bottomBar: {
+    flexDirection: 'row',
+    backgroundColor: '#cfe2f3',
+    paddingHorizontal: 16
+  },
+  bottomButton: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    paddingVertical: 20,
+  },
+  bottomButtonText: {
+    color: '#28436d',
+    marginTop: 4,
   },
 })
