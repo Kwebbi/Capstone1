@@ -491,6 +491,26 @@ const onChangeSleepEndTime = (event, selectedTime) => {
             />
           </View>
 
+          {/* Show Milestones Button*/}
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Milestones"
+              onPress={() =>
+                navigation.navigate("BabyMilestones", { fullName, babyID })
+              }
+            />
+          </View>
+
+          {/* Show Comments Button*/}
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Comments Section"
+              onPress={() =>
+                navigation.navigate("Comments", { fullName, babyID })
+              }
+            />
+          </View>
+
           {/* Color Selection Modal */}
           <Modal
             visible={colorModalVisible}
@@ -513,92 +533,6 @@ const onChangeSleepEndTime = (event, selectedTime) => {
               <Button title="Close" onPress={() => setColorModalVisible(false)} />
             </View>
           </Modal>
-
-          {/* Sleep Modal */}
-          <Modal
-            visible={sleepModalVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setSleepModalVisible(false)}
-          >
-            <View style={styles.modalView}>
-              <Text>Enter Sleep Details:</Text>
-
-              {/* Date Picker */}
-              <Button
-                title="Pick Date"
-                onPress={() => setDatePickerVisibility(true)}
-              />
-              {isDatePickerVisible && (
-                <DateTimePicker
-                  testID="datePicker"
-                  value={selectedDate}
-                  mode="date"
-                  display="calendar"
-                  onChange={onChangeDate}
-                />
-              )}
-
-              {/* Start Time Picker */}
-              <Text>Pick Start Time:</Text>
-              <Button
-                title="Pick Start Time"
-                onPress={() => setStartTimePickerVisibility(true)}
-              />
-              {isStartTimePickerVisible && (
-                <DateTimePicker
-                  testID="startTimePicker"
-                  value={sleepStart}
-                  mode="time"
-                  display="clock"
-                  onChange={onChangeSleepStartTime}
-                />
-              )}
-
-              {/* End Time Picker */}
-              <Text>Pick End Time:</Text>
-              <Button
-                title="Pick End Time"
-                onPress={() => setEndTimePickerVisibility(true)}
-              />
-              {isEndTimePickerVisible && (
-                <DateTimePicker
-                  testID="endTimePicker"
-                  value={sleepEnd}
-                  mode="time"
-                  display="clock"
-                  onChange={onChangeSleepEndTime}
-                />
-              )}
-
-              {/* Save and Cancel Buttons */}
-              <Button title="Save" onPress={handleSaveSleep} />
-              <Button
-                title="Cancel"
-                onPress={() => setSleepModalVisible(false)}
-              />
-            </View>
-          </Modal>
-
-          {/* Show Milestones Button*/}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Milestones"
-              onPress={() =>
-                navigation.navigate("BabyMilestones", { fullName, babyID })
-              }
-            />
-          </View>
-
-          {/* Show Comments Button*/}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Comments Section"
-              onPress={() =>
-                navigation.navigate("Comments", { fullName, babyID })
-              }
-            />
-          </View>
 
           {/* Feeding Modal */}
           <Modal
