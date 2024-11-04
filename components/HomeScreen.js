@@ -223,6 +223,7 @@ export default function HomeScreen({ route, navigation }) {
       console.error("Error adding Todo Item: ", error)
     }
     setSendNotification(true)
+    setNewTodo("");
   }
 
   // Function to delete a todo item
