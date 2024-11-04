@@ -404,7 +404,7 @@ export default function HomeScreen({ route, navigation }) {
         </SafeAreaView>
 
         <View
-          className="flex space-y-10 bg-white px-8 pt-8"
+          className="flex space-y-7 bg-white px-8 pt-8"
           style={{ borderRadius: 50, position: "relative", top: -20 }}
         >
           {/* Avatar Section */}
@@ -436,54 +436,68 @@ export default function HomeScreen({ route, navigation }) {
             </View>
           </View>
 
+          <View style={{ height: 1.5, backgroundColor: 'black' }} />
+
           {/* Feeding Button */}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Feeding"
-              onPress={() => setFeedingModalVisible(true)}
-            />
-            {feedings.length > 0 && (
-              <Text style={styles.recordPreview}>
-                Last Feeding: {feedings[feedings.length - 1].foodChoice} -{" "}
-                {feedings[feedings.length - 1].feedingDate} at{" "}
-                {feedings[feedings.length - 1].feedingTime},{" "}
-                {feedings[feedings.length - 1].feedingAmount} mL
-              </Text>
-            )}
-          </View>
+          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setFeedingModalVisible(true)}>
+              <Image source={require('../assets/feedingIcon.png')} style={{ width: 70, height: 70, marginTop: 8 }}/>
+
+              <View className="flex-1">
+              <Text style={styles.dataText}>Feeding</Text>
+                {feedings.length > 0 && (
+                  <Text style={styles.recordPreview}>
+                    Last Feeding: {feedings[feedings.length - 1].foodChoice} -{" "}
+                    {feedings[feedings.length - 1].feedingDate} at{" "}
+                    {feedings[feedings.length - 1].feedingTime},{" "}
+                    {feedings[feedings.length - 1].feedingAmount} mL
+                  </Text>
+                )}
+              </View>
+          </TouchableOpacity>
+
+          <View style={{ height: 1.5, backgroundColor: 'black' }} />
 
           {/* Diaper Change Button */}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Diaper Change"
-              onPress={() => setDiaperModalVisible(true)}
-            />
-            {diaperChanges.length > 0 && (
-              <Text style={styles.recordPreview}>
-                Last Diaper Change:{" "}
-                {diaperChanges[diaperChanges.length - 1].type} on{" "}
-                {diaperChanges[diaperChanges.length - 1].date} at{" "}
-                {diaperChanges[diaperChanges.length - 1].time}
-              </Text>
+          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setDiaperModalVisible(true)}>
+              <Image source={require('../assets/diaperIcon.png')} style={{ width: 70, height: 70, marginTop: 8 }}/>
+
+              <View className="flex-1">
+              <Text style={styles.dataText}>Diaper</Text>
+              {diaperChanges.length > 0 && (
+                <Text style={styles.recordPreview}>
+                  Last Diaper Change:{" "}
+                  {diaperChanges[diaperChanges.length - 1].type} on{" "}
+                  {diaperChanges[diaperChanges.length - 1].date} at{" "}
+                  {diaperChanges[diaperChanges.length - 1].time}
+                </Text>
             )}
-          </View>
+              </View>
+          </TouchableOpacity>
+
+          <View style={{ height: 1.5, backgroundColor: 'black' }} />
 
           {/* Sleep Button */}
-          <View style={styles.buttonContainer}>
-            <Button title="Sleep" onPress={() => setSleepModalVisible(true)} />
-            {sleepRecords.length > 0 && (
-              <Text style={styles.recordPreview}>
-                Last Sleep Record:{" "}
-                {new Date(
-                  sleepRecords[sleepRecords.length - 1].sleepStart
-                ).toLocaleTimeString()}{" "}
-                to{" "}
-                {new Date(
-                  sleepRecords[sleepRecords.length - 1].sleepEnd
-                ).toLocaleTimeString()}
-              </Text>
+          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setSleepModalVisible(true)}>
+              <Image source={require('../assets/sleepIcon.png')} style={{ width: 70, height: 70, marginTop: 8 }}/>
+
+              <View className="flex-1">
+              <Text style={styles.dataText}>Sleep</Text>
+              {sleepRecords.length > 0 && (
+                <Text style={styles.recordPreview}>
+                  Last Sleep Record:{" "}
+                  {new Date(
+                    sleepRecords[sleepRecords.length - 1].sleepStart
+                  ).toLocaleTimeString()}{" "}
+                  to{" "}
+                  {new Date(
+                    sleepRecords[sleepRecords.length - 1].sleepEnd
+                  ).toLocaleTimeString()}
+                </Text>
             )}
-          </View>
+              </View>
+          </TouchableOpacity>
+          
+          <View style={{ height: 1.5, backgroundColor: 'black' }} />
 
           {/* Show Weekly Report Button*/}
           <View style={styles.buttonContainer}>
@@ -698,6 +712,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
     color: "white",
+  },
+  dataText: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "black",
   },
   profileSection: {
     flexDirection: "row",
