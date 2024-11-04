@@ -485,54 +485,6 @@ export default function HomeScreen({ route, navigation }) {
             )}
           </View>
 
-          {/* Show All Records Button */}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Show All Records"
-              onPress={() => setShowAllRecords(!showAllRecords)}
-            />
-            {showAllRecords && (
-              <>
-                {feedings.map((feeding, index) => (
-                  <Text key={`feeding-${index}`}>
-                    Feeding #{index + 1}: {feeding.feedingDate} -{" "}
-                    {feeding.feedingTime} - {feeding.feedingAmount} mL -{" "}
-                    {feeding.foodChoice}
-                  </Text>
-                ))}
-                {diaperChanges.map((change, index) => (
-                  <Text key={`diaper-${index}`}>
-                    Diaper #{index + 1}: {change.type} on {change.date} at{" "}
-                    {change.time}
-                  </Text>
-                ))}
-                <View>
-                  {sleepRecords.map((record, index) => (
-                    <View
-                      key={index}
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Text>
-                        Sleep #{index + 1}:{" "}
-                        {new Date(record.sleepStart).toLocaleTimeString()} to{" "}
-                        {new Date(record.sleepEnd).toLocaleTimeString()}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => handleDeleteSleep(record.sleepTimeID)}
-                      >
-                        <Ionicons name="trash-outline" size={24} color="red" />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </View>
-              </>
-            )}
-          </View>
-
           {/* Show Weekly Report Button*/}
           <View style={styles.buttonContainer}>
             <Button
