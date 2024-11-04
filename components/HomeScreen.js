@@ -691,34 +691,56 @@ const onChangeSleepEndTime = (event, selectedTime) => {
             onRequestClose={() => setSleepModalVisible(false)}
           >
             <View style={styles.modalView}>
-              <Text>Enter Sleep Start:</Text>
+              <Text>Enter Sleep Details:</Text>
+
+              {/* Date Picker */}
+              <Button
+                title="Pick Date"
+                onPress={() => setDatePickerVisibility(true)}
+              />
+              {isDatePickerVisible && (
+                <DateTimePicker
+                  testID="datePicker"
+                  value={selectedDate}
+                  mode="date"
+                  display="calendar"
+                  onChange={onChangeDate}
+                />
+              )}
+
+              {/* Start Time Picker */}
+              <Text>Pick Start Time:</Text>
               <Button
                 title="Pick Start Time"
-                onPress={() => setStartPickerVisibility(true)}
+                onPress={() => setStartTimePickerVisibility(true)}
               />
-              {isStartPickerVisible && (
+              {isStartTimePickerVisible && (
                 <DateTimePicker
-                  testID="startDateTimePicker"
+                  testID="startTimePicker"
                   value={sleepStart}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeSleepStart}
+                  mode="time"
+                  display="clock"
+                  onChange={onChangeSleepStartTime}
                 />
               )}
-              <Text>Enter Sleep End:</Text>
+
+              {/* End Time Picker */}
+              <Text>Pick End Time:</Text>
               <Button
                 title="Pick End Time"
-                onPress={() => setEndPickerVisibility(true)}
+                onPress={() => setEndTimePickerVisibility(true)}
               />
-              {isEndPickerVisible && (
+              {isEndTimePickerVisible && (
                 <DateTimePicker
-                  testID="endDateTimePicker"
+                  testID="endTimePicker"
                   value={sleepEnd}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeSleepEnd}
+                  mode="time"
+                  display="clock"
+                  onChange={onChangeSleepEndTime}
                 />
               )}
+
+              {/* Save and Cancel Buttons */}
               <Button title="Save" onPress={handleSaveSleep} />
               <Button
                 title="Cancel"
