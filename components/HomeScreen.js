@@ -26,6 +26,7 @@ import {
   orderByChild,
   onValue,
   remove,
+  get,
 } from "firebase/database"
 import { auth, database } from "../config/firebase"
 import { Picker } from "@react-native-picker/picker"
@@ -62,6 +63,13 @@ export default function HomeScreen({ route, navigation }) {
   const commentRef = ref(database, "comments/")
   const userId = auth.currentUser.uid
   const todoItemsRef = ref(database, `todoItems/${userId}/${babyID}/`)
+  const [colorModalVisible, setColorModalVisible] = useState(false);
+  const [avatarColor, setAvatarColor] = useState("#ccc");
+  const colorOptions = ["black", "red", "blue", "green", "yellow", "pink", "purple"];
+  const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
+  const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
+  const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
+  const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true)
 
@@ -179,12 +187,12 @@ export default function HomeScreen({ route, navigation }) {
       setSleepRecords(fetchedSleepRecords)
     })
 
-    return () => unsubscribe() // Cleanup on unmount
+    return () => unsubscribe()
   }, [babyID])
 
   // Fetching existing todo items
   useEffect(() => {
-    const todoRef = ref(database, `todoItems/${userId}/${babyID}/`)
+    const todoRef = ref(database, `todoItems/${babyID}/users/${userId}/`)
     const unsubscribe = onValue(todoRef, (snapshot) => {
       if (snapshot.exists()) {
         const items = []
@@ -205,7 +213,7 @@ export default function HomeScreen({ route, navigation }) {
     if (!newTodo.trim()) return
 
     try {
-      const todoRef = ref(database, `todoItems/${userId}/${babyID}`)
+      const todoRef = ref(database, `todoItems/${babyID}/users/${userId}/`)
       const newTodoRef = push(todoRef)
       await set(newTodoRef, {
         text: newTodo,
@@ -215,11 +223,12 @@ export default function HomeScreen({ route, navigation }) {
       console.error("Error adding Todo Item: ", error)
     }
     setSendNotification(true)
+    setNewTodo("");
   }
 
   // Function to delete a todo item
   const deleteTodoItem = (itemId) => {
-    const itemRef = ref(database, `todoItems/${userId}/${babyID}/${itemId}`)
+    const itemRef = ref(database, `todoItems/${babyID}/users/${userId}/${itemId}`)
     remove(itemRef).catch((error) => {
       console.error("Error deleting todo:", error)
     })
@@ -229,22 +238,45 @@ export default function HomeScreen({ route, navigation }) {
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate || date
     setSelectedDate(currentDate)
-    setDatePickerVisibility(false) // Hide the picker
+    setDatePickerVisibility(false)
   }
 
-  // Handle sleep start date change
-  const onChangeSleepStart = (event, selectedDate) => {
-    const currentDate = selectedDate || sleepStart
-    setSleepStart(currentDate)
-    setStartPickerVisibility(false) // Hide the picker
-  }
+  const onChangeSleepStartDate = (event, selectedDate) => {
+  const currentDate = selectedDate || sleepStart;
+  setSleepStart(currentDate);
+  setStartDatePickerVisibility(false);
+};
 
-  // Handle sleep end date change
-  const onChangeSleepEnd = (event, selectedDate) => {
-    const currentDate = selectedDate || sleepEnd
-    setSleepEnd(currentDate)
-    setEndPickerVisibility(false) // Hide the picker
-  }
+const onChangeSleepStartTime = (event, selectedTime) => {
+  const currentTime = selectedTime || sleepStart;
+  setSleepStart((prevDate) => new Date(
+    prevDate.getFullYear(),
+    prevDate.getMonth(),
+    prevDate.getDate(),
+    currentTime.getHours(),
+    currentTime.getMinutes()
+  ));
+  setStartTimePickerVisibility(false);
+};
+
+const onChangeSleepEndDate = (event, selectedDate) => {
+  const currentDate = selectedDate || sleepEnd;
+  setSleepEnd(currentDate);
+  setEndDatePickerVisibility(false);
+};
+
+const onChangeSleepEndTime = (event, selectedTime) => {
+  const currentTime = selectedTime || sleepEnd;
+  setSleepEnd((prevDate) => new Date(
+    prevDate.getFullYear(),
+    prevDate.getMonth(),
+    prevDate.getDate(),
+    currentTime.getHours(),
+    currentTime.getMinutes()
+  ));
+  setEndTimePickerVisibility(false);
+};
+
 
   //Save comment record
   const handleSaveComment = () => {
@@ -358,15 +390,14 @@ export default function HomeScreen({ route, navigation }) {
   // Save sleep record
   const handleSaveSleep = () => {
     const newSleepRecord = {
-      sleepStart: sleepStart.getTime(), // Store the time as timestamp
-      sleepEnd: sleepEnd.getTime(), // Store the time as timestamp
+      sleepStart: sleepStart.getTime(),
+      sleepEnd: sleepEnd.getTime(),
       babyID: babyID,
     }
 
     setSleepRecords([...sleepRecords, newSleepRecord])
     setSleepModalVisible(false)
 
-    // Push to Firebase
     createSleepTime(newSleepRecord)
   }
 
@@ -374,7 +405,6 @@ export default function HomeScreen({ route, navigation }) {
     const newSleepTimeRef = push(sleepTimeRef)
     const sleepTimeKey = newSleepTimeRef.key
 
-    // Extend sleepData with a unique key
     const newSleepTime = {
       ...sleepData,
       sleepTimeID: sleepTimeKey,
@@ -394,7 +424,7 @@ export default function HomeScreen({ route, navigation }) {
   const handleDeleteSleep = async (recordId) => {
     try {
       const sleepRecordRef = ref(database, `sleepTimes/${recordId}`)
-      await remove(sleepRecordRef) // Delete from Firebase
+      await remove(sleepRecordRef)
 
       setSleepRecords(
         sleepRecords.filter((record) => record.sleepTimeID !== recordId)
@@ -405,6 +435,36 @@ export default function HomeScreen({ route, navigation }) {
       alert("Failed to delete sleep record.")
     }
   }
+
+  useEffect(() => {
+    const fetchAvatarColor = async () => {
+      try {
+        const avatarRef = ref(database, `avatarColors/${babyID}`);
+        const snapshot = await get(avatarRef);
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (data.avatarColor) {
+            setAvatarColor(data.avatarColor);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching avatar color: ', error);
+      }
+    };
+
+    fetchAvatarColor();
+  }, [babyID]);
+
+  const updateAvatarColor = async (color) => {
+    try {
+      setAvatarColor(color);
+      const avatarRef = ref(database, `avatarColors/${babyID}`);
+      await set(avatarRef, { avatarColor: color });
+      console.log('Color updated successfully');
+    } catch (error) {
+      console.error('Error updating color: ', error);
+    }
+  };
 
   return (
     <ScrollView
@@ -422,7 +482,7 @@ export default function HomeScreen({ route, navigation }) {
               <Ionicons name="arrow-back" size={30} color="#28436d" />
             </TouchableOpacity>
 
-            <Text style={styles.titleText}>{fullName}</Text>
+            <Text style={[styles.titleText, { color: 'black' }]}>BabyTracker</Text>
           </View>
         </SafeAreaView>
 
@@ -432,12 +492,13 @@ export default function HomeScreen({ route, navigation }) {
         >
           {/* Avatar Section */}
           <View style={styles.profileSection}>
-            <View className="flex justify-center">
-              <TouchableOpacity style={styles.avatarBubble}>
-                <Text style={styles.avatarText}>Avatar</Text>
-              </TouchableOpacity>
-              <Text style={styles.nameText}>{fullName}</Text>
-            </View>
+      <View className="flex justify-center">
+        <TouchableOpacity
+          style={[styles.avatarBubble, { backgroundColor: avatarColor }]}
+          onPress={() => setColorModalVisible(true)}
+        />
+        <Text style={styles.nameText}>{fullName}</Text>
+      </View>
 
             {/* To-Do List */}
             <View style={styles.todoList}>
@@ -491,7 +552,7 @@ export default function HomeScreen({ route, navigation }) {
             )}
           </View>
 
-          {/* Sleep Button */}
+         {/* Sleep Button */}
           <View style={styles.buttonContainer}>
             <Button title="Sleep" onPress={() => setSleepModalVisible(true)} />
             {sleepRecords.length > 0 && (
@@ -499,11 +560,17 @@ export default function HomeScreen({ route, navigation }) {
                 Last Sleep Record:{" "}
                 {new Date(
                   sleepRecords[sleepRecords.length - 1].sleepStart
-                ).toLocaleTimeString()}{" "}
+                ).toLocaleDateString("en-US")}{" "}
+                {new Date(
+                  sleepRecords[sleepRecords.length - 1].sleepStart
+                ).toLocaleTimeString("en-US")}{" "}
                 to{" "}
                 {new Date(
                   sleepRecords[sleepRecords.length - 1].sleepEnd
-                ).toLocaleTimeString()}
+                ).toLocaleDateString("en-US")}{" "}
+                {new Date(
+                  sleepRecords[sleepRecords.length - 1].sleepEnd
+                ).toLocaleTimeString("en-US")}
               </Text>
             )}
           </View>
@@ -627,6 +694,29 @@ export default function HomeScreen({ route, navigation }) {
             </View>
           </Modal>
 
+          {/* Color Selection Modal */}
+            <Modal
+              visible={colorModalVisible}
+              animationType="slide"
+              transparent={true}
+              onRequestClose={() => setColorModalVisible(false)}
+            >
+              <View style={styles.modalView}>
+                <Text>Select Avatar Color:</Text>
+                {colorOptions.map((color, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[styles.colorOption, { backgroundColor: color }]}
+                    onPress={() => {
+                      updateAvatarColor(color);
+                      setColorModalVisible(false);
+                    }}
+                  />
+                ))}
+                <Button title="Close" onPress={() => setColorModalVisible(false)} />
+              </View>
+            </Modal>
+
           {/* Feeding Modal */}
           <Modal
             visible={feedingModalVisible}
@@ -711,48 +801,70 @@ export default function HomeScreen({ route, navigation }) {
           </Modal>
 
           {/* Sleep Modal */}
-          <Modal
-            visible={sleepModalVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setSleepModalVisible(false)}
-          >
-            <View style={styles.modalView}>
-              <Text>Enter Sleep Start:</Text>
-              <Button
-                title="Pick Start Time"
-                onPress={() => setStartPickerVisibility(true)}
-              />
-              {isStartPickerVisible && (
-                <DateTimePicker
-                  testID="startDateTimePicker"
-                  value={sleepStart}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeSleepStart}
-                />
-              )}
-              <Text>Enter Sleep End:</Text>
-              <Button
-                title="Pick End Time"
-                onPress={() => setEndPickerVisibility(true)}
-              />
-              {isEndPickerVisible && (
-                <DateTimePicker
-                  testID="endDateTimePicker"
-                  value={sleepEnd}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeSleepEnd}
-                />
-              )}
-              <Button title="Save" onPress={handleSaveSleep} />
-              <Button
-                title="Cancel"
-                onPress={() => setSleepModalVisible(false)}
-              />
-            </View>
-          </Modal>
+      <Modal
+        visible={sleepModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setSleepModalVisible(false)}
+      >
+        <View style={styles.modalView}>
+          <Text>Enter Sleep Details:</Text>
+
+          {/* Date Picker */}
+          <Button
+            title="Pick Date"
+            onPress={() => setDatePickerVisibility(true)}
+          />
+          {isDatePickerVisible && (
+            <DateTimePicker
+              testID="datePicker"
+              value={selectedDate}
+              mode="date"
+              display="calendar"
+              onChange={onChangeDate}
+            />
+          )}
+
+          {/* Start Time Picker */}
+          <Text>Pick Start Time:</Text>
+          <Button
+            title="Pick Start Time"
+            onPress={() => setStartTimePickerVisibility(true)}
+          />
+          {isStartTimePickerVisible && (
+            <DateTimePicker
+              testID="startTimePicker"
+              value={sleepStart}
+              mode="time"
+              display="clock"
+              onChange={onChangeSleepStartTime}
+            />
+          )}
+
+          {/* End Time Picker */}
+          <Text>Pick End Time:</Text>
+          <Button
+            title="Pick End Time"
+            onPress={() => setEndTimePickerVisibility(true)}
+          />
+          {isEndTimePickerVisible && (
+            <DateTimePicker
+              testID="endTimePicker"
+              value={sleepEnd}
+              mode="time"
+              display="clock"
+              onChange={onChangeSleepEndTime}
+            />
+          )}
+
+          {/* Save and Cancel Buttons */}
+          <Button title="Save" onPress={handleSaveSleep} />
+          <Button
+            title="Cancel"
+            onPress={() => setSleepModalVisible(false)}
+          />
+        </View>
+      </Modal>
         </View>
       </View>
     </ScrollView>
@@ -895,5 +1007,12 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
     marginTop: 20,
+  },
+  colorOption: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginVertical: 5,
+    marginHorizontal: 10,
   },
 })
