@@ -97,7 +97,7 @@ const BabyMilestones = ({ route }) => {
 
     return (
         <View style={styles.container}>
-            <View style={{ height: 15 }} />
+            <View style={{ height: 13 }} />
             {/* Back button to navigate to previous screen */}
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                 <Ionicons name="arrow-back" size={24} color="black" />
