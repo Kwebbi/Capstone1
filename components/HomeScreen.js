@@ -1,32 +1,9 @@
 import React, { useState, useMemo, useEffect } from "react"
-import {
-  Button,
-  Image,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
-  FlatList,
-} from "react-native"
-import {
-  SafeAreaView,
-  withSafeAreaInsets,
-} from "react-native-safe-area-context"
+import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, ActivityIndicator, FlatList, } from "react-native"
+import { SafeAreaView, withSafeAreaInsets, } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import DateTimePicker from "@react-native-community/datetimepicker"
-import {
-  ref,
-  push,
-  set,
-  query,
-  orderByChild,
-  onValue,
-  remove,
-} from "firebase/database"
+import { ref, push, set, query, orderByChild, onValue, remove } from "firebase/database"
 import { auth, database } from "../config/firebase"
 import { Picker } from "@react-native-picker/picker"
 import * as Notifications from "expo-notifications"
@@ -422,13 +399,13 @@ export default function HomeScreen({ route, navigation }) {
               <Ionicons name="arrow-back" size={30} color="#28436d" />
             </TouchableOpacity>
 
-            <Text style={styles.titleText}>{fullName}</Text>
+            <Text style={styles.titleText}>Activity Log</Text>
           </View>
         </SafeAreaView>
 
         <View
           className="flex space-y-10 bg-white px-8 pt-8"
-          style={{ borderRadius: 50, position: "relative", top: -30 }}
+          style={{ borderRadius: 50, position: "relative", top: -20 }}
         >
           {/* Avatar Section */}
           <View style={styles.profileSection}>
@@ -579,7 +556,7 @@ export default function HomeScreen({ route, navigation }) {
           {/* Show Comments Button*/}
           <View style={styles.buttonContainer}>
             <Button
-              title="Comment Section"
+              title="Comments Section"
               onPress={() =>
                 setCommentSectionModalVisible(!commentSectionModalVisible)
               }
