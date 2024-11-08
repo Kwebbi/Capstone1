@@ -1,32 +1,9 @@
 import React, { useState, useMemo, useEffect } from "react"
-import {
-  Button,
-  Image,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
-  FlatList,
-} from "react-native"
-import {
-  SafeAreaView,
-  withSafeAreaInsets,
-} from "react-native-safe-area-context"
+import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, } from "react-native"
+import { SafeAreaView, withSafeAreaInsets, } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import DateTimePicker from "@react-native-community/datetimepicker"
-import {
-  ref,
-  push,
-  set,
-  query,
-  orderByChild,
-  onValue,
-  remove,
-} from "firebase/database"
+import { ref, push, set, query, orderByChild, onValue, remove, get } from "firebase/database"
 import { auth, database } from "../config/firebase"
 import { Picker } from "@react-native-picker/picker"
 import * as Notifications from "expo-notifications"
@@ -39,7 +16,6 @@ export default function HomeScreen({ route, navigation }) {
   const [feedings, setFeedings] = useState([])
   const [diaperChanges, setDiaperChanges] = useState([])
   const [sleepRecords, setSleepRecords] = useState([])
-  const [showAllRecords, setShowAllRecords] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [feedingAmount, setFeedingAmount] = useState("")
   const [foodChoice, setFoodChoice] = useState("")
@@ -48,36 +24,31 @@ export default function HomeScreen({ route, navigation }) {
   const [feedingModalVisible, setFeedingModalVisible] = useState(false)
   const [diaperModalVisible, setDiaperModalVisible] = useState(false)
   const [sleepModalVisible, setSleepModalVisible] = useState(false)
-  const [commentSectionModalVisible, setCommentSectionModalVisible] =
-    useState(false)
   const [isStartPickerVisible, setStartPickerVisibility] = useState(false)
   const [isEndPickerVisible, setEndPickerVisibility] = useState(false)
   const [sleepStart, setSleepStart] = useState(new Date())
   const [sleepEnd, setSleepEnd] = useState(new Date())
-  const [comment, setComment] = useState("")
-  const [comments, setComments] = useState([])
   const feedingTimeRef = ref(database, "feedingTimes/")
   const sleepTimeRef = ref(database, "sleepTimes/")
   const diaperChangeRef = ref(database, "diaperChanges/")
-  const commentRef = ref(database, "comments/")
   const userId = auth.currentUser.uid
   const todoItemsRef = ref(database, `todoItems/${userId}/${babyID}/`)
+  const [colorModalVisible, setColorModalVisible] = useState(false);
+  const [avatarColor, setAvatarColor] = useState("#ccc");
+  const colorOptions = ["black", "red", "blue", "green", "yellow", "pink", "purple"];
+  const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
+  const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
+  const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
+  const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true)
 
-  //setComments([{user:"john@gmail.com", babyID: 123456, text: "Juan David is a Shitty Baby, he pukes all the time"}, {user:"john@gmail.com", babyID: 123456, text: "Juan David is a Shitty Baby, he pukes all the time"}]);
-
-  const { fullName, babyID } = route.params //Get baby info from navigation params
+  const { fullName, babyID } = route.params // Get baby info from navigation params
 
   // Fetching existing feeding records
   const allFeedingTimesQuery = useMemo(
     () => query(feedingTimeRef, orderByChild("dateTime")),
     [feedingTimeRef]
-  )
-
-  const allCommentsQuery = useMemo(
-    () => query(commentRef /*, orderByChild('dateTime')*/),
-    [commentRef]
   )
 
   useEffect(() => {
@@ -100,34 +71,6 @@ export default function HomeScreen({ route, navigation }) {
       } else {
         console.log("No feedingTimes found")
         setFeedings([]) // Reset feedings with empty array
-      }
-      setIsLoading(false) // Set loading state to false
-    })
-
-    return () => unsubscribe()
-  }, [])
-
-  //Retrieving Comments from DB
-  useEffect(() => {
-    const unsubscribe = onValue(allCommentsQuery, (snapshot) => {
-      if (snapshot.exists()) {
-        console.log("Comments found in DB!!!")
-        let tmp = []
-        snapshot.forEach((child) => {
-          //console.log(child.key, child.val());
-          tmp.push(child.val())
-        })
-
-        // Filter Comments based on the "babyId"
-        const filteredComments = Object.values(tmp).filter(
-          (comment) => comment.babyID && comment.babyID == babyID
-        )
-        // Set filtered feedingTimes to state
-        setComments(filteredComments)
-        //console.log(filteredComments);
-      } else {
-        console.log("No Comments found")
-        setComments([]) // Reset comments with empty array
       }
       setIsLoading(false) // Set loading state to false
     })
@@ -179,12 +122,12 @@ export default function HomeScreen({ route, navigation }) {
       setSleepRecords(fetchedSleepRecords)
     })
 
-    return () => unsubscribe() // Cleanup on unmount
+    return () => unsubscribe()
   }, [babyID])
 
   // Fetching existing todo items
   useEffect(() => {
-    const todoRef = ref(database, `todoItems/${userId}/${babyID}/`)
+    const todoRef = ref(database, `todoItems/${babyID}/users/${userId}/`)
     const unsubscribe = onValue(todoRef, (snapshot) => {
       if (snapshot.exists()) {
         const items = []
@@ -205,7 +148,7 @@ export default function HomeScreen({ route, navigation }) {
     if (!newTodo.trim()) return
 
     try {
-      const todoRef = ref(database, `todoItems/${userId}/${babyID}`)
+      const todoRef = ref(database, `todoItems/${babyID}/users/${userId}/`)
       const newTodoRef = push(todoRef)
       await set(newTodoRef, {
         text: newTodo,
@@ -215,11 +158,12 @@ export default function HomeScreen({ route, navigation }) {
       console.error("Error adding Todo Item: ", error)
     }
     setSendNotification(true)
+    setNewTodo("");
   }
 
   // Function to delete a todo item
   const deleteTodoItem = (itemId) => {
-    const itemRef = ref(database, `todoItems/${userId}/${babyID}/${itemId}`)
+    const itemRef = ref(database, `todoItems/${babyID}/users/${userId}/${itemId}`)
     remove(itemRef).catch((error) => {
       console.error("Error deleting todo:", error)
     })
@@ -229,65 +173,45 @@ export default function HomeScreen({ route, navigation }) {
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate || date
     setSelectedDate(currentDate)
-    setDatePickerVisibility(false) // Hide the picker
+    setDatePickerVisibility(false)
   }
 
-  // Handle sleep start date change
-  const onChangeSleepStart = (event, selectedDate) => {
-    const currentDate = selectedDate || sleepStart
-    setSleepStart(currentDate)
-    setStartPickerVisibility(false) // Hide the picker
-  }
+  const onChangeSleepStartDate = (event, selectedDate) => {
+  const currentDate = selectedDate || sleepStart;
+  setSleepStart(currentDate);
+  setStartDatePickerVisibility(false);
+};
 
-  // Handle sleep end date change
-  const onChangeSleepEnd = (event, selectedDate) => {
-    const currentDate = selectedDate || sleepEnd
-    setSleepEnd(currentDate)
-    setEndPickerVisibility(false) // Hide the picker
-  }
+const onChangeSleepStartTime = (event, selectedTime) => {
+  const currentTime = selectedTime || sleepStart;
+  setSleepStart((prevDate) => new Date(
+    prevDate.getFullYear(),
+    prevDate.getMonth(),
+    prevDate.getDate(),
+    currentTime.getHours(),
+    currentTime.getMinutes()
+  ));
+  setStartTimePickerVisibility(false);
+};
 
-  //Save comment record
-  const handleSaveComment = () => {
-    const newComment = {
-      text: comment,
-      user: auth.currentUser.email.split('@')[0],
-      commentDate: new Date().toLocaleDateString(),
-      dateTime: new Date().getTime(),
-      babyID: babyID,
-    }
+const onChangeSleepEndDate = (event, selectedDate) => {
+  const currentDate = selectedDate || sleepEnd;
+  setSleepEnd(currentDate);
+  setEndDatePickerVisibility(false);
+};
 
-    setComments([...comments, newComment])
-    setComment("")
-    console.log("Comment Saved!")
-    //console.log(comments);
+const onChangeSleepEndTime = (event, selectedTime) => {
+  const currentTime = selectedTime || sleepEnd;
+  setSleepEnd((prevDate) => new Date(
+    prevDate.getFullYear(),
+    prevDate.getMonth(),
+    prevDate.getDate(),
+    currentTime.getHours(),
+    currentTime.getMinutes()
+  ));
+  setEndTimePickerVisibility(false);
+};
 
-    createComment()
-  }
-
-  // Saves comments to the database
-  function createComment() {
-    const newCommentRef = push(commentRef)
-    const commentKey = newCommentRef.key
-
-    // Create the new comment entry with a uniquely generated key
-    const newComment = {
-      commentId: commentKey,
-      text: comment,
-      user: auth.currentUser.email.split('@')[0],
-      commentDate: new Date().toLocaleDateString(),
-      dateTime: new Date().getTime(),
-      babyID: babyID,
-    }
-
-    // Set the new baby entry in the database and to catch error in case there is an error
-    set(newCommentRef, newComment)
-      .then(() => {
-        console.log("New Comment was successfully added")
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-  }
 
   // Save feeding record
   const handleSaveFeeding = () => {
@@ -358,15 +282,14 @@ export default function HomeScreen({ route, navigation }) {
   // Save sleep record
   const handleSaveSleep = () => {
     const newSleepRecord = {
-      sleepStart: sleepStart.getTime(), // Store the time as timestamp
-      sleepEnd: sleepEnd.getTime(), // Store the time as timestamp
+      sleepStart: sleepStart.getTime(),
+      sleepEnd: sleepEnd.getTime(),
       babyID: babyID,
     }
 
     setSleepRecords([...sleepRecords, newSleepRecord])
     setSleepModalVisible(false)
 
-    // Push to Firebase
     createSleepTime(newSleepRecord)
   }
 
@@ -374,7 +297,6 @@ export default function HomeScreen({ route, navigation }) {
     const newSleepTimeRef = push(sleepTimeRef)
     const sleepTimeKey = newSleepTimeRef.key
 
-    // Extend sleepData with a unique key
     const newSleepTime = {
       ...sleepData,
       sleepTimeID: sleepTimeKey,
@@ -394,7 +316,7 @@ export default function HomeScreen({ route, navigation }) {
   const handleDeleteSleep = async (recordId) => {
     try {
       const sleepRecordRef = ref(database, `sleepTimes/${recordId}`)
-      await remove(sleepRecordRef) // Delete from Firebase
+      await remove(sleepRecordRef)
 
       setSleepRecords(
         sleepRecords.filter((record) => record.sleepTimeID !== recordId)
@@ -406,42 +328,74 @@ export default function HomeScreen({ route, navigation }) {
     }
   }
 
+  useEffect(() => {
+    const fetchAvatarColor = async () => {
+      try {
+        const avatarRef = ref(database, `avatarColors/${babyID}`);
+        const snapshot = await get(avatarRef);
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          if (data.avatarColor) {
+            setAvatarColor(data.avatarColor);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching avatar color: ', error);
+      }
+    };
+
+    fetchAvatarColor();
+  }, [babyID]);
+
+  const updateAvatarColor = async (color) => {
+    try {
+      setAvatarColor(color);
+      const avatarRef = ref(database, `avatarColors/${babyID}`);
+      await set(avatarRef, { avatarColor: color });
+      console.log('Color updated successfully');
+    } catch (error) {
+      console.error('Error updating color: ', error);
+    }
+  };
+
   return (
-    <ScrollView
-      automaticallyAdjustKeyboardInsets={true}
-      style={{ backgroundColor: "#cfe2f3" }}
-    >
-      <View className="flex" style={{ backgroundColor: "#cfe2f3" }}>
-        {/* Banner with Name */}
-        <SafeAreaView className="flex">
-          <View className="flex-row justify-center" style={styles.container}>
-            <TouchableOpacity
-              style={{ position: "absolute", left: 22, top: 25 }}
-              onPress={() => navigation.navigate("Profiles")}
-            >
-              <Ionicons name="arrow-back" size={30} color="#28436d" />
-            </TouchableOpacity>
 
-            <Text style={styles.titleText}>{fullName}</Text>
-          </View>
-        </SafeAreaView>
+    
+    <View style={{ flex: 1, backgroundColor: "#cfe2f3" }}>
 
-        <View
-          className="flex space-y-10 bg-white px-8 pt-8"
-          style={{ borderRadius: 50, position: "relative", top: -30 }}
-        >
-          {/* Avatar Section */}
+      {/* Top Header */}
+        <View style={{ ...styles.headerContainer, backgroundColor: "#cfe2f3" }}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.navigate("Profiles")}
+          >
+            <Ionicons name="arrow-back" size={30} color="#28436d" />
+          </TouchableOpacity>
+
+          <Text style={styles.titleText}>Activity Log</Text>
+        </View>
+
+      {/* Scrollable Content */}
+      <ScrollView
+        automaticallyAdjustKeyboardInsets={true}
+        style={{ backgroundColor: "white" }}
+      >
+        <View className="flex space-y-5 bg-white px-8 pt-8">
           <View style={styles.profileSection}>
+            {/* Avatar Section */}
             <View className="flex justify-center">
-              <TouchableOpacity style={styles.avatarBubble}>
-                <Text style={styles.avatarText}>Avatar</Text>
-              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.avatarBubble, { backgroundColor: avatarColor }]}
+                onPress={() => setColorModalVisible(true)}
+              />
               <Text style={styles.nameText}>{fullName}</Text>
             </View>
 
             {/* To-Do List */}
             <View style={styles.todoList}>
-              <Button title="Add Todo" onPress={addTodoItem} />
+              <TouchableOpacity style={{ backgroundColor: "#cfe2f3", padding: 5 }} onPress={addTodoItem}>
+                <Text style={styles.todoButtonText}>Add Todo</Text>
+              </TouchableOpacity>
               <TextInput
                 style={styles.todoInput}
                 value={newTodo}
@@ -459,102 +413,74 @@ export default function HomeScreen({ route, navigation }) {
             </View>
           </View>
 
+          <View style={{ height: 1.5, backgroundColor: 'black' }} />
+
           {/* Feeding Button */}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Feeding"
-              onPress={() => setFeedingModalVisible(true)}
-            />
-            {feedings.length > 0 && (
-              <Text style={styles.recordPreview}>
-                Last Feeding: {feedings[feedings.length - 1].foodChoice} -{" "}
-                {feedings[feedings.length - 1].feedingDate} at{" "}
-                {feedings[feedings.length - 1].feedingTime},{" "}
-                {feedings[feedings.length - 1].feedingAmount} mL
-              </Text>
-            )}
-          </View>
+          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setFeedingModalVisible(true)}>
+              <Image source={require('../assets/feedingIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#ff5c0a' }}/>
+
+              <View className="flex-1">
+              <Text style={[styles.dataText, { color: '#ff5c0a' }]}>Feeding</Text>
+                {feedings.length > 0 && (
+                  <Text style={styles.recordPreview}>
+                    Last Feeding: {feedings[feedings.length - 1].foodChoice} -{" "}
+                    {feedings[feedings.length - 1].feedingDate} at{" "}
+                    {feedings[feedings.length - 1].feedingTime},{" "}
+                    {feedings[feedings.length - 1].feedingAmount} mL
+                  </Text>
+                )}
+              </View>
+          </TouchableOpacity>
+
+          <View style={{ height: 1.5, backgroundColor: 'black' }} />
 
           {/* Diaper Change Button */}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Diaper Change"
-              onPress={() => setDiaperModalVisible(true)}
-            />
-            {diaperChanges.length > 0 && (
-              <Text style={styles.recordPreview}>
-                Last Diaper Change:{" "}
-                {diaperChanges[diaperChanges.length - 1].type} on{" "}
-                {diaperChanges[diaperChanges.length - 1].date} at{" "}
-                {diaperChanges[diaperChanges.length - 1].time}
-              </Text>
+          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setDiaperModalVisible(true)}>
+              <Image source={require('../assets/diaperIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#98FF98' }}/>
+
+              <View className="flex-1">
+              <Text style={[styles.dataText, { color: '#98FF98' }]}>Diaper</Text>
+              {diaperChanges.length > 0 && (
+                <Text style={styles.recordPreview}>
+                  Last Diaper Change:{" "}
+                  {diaperChanges[diaperChanges.length - 1].type} on{" "}
+                  {diaperChanges[diaperChanges.length - 1].date} at{" "}
+                  {diaperChanges[diaperChanges.length - 1].time}
+                </Text>
             )}
-          </View>
+              </View>
+          </TouchableOpacity>
+
+          <View style={{ height: 1.5, backgroundColor: 'black' }} />
 
           {/* Sleep Button */}
-          <View style={styles.buttonContainer}>
-            <Button title="Sleep" onPress={() => setSleepModalVisible(true)} />
-            {sleepRecords.length > 0 && (
-              <Text style={styles.recordPreview}>
-                Last Sleep Record:{" "}
-                {new Date(
-                  sleepRecords[sleepRecords.length - 1].sleepStart
-                ).toLocaleTimeString()}{" "}
-                to{" "}
-                {new Date(
-                  sleepRecords[sleepRecords.length - 1].sleepEnd
-                ).toLocaleTimeString()}
-              </Text>
-            )}
-          </View>
+          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setSleepModalVisible(true)}>
+              <Image source={require('../assets/sleepIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#adadff' }}/>
 
-          {/* Show All Records Button */}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Show All Records"
-              onPress={() => setShowAllRecords(!showAllRecords)}
-            />
-            {showAllRecords && (
-              <>
-                {feedings.map((feeding, index) => (
-                  <Text key={`feeding-${index}`}>
-                    Feeding #{index + 1}: {feeding.feedingDate} -{" "}
-                    {feeding.feedingTime} - {feeding.feedingAmount} mL -{" "}
-                    {feeding.foodChoice}
-                  </Text>
-                ))}
-                {diaperChanges.map((change, index) => (
-                  <Text key={`diaper-${index}`}>
-                    Diaper #{index + 1}: {change.type} on {change.date} at{" "}
-                    {change.time}
-                  </Text>
-                ))}
-                <View>
-                  {sleepRecords.map((record, index) => (
-                    <View
-                      key={index}
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Text>
-                        Sleep #{index + 1}:{" "}
-                        {new Date(record.sleepStart).toLocaleTimeString()} to{" "}
-                        {new Date(record.sleepEnd).toLocaleTimeString()}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => handleDeleteSleep(record.sleepTimeID)}
-                      >
-                        <Ionicons name="trash-outline" size={24} color="red" />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </View>
-              </>
+              <View className="flex-1">
+              <Text style={[styles.dataText, { color: '#adadff' }]}>Sleep</Text>
+              {sleepRecords.length > 0 && (
+                <Text style={styles.recordPreview}>
+                  Last Sleep Record:{" "}
+                  {new Date(
+                    sleepRecords[sleepRecords.length - 1].sleepStart
+                  ).toLocaleDateString("en-US")}{" "}
+                  {new Date(
+                    sleepRecords[sleepRecords.length - 1].sleepStart
+                  ).toLocaleTimeString("en-US")}{" "}
+                  to{" "}
+                  {new Date(
+                    sleepRecords[sleepRecords.length - 1].sleepEnd
+                  ).toLocaleDateString("en-US")}{" "}
+                  {new Date(
+                    sleepRecords[sleepRecords.length - 1].sleepEnd
+                  ).toLocaleTimeString("en-US")}
+                </Text>
             )}
-          </View>
+              </View>
+          </TouchableOpacity>
+          
+          <View style={{ height: 1.5, backgroundColor: 'black' }} />
 
           {/* Show Weekly Report Button*/}
           <View style={styles.buttonContainer}>
@@ -579,51 +505,33 @@ export default function HomeScreen({ route, navigation }) {
           {/* Show Comments Button*/}
           <View style={styles.buttonContainer}>
             <Button
-              title="Comment Section"
+              title="Comments Section"
               onPress={() =>
-                setCommentSectionModalVisible(!commentSectionModalVisible)
+                navigation.navigate("Comments", { fullName, babyID })
               }
             />
           </View>
 
-          {/* Comment Section Modal */}
+          {/* Color Selection Modal */}
           <Modal
-            visible={commentSectionModalVisible}
-            onRequestClose={() => setCommentSectionModalVisible(false)}
+            visible={colorModalVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setColorModalVisible(false)}
           >
-            <View style={styles.commentSection}>
-              {/* Comment Input Field */}
-              <TextInput
-                style={styles.commentInput}
-                label="Add a comment"
-                value={comment}
-                onChangeText={(text) => setComment(text)}
-                mode="outlined"
-                placeholder="Enter your comment here..."
-              />
-              {/* Submit Button */}
-              <Button
-                mode="contained"
-                title="Post"
-                onPress={handleSaveComment}
-              ></Button>
-              {/* Display list of comments */}
-              <FlatList
-                data={comments}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => (
-                  <View style={styles.comment}>
-                    <Text style={styles.user}>User: {item.user}</Text>
-                    <Text>Date: {item.commentDate}</Text>
-                    <Text>{item.text}</Text>
-                  </View>
-                )}
-                ListEmptyComponent={<Text>No comments yet.</Text>}
-              />
-              <Button
-                title="Go Back to HomeScreen"
-                onPress={() => setCommentSectionModalVisible(false)}
-              ></Button>
+            <View style={styles.modalView}>
+              <Text>Select Avatar Color:</Text>
+              {colorOptions.map((color, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[styles.colorOption, { backgroundColor: color }]}
+                  onPress={() => {
+                    updateAvatarColor(color);
+                    setColorModalVisible(false);
+                  }}
+                />
+              ))}
+              <Button title="Close" onPress={() => setColorModalVisible(false)} />
             </View>
           </Modal>
 
@@ -718,34 +626,56 @@ export default function HomeScreen({ route, navigation }) {
             onRequestClose={() => setSleepModalVisible(false)}
           >
             <View style={styles.modalView}>
-              <Text>Enter Sleep Start:</Text>
+              <Text>Enter Sleep Details:</Text>
+
+              {/* Date Picker */}
+              <Button
+                title="Pick Date"
+                onPress={() => setDatePickerVisibility(true)}
+              />
+              {isDatePickerVisible && (
+                <DateTimePicker
+                  testID="datePicker"
+                  value={selectedDate}
+                  mode="date"
+                  display="calendar"
+                  onChange={onChangeDate}
+                />
+              )}
+
+              {/* Start Time Picker */}
+              <Text>Pick Start Time:</Text>
               <Button
                 title="Pick Start Time"
-                onPress={() => setStartPickerVisibility(true)}
+                onPress={() => setStartTimePickerVisibility(true)}
               />
-              {isStartPickerVisible && (
+              {isStartTimePickerVisible && (
                 <DateTimePicker
-                  testID="startDateTimePicker"
+                  testID="startTimePicker"
                   value={sleepStart}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeSleepStart}
+                  mode="time"
+                  display="clock"
+                  onChange={onChangeSleepStartTime}
                 />
               )}
-              <Text>Enter Sleep End:</Text>
+
+              {/* End Time Picker */}
+              <Text>Pick End Time:</Text>
               <Button
                 title="Pick End Time"
-                onPress={() => setEndPickerVisibility(true)}
+                onPress={() => setEndTimePickerVisibility(true)}
               />
-              {isEndPickerVisible && (
+              {isEndTimePickerVisible && (
                 <DateTimePicker
-                  testID="endDateTimePicker"
+                  testID="endTimePicker"
                   value={sleepEnd}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeSleepEnd}
+                  mode="time"
+                  display="clock"
+                  onChange={onChangeSleepEndTime}
                 />
               )}
+
+              {/* Save and Cancel Buttons */}
               <Button title="Save" onPress={handleSaveSleep} />
               <Button
                 title="Cancel"
@@ -754,26 +684,40 @@ export default function HomeScreen({ route, navigation }) {
             </View>
           </Modal>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  headerContainer: {
+    alignItems: 'center',
+    height: 80,
     padding: 20,
+    marginTop: 40
+  },
+  backButton: {
+    position: 'absolute',
+    left: 20,
+    top: 25,
+    zIndex: 1,
   },
   titleText: {
+    flex: 1,
     fontSize: 30,
     textAlign: "center",
     fontWeight: "bold",
-    color: "white",
+    color: '#28436d',
+  },
+  dataText: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "black",
   },
   profileSection: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
+    width: '100%',
   },
   avatarBubble: {
     width: 100,
@@ -794,12 +738,19 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   todoList: {
-    marginLeft: 20,
+    marginLeft: 80,
     fontWeight: "bold",
     padding: 10,
     borderWidth: 1,
     borderRadius: 8,
     borderColor: "#999",
+    flex: 1,
+  },
+  todoButtonText: {
+    color: '#28436d',
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   todoInput: {
     borderColor: "#ccc",
@@ -811,7 +762,7 @@ const styles = StyleSheet.create({
   recordPreview: {
     marginTop: 8,
     fontSize: 14,
-    color: "#666",
+    color: "#303030",
   },
   buttonContainer: {
     marginVertical: 10,
@@ -839,42 +790,6 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
   },
-  comment: {
-    margin: 2,
-    fontWeight: "bold",
-    padding: 10,
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: "#999",
-    width: 300,
-  },
-  commentInput: {
-    width: 310,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 4,
-    padding: 10,
-    marginBottom: 10,
-    marginTop: 10,
-    height: 80,
-  },
-  commentSection: {
-    backgroundColor: "white",
-    padding: 10,
-    margin: 20,
-    marginTop: 100,
-    borderRadius: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    height: 500,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
   todoItemContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -895,5 +810,12 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
     marginTop: 20,
+  },
+  colorOption: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginVertical: 5,
+    marginHorizontal: 10,
   },
 })

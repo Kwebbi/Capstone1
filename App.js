@@ -10,6 +10,7 @@ import Profiles from "./components/Profiles"
 import ShareBaby from "./components/ShareBaby"
 import ShareRequests from "./components/ShareRequests"
 import BabyMilestones from "./components/BabyMilestones"
+import Comments from "./components/Comments"
 import MilestoneView from "./components/MilestoneView"
 import Settings from "./components/Settings"
 import WeeklyReport from "./components/WeeklyReport"
@@ -93,6 +94,11 @@ export default function App() {
             name="BabyMilestones"
             options={{ headerShown: false }}
             component={BabyMilestones}
+          />
+          <Stack.Screen
+            name="Comments"
+            options={{ headerShown: false }}
+            component={Comments}
           />
           <Stack.Screen
             name="WeeklyReport"
