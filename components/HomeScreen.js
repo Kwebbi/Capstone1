@@ -180,38 +180,37 @@ export default function HomeScreen({ route, navigation }) {
   const currentDate = selectedDate || sleepStart;
   setSleepStart(currentDate);
   setStartDatePickerVisibility(false);
-};
+  };
 
-const onChangeSleepStartTime = (event, selectedTime) => {
-  const currentTime = selectedTime || sleepStart;
-  setSleepStart((prevDate) => new Date(
-    prevDate.getFullYear(),
-    prevDate.getMonth(),
-    prevDate.getDate(),
-    currentTime.getHours(),
-    currentTime.getMinutes()
-  ));
-  setStartTimePickerVisibility(false);
-};
+  const onChangeSleepStartTime = (event, selectedTime) => {
+    const currentTime = selectedTime || sleepStart;
+    setSleepStart((prevDate) => new Date(
+      prevDate.getFullYear(),
+      prevDate.getMonth(),
+      prevDate.getDate(),
+      currentTime.getHours(),
+      currentTime.getMinutes()
+    ));
+    setStartTimePickerVisibility(false);
+  };
 
-const onChangeSleepEndDate = (event, selectedDate) => {
-  const currentDate = selectedDate || sleepEnd;
-  setSleepEnd(currentDate);
-  setEndDatePickerVisibility(false);
-};
+  const onChangeSleepEndDate = (event, selectedDate) => {
+    const currentDate = selectedDate || sleepEnd;
+    setSleepEnd(currentDate);
+    setEndDatePickerVisibility(false);
+  };
 
-const onChangeSleepEndTime = (event, selectedTime) => {
-  const currentTime = selectedTime || sleepEnd;
-  setSleepEnd((prevDate) => new Date(
-    prevDate.getFullYear(),
-    prevDate.getMonth(),
-    prevDate.getDate(),
-    currentTime.getHours(),
-    currentTime.getMinutes()
-  ));
-  setEndTimePickerVisibility(false);
-};
-
+  const onChangeSleepEndTime = (event, selectedTime) => {
+    const currentTime = selectedTime || sleepEnd;
+    setSleepEnd((prevDate) => new Date(
+      prevDate.getFullYear(),
+      prevDate.getMonth(),
+      prevDate.getDate(),
+      currentTime.getHours(),
+      currentTime.getMinutes()
+    ));
+    setEndTimePickerVisibility(false);
+  };
 
   // Save feeding record
   const handleSaveFeeding = () => {
@@ -328,6 +327,57 @@ const onChangeSleepEndTime = (event, selectedTime) => {
     }
   }
 
+  // Function to calculate the sleep duration
+  function getSleepDuration(time1, time2) {
+    const diffInMs = time2 - time1;
+    const diffInMins = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+    if (diffInHours >= 1) { // at least an hour ago
+      const mins = diffInMins % 60;
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} and ${mins} min${mins !== 1 ? 's' : ''}`;
+    } else {
+      return `${diffInMins} min${diffInMins !== 1 ? 's' : ''}`;
+    }
+  }
+
+  // Function to calculate the time difference for last data entries
+  function getTimeAgo(date, time) {
+    // Split date and time
+    const [month, day, year] = date.split("/");
+    const [clock, period] = time.split(" ");
+    let [hoursStr, minutes, seconds] = clock.split(":");
+
+    // Convert to 24-hour format
+    let hours = parseInt(hoursStr);
+    if (period === "PM" && hours !== 12) {
+      hours += 12;
+    }
+    if (period === "AM" && hours === 12) {
+      hours = 0;
+    }
+
+    // Convert to ISO string format (YYYY-MM-DDTHH:mm:ss)
+    const isoString = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hours.toString().padStart(2, "0")}:${minutes}:${seconds}`;
+
+    // Get time difference
+    const lastTime = new Date(isoString).getTime();
+    const currentTime = Date.now();
+    const diffInMs = currentTime - lastTime;
+    const diffInMins = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInDays >= 1) { // at least a day ago
+      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    } else if (diffInHours >= 1) { // at least an hour ago
+      const mins = diffInMins % 60;
+      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} and ${mins} min${mins !== 1 ? 's' : ''} ago`;
+    } else {
+      return `${diffInMins} min${diffInMins !== 1 ? 's' : ''} ago`;
+    }
+  }
+
   useEffect(() => {
     const fetchAvatarColor = async () => {
       try {
@@ -378,7 +428,7 @@ const onChangeSleepEndTime = (event, selectedTime) => {
         automaticallyAdjustKeyboardInsets={true}
         style={{ backgroundColor: "white" }}
       >
-        <View className="flex space-y-5 bg-white px-8 pt-8">
+        <View className="flex space-y-5 bg-white px-6 pt-8">
           <View style={styles.profileSection}>
             {/* Avatar Section */}
             <View className="flex justify-center">
@@ -420,11 +470,10 @@ const onChangeSleepEndTime = (event, selectedTime) => {
               <View className="flex-1">
               <Text style={[styles.dataText, { color: '#ff5c0a' }]}>Feeding</Text>
                 {feedings.length > 0 && (
-                  <Text style={styles.recordPreview}>
-                    Last Feeding: {feedings[feedings.length - 1].foodChoice} -{" "}
-                    {feedings[feedings.length - 1].feedingDate} at{" "}
-                    {feedings[feedings.length - 1].feedingTime},{" "}
-                    {feedings[feedings.length - 1].feedingAmount} mL
+                  <Text style={[styles.recordPreview]}>
+                    {getTimeAgo(feedings[feedings.length - 1].feedingDate, feedings[feedings.length - 1].feedingTime)} •{" "}
+                    {feedings[feedings.length - 1].foodChoice} (
+                    {feedings[feedings.length - 1].feedingAmount} mL)
                   </Text>
                 )}
               </View>
@@ -440,10 +489,8 @@ const onChangeSleepEndTime = (event, selectedTime) => {
               <Text style={[styles.dataText, { color: '#98FF98' }]}>Diaper</Text>
               {diaperChanges.length > 0 && (
                 <Text style={styles.recordPreview}>
-                  Last Diaper Change:{" "}
-                  {diaperChanges[diaperChanges.length - 1].type} on{" "}
-                  {diaperChanges[diaperChanges.length - 1].date} at{" "}
-                  {diaperChanges[diaperChanges.length - 1].time}
+                  {getTimeAgo(diaperChanges[diaperChanges.length - 1].date, diaperChanges[diaperChanges.length - 1].time)} •{" "}
+                  {diaperChanges[diaperChanges.length - 1].type}
                 </Text>
             )}
               </View>
@@ -459,20 +506,8 @@ const onChangeSleepEndTime = (event, selectedTime) => {
               <Text style={[styles.dataText, { color: '#adadff' }]}>Sleep</Text>
               {sleepRecords.length > 0 && (
                 <Text style={styles.recordPreview}>
-                  Last Sleep Record:{" "}
-                  {new Date(
-                    sleepRecords[sleepRecords.length - 1].sleepStart
-                  ).toLocaleDateString("en-US")}{" "}
-                  {new Date(
-                    sleepRecords[sleepRecords.length - 1].sleepStart
-                  ).toLocaleTimeString("en-US")}{" "}
-                  to{" "}
-                  {new Date(
-                    sleepRecords[sleepRecords.length - 1].sleepEnd
-                  ).toLocaleDateString("en-US")}{" "}
-                  {new Date(
-                    sleepRecords[sleepRecords.length - 1].sleepEnd
-                  ).toLocaleTimeString("en-US")}
+                  {getTimeAgo(new Date(sleepRecords[sleepRecords.length - 1].sleepEnd).toLocaleDateString("en-US"), new Date(sleepRecords[sleepRecords.length - 1].sleepEnd).toLocaleTimeString("en-US"))} •{" "}
+                  {getSleepDuration(sleepRecords[sleepRecords.length - 1].sleepStart, sleepRecords[sleepRecords.length - 1].sleepEnd)}
                 </Text>
             )}
               </View>
