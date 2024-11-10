@@ -517,19 +517,21 @@ const onChangeSleepEndTime = (event, selectedTime) => {
             transparent={true}
             onRequestClose={() => setColorModalVisible(false)}
           >
-            <View style={styles.modalView}>
-              <Text>Select Avatar Color:</Text>
-              {colorOptions.map((color, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[styles.colorOption, { backgroundColor: color }]}
-                  onPress={() => {
-                    updateAvatarColor(color);
-                    setColorModalVisible(false);
-                  }}
-                />
-              ))}
-              <Button title="Close" onPress={() => setColorModalVisible(false)} />
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <Text>Select Avatar Color:</Text>
+                {colorOptions.map((color, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[styles.colorOption, { backgroundColor: color }]}
+                    onPress={() => {
+                      updateAvatarColor(color);
+                      setColorModalVisible(false);
+                    }}
+                  />
+                ))}
+                <Button title="Close" onPress={() => setColorModalVisible(false)} />
+              </View>
             </View>
           </Modal>
 
@@ -540,39 +542,41 @@ const onChangeSleepEndTime = (event, selectedTime) => {
             transparent={true}
             onRequestClose={() => setFeedingModalVisible(false)}
           >
-            <View style={styles.modalView}>
-              <Text>Enter Feeding Details:</Text>
-              <Button
-                title="Pick Date & Time"
-                onPress={() => setDatePickerVisibility(true)}
-              />
-              {isDatePickerVisible && (
-                <DateTimePicker
-                  testID="dateTimePicker"
-                  value={selectedDate}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeDate}
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <Text>Enter Feeding Details:</Text>
+                <Button
+                  title="Pick Date & Time"
+                  onPress={() => setDatePickerVisibility(true)}
                 />
-              )}
-              <TextInput
-                style={styles.input}
-                placeholder="Food Choice Name"
-                value={foodChoice}
-                onChangeText={setFoodChoice}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Amount in mL"
-                value={feedingAmount}
-                onChangeText={setFeedingAmount}
-                keyboardType="numeric"
-              />
-              <Button title="Save" onPress={handleSaveFeeding} />
-              <Button
-                title="Cancel"
-                onPress={() => setFeedingModalVisible(false)}
-              />
+                {isDatePickerVisible && (
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={selectedDate}
+                    mode="datetime"
+                    display="default"
+                    onChange={onChangeDate}
+                  />
+                )}
+                <TextInput
+                  style={styles.input}
+                  placeholder="Food Choice Name"
+                  value={foodChoice}
+                  onChangeText={setFoodChoice}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Amount in mL"
+                  value={feedingAmount}
+                  onChangeText={setFeedingAmount}
+                  keyboardType="numeric"
+                />
+                <Button title="Save" onPress={handleSaveFeeding} />
+                <Button
+                  title="Cancel"
+                  onPress={() => setFeedingModalVisible(false)}
+                />
+              </View>
             </View>
           </Modal>
 
@@ -583,36 +587,38 @@ const onChangeSleepEndTime = (event, selectedTime) => {
             transparent={true}
             onRequestClose={() => setDiaperModalVisible(false)}
           >
-            <View style={styles.modalView}>
-              <Text>Diaper Change Type:</Text>
-              <Picker
-                selectedValue={diaperType}
-                onValueChange={(itemValue) => setDiaperType(itemValue)}
-                style={{ width: 200, height: 200 }}
-              >
-                <Picker.Item label="Wet" value="Wet" />
-                <Picker.Item label="Dirty" value="Dirty" />
-                <Picker.Item label="Mixed" value="Mixed" />
-                <Picker.Item label="Dry" value="Dry" />
-              </Picker>
-              <Button
-                title="Pick Date & Time"
-                onPress={() => setDatePickerVisibility(true)}
-              />
-              {isDatePickerVisible && (
-                <DateTimePicker
-                  testID="dateTimePicker"
-                  value={selectedDate}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeDate}
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <Text>Diaper Change Type:</Text>
+                <Picker
+                  selectedValue={diaperType}
+                  onValueChange={(itemValue) => setDiaperType(itemValue)}
+                  style={{ width: 200, height: 200 }}
+                >
+                  <Picker.Item label="Wet" value="Wet" />
+                  <Picker.Item label="Dirty" value="Dirty" />
+                  <Picker.Item label="Mixed" value="Mixed" />
+                  <Picker.Item label="Dry" value="Dry" />
+                </Picker>
+                <Button
+                  title="Pick Date & Time"
+                  onPress={() => setDatePickerVisibility(true)}
                 />
-              )}
-              <Button title="Save" onPress={handleSaveDiaperChange} />
-              <Button
-                title="Cancel"
-                onPress={() => setDiaperModalVisible(false)}
-              />
+                {isDatePickerVisible && (
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={selectedDate}
+                    mode="datetime"
+                    display="default"
+                    onChange={onChangeDate}
+                  />
+                )}
+                <Button title="Save" onPress={handleSaveDiaperChange} />
+                <Button
+                  title="Cancel"
+                  onPress={() => setDiaperModalVisible(false)}
+                />
+              </View>
             </View>
           </Modal>
 
@@ -623,62 +629,64 @@ const onChangeSleepEndTime = (event, selectedTime) => {
             transparent={true}
             onRequestClose={() => setSleepModalVisible(false)}
           >
-            <View style={styles.modalView}>
-              <Text>Enter Sleep Details:</Text>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <Text>Enter Sleep Details:</Text>
 
-              {/* Date Picker */}
-              <Button
-                title="Pick Date"
-                onPress={() => setDatePickerVisibility(true)}
-              />
-              {isDatePickerVisible && (
-                <DateTimePicker
-                  testID="datePicker"
-                  value={selectedDate}
-                  mode="date"
-                  display="calendar"
-                  onChange={onChangeDate}
+                {/* Date Picker */}
+                <Button
+                  title="Pick Date"
+                  onPress={() => setDatePickerVisibility(true)}
                 />
-              )}
+                {isDatePickerVisible && (
+                  <DateTimePicker
+                    testID="datePicker"
+                    value={selectedDate}
+                    mode="date"
+                    display="calendar"
+                    onChange={onChangeDate}
+                  />
+                )}
 
-              {/* Start Time Picker */}
-              <Text>Pick Start Time:</Text>
-              <Button
-                title="Pick Start Time"
-                onPress={() => setStartTimePickerVisibility(true)}
-              />
-              {isStartTimePickerVisible && (
-                <DateTimePicker
-                  testID="startTimePicker"
-                  value={sleepStart}
-                  mode="time"
-                  display="clock"
-                  onChange={onChangeSleepStartTime}
+                {/* Start Time Picker */}
+                <Text>Pick Start Time:</Text>
+                <Button
+                  title="Pick Start Time"
+                  onPress={() => setStartTimePickerVisibility(true)}
                 />
-              )}
+                {isStartTimePickerVisible && (
+                  <DateTimePicker
+                    testID="startTimePicker"
+                    value={sleepStart}
+                    mode="time"
+                    display="clock"
+                    onChange={onChangeSleepStartTime}
+                  />
+                )}
 
-              {/* End Time Picker */}
-              <Text>Pick End Time:</Text>
-              <Button
-                title="Pick End Time"
-                onPress={() => setEndTimePickerVisibility(true)}
-              />
-              {isEndTimePickerVisible && (
-                <DateTimePicker
-                  testID="endTimePicker"
-                  value={sleepEnd}
-                  mode="time"
-                  display="clock"
-                  onChange={onChangeSleepEndTime}
+                {/* End Time Picker */}
+                <Text>Pick End Time:</Text>
+                <Button
+                  title="Pick End Time"
+                  onPress={() => setEndTimePickerVisibility(true)}
                 />
-              )}
+                {isEndTimePickerVisible && (
+                  <DateTimePicker
+                    testID="endTimePicker"
+                    value={sleepEnd}
+                    mode="time"
+                    display="clock"
+                    onChange={onChangeSleepEndTime}
+                  />
+                )}
 
-              {/* Save and Cancel Buttons */}
-              <Button title="Save" onPress={handleSaveSleep} />
-              <Button
-                title="Cancel"
-                onPress={() => setSleepModalVisible(false)}
-              />
+                {/* Save and Cancel Buttons */}
+                <Button title="Save" onPress={handleSaveSleep} />
+                <Button
+                  title="Cancel"
+                  onPress={() => setSleepModalVisible(false)}
+                />
+              </View>
             </View>
           </Modal>
         </View>
@@ -787,11 +795,17 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginVertical: 10,
   },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
   modalView: {
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 50,
+    padding: 40,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
