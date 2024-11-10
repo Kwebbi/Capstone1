@@ -100,7 +100,7 @@ const BabyMilestones = ({ route }) => {
             <View style={{ height: 13 }} />
             {/* Back button to navigate to previous screen */}
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="arrow-back" size={24} color="black" />
+                <Ionicons name="arrow-back" size={30} color="#28436d" />
             </TouchableOpacity>
             <Text style={styles.title}>{fullName}'s Milestones</Text>
 
@@ -139,7 +139,8 @@ const BabyMilestones = ({ route }) => {
                 onRequestClose={() => setModalVisible(false)}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Add New Milestone</Text>
+                        <Text style={styles.modal
+                        }>Add New Milestone</Text>
                         <TextInput
                             style={styles.input}
                             placeholder="Title"
@@ -198,6 +199,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
+        paddingTop: 25,
     },
     backButton: {
         position: 'absolute',
@@ -210,6 +212,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginVertical: 20,
         textAlign: 'center',
+        color: "#28436d",
     },
     addButton: {
         backgroundColor: '#007BFF',

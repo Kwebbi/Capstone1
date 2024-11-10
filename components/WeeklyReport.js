@@ -169,13 +169,15 @@ const WeeklyReport = ({ route }) => {
 
   return (
     <View style={styles.container}>
+      <View style={{ height: 13 }} />
+
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="arrow-back" size={24} color="black" />
+        <Ionicons name="arrow-back" size={30} color="#28436d" />
       </TouchableOpacity>
-      <Text style={styles.title}>{fullName}'s Report for Last Week</Text>
+      <Text style={styles.title}>{fullName}'s Weekly Report</Text>
 
       <ScrollView style={styles.scrollContainer}>
         {dailyReports.map((day, index) => (
@@ -240,7 +242,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f2f5f7",
-    padding: 15,
+    padding: 20,
+    paddingTop: 25,
   },
   scrollContainer: {
     marginTop: 20,
@@ -248,12 +251,9 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: 40,
+    top: 57,
     left: 20,
     zIndex: 1,
-    backgroundColor: "#e4e7eb",
-    borderRadius: 10,
-    padding: 5,
   },
   title: {
     fontSize: 24,
