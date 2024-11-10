@@ -335,9 +335,9 @@ export default function HomeScreen({ route, navigation }) {
 
     if (diffInHours >= 1) { // at least an hour ago
       const mins = diffInMins % 60;
-      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} and ${mins} min${mins !== 1 ? 's' : ''}`;
+      return `${diffInHours}h ${mins}m`;
     } else {
-      return `${diffInMins} min${diffInMins !== 1 ? 's' : ''}`;
+      return `${diffInMins}m`;
     }
   }
 
@@ -372,9 +372,9 @@ export default function HomeScreen({ route, navigation }) {
       return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
     } else if (diffInHours >= 1) { // at least an hour ago
       const mins = diffInMins % 60;
-      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} and ${mins} min${mins !== 1 ? 's' : ''} ago`;
+      return `${diffInHours}h ${mins}m ago`;
     } else {
-      return `${diffInMins} min${diffInMins !== 1 ? 's' : ''} ago`;
+      return `${diffInMins}m ago`;
     }
   }
 
@@ -798,7 +798,7 @@ const styles = StyleSheet.create({
   },
   recordPreview: {
     marginTop: 8,
-    fontSize: 14,
+    fontSize: 15,
     color: "#303030",
   },
   buttonContainer: {
