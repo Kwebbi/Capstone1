@@ -480,36 +480,6 @@ const onChangeSleepEndTime = (event, selectedTime) => {
           
           <View style={{ height: 1.5, backgroundColor: 'black' }} />
 
-          {/* Show Weekly Report Button*/}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Weekly Report"
-              onPress={() =>
-                navigation.navigate("WeeklyReport", { fullName, babyID })
-              }
-            />
-          </View>
-
-          {/* Show Milestones Button*/}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Milestones"
-              onPress={() =>
-                navigation.navigate("BabyMilestones", { fullName, babyID })
-              }
-            />
-          </View>
-
-          {/* Show Comments Button*/}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Comments Section"
-              onPress={() =>
-                navigation.navigate("Comments", { fullName, babyID })
-              }
-            />
-          </View>
-
           {/* Color Selection Modal */}
           <Modal
             visible={colorModalVisible}
@@ -693,22 +663,26 @@ const onChangeSleepEndTime = (event, selectedTime) => {
       </ScrollView>
           {/* Bottom Bar */}
           <View style={styles.bottomBar}>
-            <TouchableOpacity style={styles.bottomButton}>
-              <Ionicons name="home" size={30} color="#28436d" />
-              <Text style={styles.bottomButtonText}>Home</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.bottomButton}>
+            <TouchableOpacity
+              style={styles.bottomButton }
+              onPress={() => navigation.navigate("WeeklyReport", { fullName, babyID })}
+             >
               <Ionicons name="calendar" size={30} color="#28436d" />
               <Text style={styles.bottomButtonText}>Report</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.bottomButton}>
+            <TouchableOpacity
+              style={styles.bottomButton }
+              onPress={() => navigation.navigate("BabyMilestones", { fullName, babyID })}
+             >
               <Ionicons name="trophy" size={30} color="#28436d" />
               <Text style={styles.bottomButtonText}>Milestones</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.bottomButton}>
+            <TouchableOpacity
+              style={styles.bottomButton }
+              onPress={() => navigation.navigate("Comments", { fullName, babyID })}
+             >
               <Ionicons name="chatbubbles" size={30} color="#28436d" />
               <Text style={styles.bottomButtonText}>Comments</Text>
             </TouchableOpacity>
