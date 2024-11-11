@@ -72,12 +72,14 @@ const WeeklyReport = ({ route }) => {
   const [feedings, setFeedings] = useState([])
   const [diaperChanges, setDiaperChanges] = useState([])
   const [sleepRecords, setSleepRecords] = useState([])
+  const [comments, setComments] = useState([])
 
   const navigation = useNavigation()
 
   const feedingTimeRef = ref(database, "feedingTimes/")
   const diaperChangeRef = ref(database, "diaperChanges/")
   const sleepTimeRef = ref(database, "sleepTimes/")
+  const commentRef = ref(database, "comments/")
 
   async function scheduleWeeklyNotification() {
     try {
@@ -139,7 +141,19 @@ const WeeklyReport = ({ route }) => {
         setSleepRecords([])
       }
     })
+    onValue(commentRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const commentsArray = Object.values(snapshot.val()).filter(
+          (comment) => comment.babyID === babyID
+        )
+        setComments(commentsArray)
+      } else {
+        setComments([])
+      }
+    })
   }, [babyID])
+
+  console.log(comments)
 
   const prepareDailyReports = useCallback(() => {
     const lastWeekDates = getLastWeekDates()
@@ -154,6 +168,7 @@ const WeeklyReport = ({ route }) => {
           isDateEqual(formatTimestampToDDMMYY(s.sleepStart), day.label) ||
           isDateEqual(formatTimestampToDDMMYY(s.sleepEnd), day.label)
       ),
+      comments: comments.filter((c) => isDateEqual(c.commentDate, day.label)),
     }))
 
     setDailyReports(reports)
@@ -191,40 +206,57 @@ const WeeklyReport = ({ route }) => {
               {day.feeding.length > 0 ? (
                 day.feeding.map((el, idx) => (
                   <Text key={idx}>
-                    {el.foodChoice} {el.feedingAmount} ml at {el.feedingTime},{" "}
-                    {""}
+                    {"\n"}⦿{el.foodChoice} {el.feedingAmount} ml at{" "}
+                    {el.feedingTime}
                   </Text>
                 ))
               ) : (
-                <Text> No feeding data </Text>
+                <Text> No feeding data {"\n"}</Text>
               )}
             </Text>
 
             <Text style={styles.dayDetail}>
-              Sleep Records: {""}
+              Sleep Records:
               {day.sleep.length > 0 ? (
                 day.sleep.map((el, idx) => (
                   <Text key={idx}>
+                    {"\n"}⦿
                     {`Sleep from ${convertTimestamp(
                       el.sleepStart
-                    )} to ${convertTimestamp(el.sleepEnd)}, `}
+                    )} to ${convertTimestamp(el.sleepEnd)}`}
                   </Text>
                 ))
               ) : (
-                <Text> No sleep data </Text>
+                <Text> No sleep data {"\n"}</Text>
               )}
             </Text>
 
             <Text style={styles.dayDetail}>
-              Diaper Changes: {""}
+              Diaper Changes:
               {day.diapers.length > 0 ? (
                 day.diapers.map((el, idx) => (
                   <Text key={idx}>
-                    {el.type} at {el.time}, {""}
+                    {"\n"}⦿{el.type} at {el.time}
                   </Text>
                 ))
               ) : (
-                <Text> No diaper change data </Text>
+                <Text> No diaper change data {"\n"}</Text>
+              )}
+            </Text>
+
+            <Text style={styles.dayDetail}>
+              Comments:
+              {day.comments.length > 0 ? (
+                day.comments.map((el, idx) => (
+                  <Text key={idx}>
+                    {"\n"}⦿
+                    {`${el.user} commented ${el.text} at ${convertTimestamp(
+                      el.dateTime
+                    )}`}
+                  </Text>
+                ))
+              ) : (
+                <Text> No Comment data</Text>
               )}
             </Text>
           </View>
