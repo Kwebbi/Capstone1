@@ -428,7 +428,7 @@ export default function HomeScreen({ route, navigation }) {
         automaticallyAdjustKeyboardInsets={true}
         style={{ backgroundColor: "white" }}
       >
-        <View className="flex space-y-5 bg-white px-6 pt-8">
+        <View className="flex space-y-5 bg-white px-4 pt-8">
           <View style={styles.profileSection}>
             {/* Avatar Section */}
             <View className="flex justify-center">
@@ -461,14 +461,14 @@ export default function HomeScreen({ route, navigation }) {
             </View>
           </View>
 
-          <View style={{ height: 1.5, backgroundColor: 'black' }} />
+          <View style={{ height: 1.5, backgroundColor: 'grey' }} />
 
           {/* Feeding Button */}
-          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setFeedingModalVisible(true)}>
-              <Image source={require('../assets/feedingIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#ff5c0a' }}/>
+          <TouchableOpacity className="flex-row space-x-7" style={[ styles.dataButton, { backgroundColor: '#fd763e' }]} onPress={()=> setFeedingModalVisible(true)}>
+              <Image source={require('../assets/feedingIcon.png')} style={[ styles.dataIcon, { tintColor: '#e64d14' }]}/>
 
               <View className="flex-1">
-              <Text style={[styles.dataText, { color: '#ff5c0a' }]}>Feeding</Text>
+                <Text style={styles.dataText}>Feeding</Text>
                 {feedings.length > 0 && (
                   <Text style={[styles.recordPreview]}>
                     {getTimeAgo(feedings[feedings.length - 1].feedingDate, feedings[feedings.length - 1].feedingTime)} •{" "}
@@ -478,15 +478,13 @@ export default function HomeScreen({ route, navigation }) {
                 )}
               </View>
           </TouchableOpacity>
-
-          <View style={{ height: 1.5, backgroundColor: 'black' }} />
-
+          
           {/* Diaper Change Button */}
-          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setDiaperModalVisible(true)}>
-              <Image source={require('../assets/diaperIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#98FF98' }}/>
+          <TouchableOpacity className="flex-row space-x-7" style={[styles.dataButton, { backgroundColor: '#23de62' } ]} onPress={()=> setDiaperModalVisible(true)}>
+              <Image source={require('../assets/diaperIcon.png')} style={[ styles.dataIcon, { marginTop: 2, tintColor: '#19b64f' }]}/>
 
               <View className="flex-1">
-              <Text style={[styles.dataText, { color: '#98FF98' }]}>Diaper</Text>
+              <Text style={styles.dataText}>Diaper</Text>
               {diaperChanges.length > 0 && (
                 <Text style={styles.recordPreview}>
                   {getTimeAgo(diaperChanges[diaperChanges.length - 1].date, diaperChanges[diaperChanges.length - 1].time)} •{" "}
@@ -495,15 +493,13 @@ export default function HomeScreen({ route, navigation }) {
             )}
               </View>
           </TouchableOpacity>
-
-          <View style={{ height: 1.5, backgroundColor: 'black' }} />
-
+          
           {/* Sleep Button */}
-          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setSleepModalVisible(true)}>
-              <Image source={require('../assets/sleepIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#adadff' }}/>
+          <TouchableOpacity className="flex-row space-x-7" style={[styles.dataButton, { backgroundColor: '#a184ff' } ]} onPress={()=> setSleepModalVisible(true)}>
+              <Image source={require('../assets/sleepIcon.png')} style={[ styles.dataIcon, { tintColor: '#8064de' }]}/>
 
               <View className="flex-1">
-              <Text style={[styles.dataText, { color: '#adadff' }]}>Sleep</Text>
+              <Text style={styles.dataText}>Sleep</Text>
               {sleepRecords.length > 0 && (
                 <Text style={styles.recordPreview}>
                   {getTimeAgo(new Date(sleepRecords[sleepRecords.length - 1].sleepEnd).toLocaleDateString("en-US"), new Date(sleepRecords[sleepRecords.length - 1].sleepEnd).toLocaleTimeString("en-US"))} •{" "}
@@ -512,8 +508,6 @@ export default function HomeScreen({ route, navigation }) {
             )}
               </View>
           </TouchableOpacity>
-          
-          <View style={{ height: 1.5, backgroundColor: 'black' }} />
 
           {/* Color Selection Modal */}
           <Modal
@@ -746,15 +740,26 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: '#28436d',
   },
+  dataButton: {
+    borderRadius: 8,
+    alignItems: 'center',
+    height: 100,
+  },
   dataText: {
     fontSize: 30,
     fontWeight: "bold",
-    color: "black",
+    color: "white",
+  },
+  dataIcon: {
+    width: 70,
+    height: 70,
+    marginLeft: 12,
   },
   profileSection: {
     flexDirection: "row",
     justifyContent: 'space-between',
     width: '100%',
+    marginHorizontal: 10,
   },
   avatarBubble: {
     width: 100,
@@ -776,6 +781,7 @@ const styles = StyleSheet.create({
   },
   todoList: {
     marginLeft: 80,
+    marginRight: 20,
     fontWeight: "bold",
     padding: 10,
     borderWidth: 1,
@@ -799,10 +805,8 @@ const styles = StyleSheet.create({
   recordPreview: {
     marginTop: 8,
     fontSize: 15,
-    color: "#303030",
-  },
-  buttonContainer: {
-    marginVertical: 10,
+    fontWeight: "bold",
+    color: "white",
   },
   modalContainer: {
     flex: 1,
