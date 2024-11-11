@@ -153,8 +153,6 @@ const WeeklyReport = ({ route }) => {
     })
   }, [babyID])
 
-  console.log(comments)
-
   const prepareDailyReports = useCallback(() => {
     const lastWeekDates = getLastWeekDates()
 
