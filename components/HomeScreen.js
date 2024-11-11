@@ -555,6 +555,7 @@ export default function HomeScreen({ route, navigation }) {
                     mode="datetime"
                     display="default"
                     onChange={onChangeDate}
+                    maximumDate={new Date()}
                   />
                 )}
                 <TextInput
@@ -610,6 +611,7 @@ export default function HomeScreen({ route, navigation }) {
                     mode="datetime"
                     display="default"
                     onChange={onChangeDate}
+                    maximumDate={new Date()}
                   />
                 )}
                 <Button title="Save" onPress={handleSaveDiaperChange} />
@@ -644,6 +646,7 @@ export default function HomeScreen({ route, navigation }) {
                     mode="date"
                     display="calendar"
                     onChange={onChangeDate}
+                    maximumDate={new Date()}
                   />
                 )}
 
