@@ -90,6 +90,7 @@ export default function AddProfile({ navigation }) {
                       setDOBSelected(true);
                     }
                   }}
+                  maximumDate={new Date()} // Restrict date picker to the current date
                 />
                 {Platform.OS === 'ios' && ( // manually add confirmation button for iOS
                   <Button

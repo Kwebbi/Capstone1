@@ -12,7 +12,6 @@ export default function Profiles({ navigation }) {
     const [visible, setVisible] = useState(false);
     const [selectedBaby, setSelectedBaby] = useState(null);
 
-
     const handleLogout = () => {
         auth.signOut().then(() => {
             // Sign-out successful.
@@ -93,7 +92,6 @@ export default function Profiles({ navigation }) {
                     setMyBabies([]); // Reset babies state if no data found
                 }
                 addAlert();
-                console.log("alergs were cqlledadsf");
                 setIsLoading(false); // Set loading state to false
             }, {
             });
@@ -146,6 +144,37 @@ export default function Profiles({ navigation }) {
         setVisible(false);
     };
 
+    const calculateAge = (dob) => {
+
+        const dateParts = dob.split('/');   //parse dob
+        
+        if (dateParts.length !== 3) {
+            return "Invalid DOB"; // Return if the date format is incorrect
+        }
+    
+        const month = parseInt(dateParts[0], 10);
+        const day = parseInt(dateParts[1], 10);
+        const year = parseInt(dateParts[2], 10);
+        const birthDate = new Date(year, month - 1, day);
+    
+        // Check if the date is valid
+        if (isNaN(birthDate.getTime())) {
+            return dob;
+        }
+        const currentDate = new Date(); 
+        const diffInTime = currentDate - birthDate;
+        const diffInDays = Math.floor(diffInTime / (1000 * 3600 * 24));
+    
+        // If the baby is less than 1 month old, return the age in days
+        if (diffInDays < 30) {
+            return `${diffInDays} days old`;
+        } else {
+            const diffInMonths = currentDate.getMonth() - birthDate.getMonth() + 
+                (12 * (currentDate.getFullYear() - birthDate.getFullYear()));
+            
+            return `${diffInMonths} months old`;
+        }
+    };
 
     return (
       <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
@@ -166,7 +195,9 @@ export default function Profiles({ navigation }) {
                             style={{ backgroundColor: '#fef9c3', padding: 10, borderRadius: 20 }}
                         >
                             <Text style={{ fontSize: 18, color: '#28436d', fontWeight: 'bold', textAlign: 'center' }}>
-                                You have {myAlerts.length} share requests!
+                                {myAlerts.length === 1
+                                    ? `You have 1 share request!`
+                                    : `You have ${myAlerts.length} share requests!`}
                             </Text>
                         </TouchableOpacity>
                     )}
@@ -182,6 +213,7 @@ export default function Profiles({ navigation }) {
                     data={myBabies}
                     keyExtractor={item => item.babyID}
                     renderItem={({ item }) => {
+                        const ageText = calculateAge(item.DOB); // convert DOB to days or months old
                         return (
 
                             <View className="form space-y-2 mb-8 border rounded-3xl">
@@ -195,7 +227,7 @@ export default function Profiles({ navigation }) {
                                     <Text className=""></Text>
                                     <Text className=""></Text>
                                     <Text className="text-white" style={styles.nameText}>{item.fullName}</Text>
-                                    <Text className="text-white" style={styles.ageText}>{item.DOB}</Text>
+                                    <Text className="text-white" style={styles.ageText}>{ageText}</Text>
                                     </View>
                                     {!item.isCaretaker && (
                                     <TouchableOpacity style={{ position: "absolute", right: 12, top: 10 }} onPress={()=> navigation.navigate('EditBaby', item)}>
