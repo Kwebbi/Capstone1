@@ -16,13 +16,13 @@ export default function EditBaby({ route, navigation }) {
   const [dob, setDOB] = useState(new Date()); // date of birth
   const [dobSelected, setDOBSelected] = useState(false); // has date of birth been selected
   const [showPicker, setShowPicker] = useState(false); // state for showing the date picker
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [selectedCaretaker, setSelectedCaretaker] = useState("");
   const [fullNames, setFullNames] = useState([]);
   const [selectedCaretakerId, setSelectedCaretakerId] = useState(null);
   const [visible, setVisible] = useState(false);
   const [selecteddisplayName, setdisplayName] = useState(fullName);
-
+  const nameToSave = name.trim() === "" ? fullName : name;
 
   useEffect(() => {
     const fetchCaretakersFullNames = async () => {
@@ -51,7 +51,6 @@ export default function EditBaby({ route, navigation }) {
     };
 
     fetchCaretakersFullNames();
-    console.log("here are names and IDS: ")
     console.log(fullNames);    
   }, [caretakers]);
 
@@ -84,7 +83,7 @@ export default function EditBaby({ route, navigation }) {
     Alert.alert("Caretaker removed.");
   };
 
-
+  console.log(DOB);
 
   const showDialog = () => {
       console.log("selected caretakerID: ", selectedCaretakerId);
@@ -92,16 +91,16 @@ export default function EditBaby({ route, navigation }) {
   };
 
 
-
-
-  console.log("caretakers: " + caretakers);
-
-
   
   const updateBaby = () => {
     const babyRef = ref(database, `babies/${babyID}`);
 
-    //get the current caretakers
+    if (name.trim() === "") {
+      setName(fullName);
+      console.log("name field left empty")
+    }
+    const finalDOB = dobSelected ? dob.toLocaleDateString() : DOB;
+
     get(babyRef)
         .then((snapshot) => {
             if (snapshot.exists()) {
@@ -109,8 +108,8 @@ export default function EditBaby({ route, navigation }) {
 
                 // Update the baby record
                 update(babyRef, {
-                  DOB: dob.toLocaleDateString(), // Ensure date is stored in ISO format
-                  fullName: name
+                  DOB: finalDOB, 
+                  fullName: nameToSave
                 })
                 .then(() => {
                     console.log("Name and DOB updated successfully.");
@@ -123,7 +122,7 @@ export default function EditBaby({ route, navigation }) {
         .catch((error) => {
             console.error("Error fetching baby data: ", error);
         });
-        setdisplayName(name);
+        setdisplayName(nameToSave);
         Alert.alert("Baby's profile has been updated.");
 };
 
@@ -173,6 +172,7 @@ export default function EditBaby({ route, navigation }) {
                       setDOBSelected(true);
                     }
                   }}
+                  maximumDate={new Date()} // Restrict date picker to the current date
                 />
                 {Platform.OS === 'ios' && ( // manually add confirmation button for iOS
                   <Button
