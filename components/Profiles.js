@@ -221,7 +221,7 @@ export default function Profiles({ navigation }) {
 
                                     <Image source={require('../assets/logo.png')} style={{ width: 150, height: 150 }}/>
 
-                                    <View style={{ borderRightWidth: 1, borderRightColor: 'black', marginHorizontal: 0 }}></View>
+                                    <View style={{ borderRightWidth: 1, borderRightColor: 'black' }}></View>
 
                                     <View className="form space-y-2">
                                     <Text className=""></Text>

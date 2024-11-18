@@ -180,38 +180,37 @@ export default function HomeScreen({ route, navigation }) {
   const currentDate = selectedDate || sleepStart;
   setSleepStart(currentDate);
   setStartDatePickerVisibility(false);
-};
+  };
 
-const onChangeSleepStartTime = (event, selectedTime) => {
-  const currentTime = selectedTime || sleepStart;
-  setSleepStart((prevDate) => new Date(
-    prevDate.getFullYear(),
-    prevDate.getMonth(),
-    prevDate.getDate(),
-    currentTime.getHours(),
-    currentTime.getMinutes()
-  ));
-  setStartTimePickerVisibility(false);
-};
+  const onChangeSleepStartTime = (event, selectedTime) => {
+    const currentTime = selectedTime || sleepStart;
+    setSleepStart((prevDate) => new Date(
+      prevDate.getFullYear(),
+      prevDate.getMonth(),
+      prevDate.getDate(),
+      currentTime.getHours(),
+      currentTime.getMinutes()
+    ));
+    setStartTimePickerVisibility(false);
+  };
 
-const onChangeSleepEndDate = (event, selectedDate) => {
-  const currentDate = selectedDate || sleepEnd;
-  setSleepEnd(currentDate);
-  setEndDatePickerVisibility(false);
-};
+  const onChangeSleepEndDate = (event, selectedDate) => {
+    const currentDate = selectedDate || sleepEnd;
+    setSleepEnd(currentDate);
+    setEndDatePickerVisibility(false);
+  };
 
-const onChangeSleepEndTime = (event, selectedTime) => {
-  const currentTime = selectedTime || sleepEnd;
-  setSleepEnd((prevDate) => new Date(
-    prevDate.getFullYear(),
-    prevDate.getMonth(),
-    prevDate.getDate(),
-    currentTime.getHours(),
-    currentTime.getMinutes()
-  ));
-  setEndTimePickerVisibility(false);
-};
-
+  const onChangeSleepEndTime = (event, selectedTime) => {
+    const currentTime = selectedTime || sleepEnd;
+    setSleepEnd((prevDate) => new Date(
+      prevDate.getFullYear(),
+      prevDate.getMonth(),
+      prevDate.getDate(),
+      currentTime.getHours(),
+      currentTime.getMinutes()
+    ));
+    setEndTimePickerVisibility(false);
+  };
 
   // Save feeding record
   const handleSaveFeeding = () => {
@@ -328,6 +327,57 @@ const onChangeSleepEndTime = (event, selectedTime) => {
     }
   }
 
+  // Function to calculate the sleep duration
+  function getSleepDuration(time1, time2) {
+    const diffInMs = time2 - time1;
+    const diffInMins = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+    if (diffInHours >= 1) { // at least an hour ago
+      const mins = diffInMins % 60;
+      return `${diffInHours}h ${mins}m`;
+    } else {
+      return `${diffInMins}m`;
+    }
+  }
+
+  // Function to calculate the time difference for last data entries
+  function getTimeAgo(date, time) {
+    // Split date and time
+    const [month, day, year] = date.split("/");
+    const [clock, period] = time.split(" ");
+    let [hoursStr, minutes, seconds] = clock.split(":");
+
+    // Convert to 24-hour format
+    let hours = parseInt(hoursStr);
+    if (period === "PM" && hours !== 12) {
+      hours += 12;
+    }
+    if (period === "AM" && hours === 12) {
+      hours = 0;
+    }
+
+    // Convert to ISO string format (YYYY-MM-DDTHH:mm:ss)
+    const isoString = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hours.toString().padStart(2, "0")}:${minutes}:${seconds}`;
+
+    // Get time difference
+    const lastTime = new Date(isoString).getTime();
+    const currentTime = Date.now();
+    const diffInMs = currentTime - lastTime;
+    const diffInMins = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInDays >= 1) { // at least a day ago
+      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+    } else if (diffInHours >= 1) { // at least an hour ago
+      const mins = diffInMins % 60;
+      return `${diffInHours}h ${mins}m ago`;
+    } else {
+      return `${diffInMins}m ago`;
+    }
+  }
+
   useEffect(() => {
     const fetchAvatarColor = async () => {
       try {
@@ -359,12 +409,10 @@ const onChangeSleepEndTime = (event, selectedTime) => {
   };
 
   return (
-
-    
     <View style={{ flex: 1, backgroundColor: "#cfe2f3" }}>
 
       {/* Top Header */}
-        <View style={{ ...styles.headerContainer, backgroundColor: "#cfe2f3" }}>
+        <View style={{ ...styles.topHeader, backgroundColor: "#cfe2f3" }}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.navigate("Profiles")}
@@ -380,7 +428,7 @@ const onChangeSleepEndTime = (event, selectedTime) => {
         automaticallyAdjustKeyboardInsets={true}
         style={{ backgroundColor: "white" }}
       >
-        <View className="flex space-y-5 bg-white px-8 pt-8">
+        <View className="flex space-y-5 bg-white px-4 pt-8">
           <View style={styles.profileSection}>
             {/* Avatar Section */}
             <View className="flex justify-center">
@@ -413,104 +461,53 @@ const onChangeSleepEndTime = (event, selectedTime) => {
             </View>
           </View>
 
-          <View style={{ height: 1.5, backgroundColor: 'black' }} />
+          <View style={{ height: 1.5, backgroundColor: 'grey' }} />
 
           {/* Feeding Button */}
-          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setFeedingModalVisible(true)}>
-              <Image source={require('../assets/feedingIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#ff5c0a' }}/>
+          <TouchableOpacity className="flex-row space-x-7" style={[ styles.dataButton, { backgroundColor: '#fd763e' }]} onPress={()=> setFeedingModalVisible(true)}>
+              <Image source={require('../assets/feedingIcon.png')} style={[ styles.dataIcon, { tintColor: '#e64d14' }]}/>
 
               <View className="flex-1">
-              <Text style={[styles.dataText, { color: '#ff5c0a' }]}>Feeding</Text>
+                <Text style={styles.dataText}>Feeding</Text>
                 {feedings.length > 0 && (
-                  <Text style={styles.recordPreview}>
-                    Last Feeding: {feedings[feedings.length - 1].foodChoice} -{" "}
-                    {feedings[feedings.length - 1].feedingDate} at{" "}
-                    {feedings[feedings.length - 1].feedingTime},{" "}
-                    {feedings[feedings.length - 1].feedingAmount} mL
+                  <Text style={[styles.recordPreview]}>
+                    {getTimeAgo(feedings[feedings.length - 1].feedingDate, feedings[feedings.length - 1].feedingTime)} •{" "}
+                    {feedings[feedings.length - 1].foodChoice} (
+                    {feedings[feedings.length - 1].feedingAmount} mL)
                   </Text>
                 )}
               </View>
           </TouchableOpacity>
-
-          <View style={{ height: 1.5, backgroundColor: 'black' }} />
-
+          
           {/* Diaper Change Button */}
-          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setDiaperModalVisible(true)}>
-              <Image source={require('../assets/diaperIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#98FF98' }}/>
+          <TouchableOpacity className="flex-row space-x-7" style={[styles.dataButton, { backgroundColor: '#23de62' } ]} onPress={()=> setDiaperModalVisible(true)}>
+              <Image source={require('../assets/diaperIcon.png')} style={[ styles.dataIcon, { marginTop: 2, tintColor: '#19b64f' }]}/>
 
               <View className="flex-1">
-              <Text style={[styles.dataText, { color: '#98FF98' }]}>Diaper</Text>
+              <Text style={styles.dataText}>Diaper</Text>
               {diaperChanges.length > 0 && (
                 <Text style={styles.recordPreview}>
-                  Last Diaper Change:{" "}
-                  {diaperChanges[diaperChanges.length - 1].type} on{" "}
-                  {diaperChanges[diaperChanges.length - 1].date} at{" "}
-                  {diaperChanges[diaperChanges.length - 1].time}
-                </Text>
-            )}
-              </View>
-          </TouchableOpacity>
-
-          <View style={{ height: 1.5, backgroundColor: 'black' }} />
-
-          {/* Sleep Button */}
-          <TouchableOpacity className="flex-row space-x-7" onPress={()=> setSleepModalVisible(true)}>
-              <Image source={require('../assets/sleepIcon.png')} style={{ width: 70, height: 70, marginTop: 8, tintColor: '#adadff' }}/>
-
-              <View className="flex-1">
-              <Text style={[styles.dataText, { color: '#adadff' }]}>Sleep</Text>
-              {sleepRecords.length > 0 && (
-                <Text style={styles.recordPreview}>
-                  Last Sleep Record:{" "}
-                  {new Date(
-                    sleepRecords[sleepRecords.length - 1].sleepStart
-                  ).toLocaleDateString("en-US")}{" "}
-                  {new Date(
-                    sleepRecords[sleepRecords.length - 1].sleepStart
-                  ).toLocaleTimeString("en-US")}{" "}
-                  to{" "}
-                  {new Date(
-                    sleepRecords[sleepRecords.length - 1].sleepEnd
-                  ).toLocaleDateString("en-US")}{" "}
-                  {new Date(
-                    sleepRecords[sleepRecords.length - 1].sleepEnd
-                  ).toLocaleTimeString("en-US")}
+                  {getTimeAgo(diaperChanges[diaperChanges.length - 1].date, diaperChanges[diaperChanges.length - 1].time)} •{" "}
+                  {diaperChanges[diaperChanges.length - 1].type}
                 </Text>
             )}
               </View>
           </TouchableOpacity>
           
-          <View style={{ height: 1.5, backgroundColor: 'black' }} />
+          {/* Sleep Button */}
+          <TouchableOpacity className="flex-row space-x-7" style={[styles.dataButton, { backgroundColor: '#a184ff' } ]} onPress={()=> setSleepModalVisible(true)}>
+              <Image source={require('../assets/sleepIcon.png')} style={[ styles.dataIcon, { tintColor: '#8064de' }]}/>
 
-          {/* Show Weekly Report Button*/}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Weekly Report"
-              onPress={() =>
-                navigation.navigate("WeeklyReport", { fullName, babyID })
-              }
-            />
-          </View>
-
-          {/* Show Milestones Button*/}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Milestones"
-              onPress={() =>
-                navigation.navigate("BabyMilestones", { fullName, babyID })
-              }
-            />
-          </View>
-
-          {/* Show Comments Button*/}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Comments Section"
-              onPress={() =>
-                navigation.navigate("Comments", { fullName, babyID })
-              }
-            />
-          </View>
+              <View className="flex-1">
+              <Text style={styles.dataText}>Sleep</Text>
+              {sleepRecords.length > 0 && (
+                <Text style={styles.recordPreview}>
+                  {getTimeAgo(new Date(sleepRecords[sleepRecords.length - 1].sleepEnd).toLocaleDateString("en-US"), new Date(sleepRecords[sleepRecords.length - 1].sleepEnd).toLocaleTimeString("en-US"))} •{" "}
+                  {getSleepDuration(sleepRecords[sleepRecords.length - 1].sleepStart, sleepRecords[sleepRecords.length - 1].sleepEnd)}
+                </Text>
+            )}
+              </View>
+          </TouchableOpacity>
 
           {/* Color Selection Modal */}
           <Modal
@@ -519,19 +516,21 @@ const onChangeSleepEndTime = (event, selectedTime) => {
             transparent={true}
             onRequestClose={() => setColorModalVisible(false)}
           >
-            <View style={styles.modalView}>
-              <Text>Select Avatar Color:</Text>
-              {colorOptions.map((color, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[styles.colorOption, { backgroundColor: color }]}
-                  onPress={() => {
-                    updateAvatarColor(color);
-                    setColorModalVisible(false);
-                  }}
-                />
-              ))}
-              <Button title="Close" onPress={() => setColorModalVisible(false)} />
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <Text>Select Avatar Color:</Text>
+                {colorOptions.map((color, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[styles.colorOption, { backgroundColor: color }]}
+                    onPress={() => {
+                      updateAvatarColor(color);
+                      setColorModalVisible(false);
+                    }}
+                  />
+                ))}
+                <Button title="Close" onPress={() => setColorModalVisible(false)} />
+              </View>
             </View>
           </Modal>
 
@@ -542,39 +541,42 @@ const onChangeSleepEndTime = (event, selectedTime) => {
             transparent={true}
             onRequestClose={() => setFeedingModalVisible(false)}
           >
-            <View style={styles.modalView}>
-              <Text>Enter Feeding Details:</Text>
-              <Button
-                title="Pick Date & Time"
-                onPress={() => setDatePickerVisibility(true)}
-              />
-              {isDatePickerVisible && (
-                <DateTimePicker
-                  testID="dateTimePicker"
-                  value={selectedDate}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeDate}
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <Text>Enter Feeding Details:</Text>
+                <Button
+                  title="Pick Date & Time"
+                  onPress={() => setDatePickerVisibility(true)}
                 />
-              )}
-              <TextInput
-                style={styles.input}
-                placeholder="Food Choice Name"
-                value={foodChoice}
-                onChangeText={setFoodChoice}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Amount in mL"
-                value={feedingAmount}
-                onChangeText={setFeedingAmount}
-                keyboardType="numeric"
-              />
-              <Button title="Save" onPress={handleSaveFeeding} />
-              <Button
-                title="Cancel"
-                onPress={() => setFeedingModalVisible(false)}
-              />
+                {isDatePickerVisible && (
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={selectedDate}
+                    mode="datetime"
+                    display="default"
+                    onChange={onChangeDate}
+                    maximumDate={new Date()}
+                  />
+                )}
+                <TextInput
+                  style={styles.input}
+                  placeholder="Food Choice Name"
+                  value={foodChoice}
+                  onChangeText={setFoodChoice}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Amount in mL"
+                  value={feedingAmount}
+                  onChangeText={setFeedingAmount}
+                  keyboardType="numeric"
+                />
+                <Button title="Save" onPress={handleSaveFeeding} />
+                <Button
+                  title="Cancel"
+                  onPress={() => setFeedingModalVisible(false)}
+                />
+              </View>
             </View>
           </Modal>
 
@@ -585,36 +587,39 @@ const onChangeSleepEndTime = (event, selectedTime) => {
             transparent={true}
             onRequestClose={() => setDiaperModalVisible(false)}
           >
-            <View style={styles.modalView}>
-              <Text>Diaper Change Type:</Text>
-              <Picker
-                selectedValue={diaperType}
-                onValueChange={(itemValue) => setDiaperType(itemValue)}
-                style={{ width: 200, height: 200 }}
-              >
-                <Picker.Item label="Wet" value="Wet" />
-                <Picker.Item label="Dirty" value="Dirty" />
-                <Picker.Item label="Mixed" value="Mixed" />
-                <Picker.Item label="Dry" value="Dry" />
-              </Picker>
-              <Button
-                title="Pick Date & Time"
-                onPress={() => setDatePickerVisibility(true)}
-              />
-              {isDatePickerVisible && (
-                <DateTimePicker
-                  testID="dateTimePicker"
-                  value={selectedDate}
-                  mode="datetime"
-                  display="default"
-                  onChange={onChangeDate}
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <Text>Diaper Change Type:</Text>
+                <Picker
+                  selectedValue={diaperType}
+                  onValueChange={(itemValue) => setDiaperType(itemValue)}
+                  style={{ width: 200, height: 200 }}
+                >
+                  <Picker.Item label="Wet" value="Wet" />
+                  <Picker.Item label="Dirty" value="Dirty" />
+                  <Picker.Item label="Mixed" value="Mixed" />
+                  <Picker.Item label="Dry" value="Dry" />
+                </Picker>
+                <Button
+                  title="Pick Date & Time"
+                  onPress={() => setDatePickerVisibility(true)}
                 />
-              )}
-              <Button title="Save" onPress={handleSaveDiaperChange} />
-              <Button
-                title="Cancel"
-                onPress={() => setDiaperModalVisible(false)}
-              />
+                {isDatePickerVisible && (
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={selectedDate}
+                    mode="datetime"
+                    display="default"
+                    onChange={onChangeDate}
+                    maximumDate={new Date()}
+                  />
+                )}
+                <Button title="Save" onPress={handleSaveDiaperChange} />
+                <Button
+                  title="Cancel"
+                  onPress={() => setDiaperModalVisible(false)}
+                />
+              </View>
             </View>
           </Modal>
 
@@ -625,76 +630,105 @@ const onChangeSleepEndTime = (event, selectedTime) => {
             transparent={true}
             onRequestClose={() => setSleepModalVisible(false)}
           >
-            <View style={styles.modalView}>
-              <Text>Enter Sleep Details:</Text>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalView}>
+                <Text>Enter Sleep Details:</Text>
 
-              {/* Date Picker */}
-              <Button
-                title="Pick Date"
-                onPress={() => setDatePickerVisibility(true)}
-              />
-              {isDatePickerVisible && (
-                <DateTimePicker
-                  testID="datePicker"
-                  value={selectedDate}
-                  mode="date"
-                  display="calendar"
-                  onChange={onChangeDate}
+                {/* Date Picker */}
+                <Button
+                  title="Pick Date"
+                  onPress={() => setDatePickerVisibility(true)}
                 />
-              )}
+                {isDatePickerVisible && (
+                  <DateTimePicker
+                    testID="datePicker"
+                    value={selectedDate}
+                    mode="date"
+                    display="calendar"
+                    onChange={onChangeDate}
+                    maximumDate={new Date()}
+                  />
+                )}
 
-              {/* Start Time Picker */}
-              <Text>Pick Start Time:</Text>
-              <Button
-                title="Pick Start Time"
-                onPress={() => setStartTimePickerVisibility(true)}
-              />
-              {isStartTimePickerVisible && (
-                <DateTimePicker
-                  testID="startTimePicker"
-                  value={sleepStart}
-                  mode="time"
-                  display="clock"
-                  onChange={onChangeSleepStartTime}
+                {/* Start Time Picker */}
+                <Text>Pick Start Time:</Text>
+                <Button
+                  title="Pick Start Time"
+                  onPress={() => setStartTimePickerVisibility(true)}
                 />
-              )}
+                {isStartTimePickerVisible && (
+                  <DateTimePicker
+                    testID="startTimePicker"
+                    value={sleepStart}
+                    mode="time"
+                    display="clock"
+                    onChange={onChangeSleepStartTime}
+                  />
+                )}
 
-              {/* End Time Picker */}
-              <Text>Pick End Time:</Text>
-              <Button
-                title="Pick End Time"
-                onPress={() => setEndTimePickerVisibility(true)}
-              />
-              {isEndTimePickerVisible && (
-                <DateTimePicker
-                  testID="endTimePicker"
-                  value={sleepEnd}
-                  mode="time"
-                  display="clock"
-                  onChange={onChangeSleepEndTime}
+                {/* End Time Picker */}
+                <Text>Pick End Time:</Text>
+                <Button
+                  title="Pick End Time"
+                  onPress={() => setEndTimePickerVisibility(true)}
                 />
-              )}
+                {isEndTimePickerVisible && (
+                  <DateTimePicker
+                    testID="endTimePicker"
+                    value={sleepEnd}
+                    mode="time"
+                    display="clock"
+                    onChange={onChangeSleepEndTime}
+                  />
+                )}
 
-              {/* Save and Cancel Buttons */}
-              <Button title="Save" onPress={handleSaveSleep} />
-              <Button
-                title="Cancel"
-                onPress={() => setSleepModalVisible(false)}
-              />
+                {/* Save and Cancel Buttons */}
+                <Button title="Save" onPress={handleSaveSleep} />
+                <Button
+                  title="Cancel"
+                  onPress={() => setSleepModalVisible(false)}
+                />
+              </View>
             </View>
           </Modal>
         </View>
       </ScrollView>
+          {/* Bottom Bar */}
+          <View style={styles.bottomBar}>
+            <TouchableOpacity
+              style={styles.bottomButton }
+              onPress={() => navigation.navigate("WeeklyReport", { fullName, babyID })}
+             >
+              <Ionicons name="calendar" size={30} color="#28436d" />
+              <Text style={styles.bottomButtonText}>Report</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.bottomButton }
+              onPress={() => navigation.navigate("BabyMilestones", { fullName, babyID })}
+             >
+              <Ionicons name="trophy" size={30} color="#28436d" />
+              <Text style={styles.bottomButtonText}>Milestones</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.bottomButton }
+              onPress={() => navigation.navigate("Comments", { fullName, babyID })}
+             >
+              <Ionicons name="chatbubbles" size={30} color="#28436d" />
+              <Text style={styles.bottomButtonText}>Comments</Text>
+            </TouchableOpacity>
+          </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  headerContainer: {
+  topHeader: {
     alignItems: 'center',
     height: 80,
     padding: 20,
-    marginTop: 40
+    marginTop: 40,
   },
   backButton: {
     position: 'absolute',
@@ -709,15 +743,26 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: '#28436d',
   },
+  dataButton: {
+    borderRadius: 8,
+    alignItems: 'center',
+    height: 100,
+  },
   dataText: {
     fontSize: 30,
     fontWeight: "bold",
-    color: "black",
+    color: "white",
+  },
+  dataIcon: {
+    width: 70,
+    height: 70,
+    marginLeft: 12,
   },
   profileSection: {
     flexDirection: "row",
     justifyContent: 'space-between',
     width: '100%',
+    marginHorizontal: 10,
   },
   avatarBubble: {
     width: 100,
@@ -739,6 +784,7 @@ const styles = StyleSheet.create({
   },
   todoList: {
     marginLeft: 80,
+    marginRight: 20,
     fontWeight: "bold",
     padding: 10,
     borderWidth: 1,
@@ -761,17 +807,21 @@ const styles = StyleSheet.create({
   },
   recordPreview: {
     marginTop: 8,
-    fontSize: 14,
-    color: "#303030",
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "white",
   },
-  buttonContainer: {
-    marginVertical: 10,
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 50,
+    padding: 40,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -796,12 +846,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
   },
-
   todoItem: {
     fontSize: 16,
     flex: 1,
   },
-
   deleteIcon: {
     marginLeft: 10,
   },
@@ -817,5 +865,20 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginVertical: 5,
     marginHorizontal: 10,
+  },
+  bottomBar: {
+    flexDirection: 'row',
+    backgroundColor: '#cfe2f3',
+    paddingHorizontal: 16
+  },
+  bottomButton: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'column',
+    paddingVertical: 20,
+  },
+  bottomButtonText: {
+    color: '#28436d',
+    marginTop: 4,
   },
 })

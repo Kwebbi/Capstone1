@@ -97,7 +97,7 @@ const Comments = ({ route }) => {
     <View style={{ height: 13 }} />
       {/* Back button to navigate to previous screen */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color="black" />
+        <Ionicons name="arrow-back" size={30} color="#28436d" />
       </TouchableOpacity>
       <Text style={styles.title}>{fullName}'s Comments</Text>
 
@@ -141,6 +141,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    paddingTop: 25,
   },
   backButton: {
     position: 'absolute',
@@ -153,6 +154,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginVertical: 20,
     textAlign: 'center',
+    color: "#28436d",
   },
   comment: {
     margin: 3,

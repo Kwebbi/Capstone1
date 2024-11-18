@@ -72,12 +72,14 @@ const WeeklyReport = ({ route }) => {
   const [feedings, setFeedings] = useState([])
   const [diaperChanges, setDiaperChanges] = useState([])
   const [sleepRecords, setSleepRecords] = useState([])
+  const [comments, setComments] = useState([])
 
   const navigation = useNavigation()
 
   const feedingTimeRef = ref(database, "feedingTimes/")
   const diaperChangeRef = ref(database, "diaperChanges/")
   const sleepTimeRef = ref(database, "sleepTimes/")
+  const commentRef = ref(database, "comments/")
 
   async function scheduleWeeklyNotification() {
     try {
@@ -139,6 +141,16 @@ const WeeklyReport = ({ route }) => {
         setSleepRecords([])
       }
     })
+    onValue(commentRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const commentsArray = Object.values(snapshot.val()).filter(
+          (comment) => comment.babyID === babyID
+        )
+        setComments(commentsArray)
+      } else {
+        setComments([])
+      }
+    })
   }, [babyID])
 
   const prepareDailyReports = useCallback(() => {
@@ -154,6 +166,7 @@ const WeeklyReport = ({ route }) => {
           isDateEqual(formatTimestampToDDMMYY(s.sleepStart), day.label) ||
           isDateEqual(formatTimestampToDDMMYY(s.sleepEnd), day.label)
       ),
+      comments: comments.filter((c) => isDateEqual(c.commentDate, day.label)),
     }))
 
     setDailyReports(reports)
@@ -169,13 +182,15 @@ const WeeklyReport = ({ route }) => {
 
   return (
     <View style={styles.container}>
+      <View style={{ height: 13 }} />
+
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="arrow-back" size={24} color="black" />
+        <Ionicons name="arrow-back" size={30} color="#28436d" />
       </TouchableOpacity>
-      <Text style={styles.title}>{fullName}'s Report for Last Week</Text>
+      <Text style={styles.title}>{fullName}'s Weekly Report</Text>
 
       <ScrollView style={styles.scrollContainer}>
         {dailyReports.map((day, index) => (
@@ -189,40 +204,57 @@ const WeeklyReport = ({ route }) => {
               {day.feeding.length > 0 ? (
                 day.feeding.map((el, idx) => (
                   <Text key={idx}>
-                    {el.foodChoice} {el.feedingAmount} ml at {el.feedingTime},{" "}
-                    {""}
+                    {"\n"}⦿{el.foodChoice} {el.feedingAmount} ml at{" "}
+                    {el.feedingTime}
                   </Text>
                 ))
               ) : (
-                <Text> No feeding data </Text>
+                <Text> No feeding data {"\n"}</Text>
               )}
             </Text>
 
             <Text style={styles.dayDetail}>
-              Sleep Records: {""}
+              Sleep Records:
               {day.sleep.length > 0 ? (
                 day.sleep.map((el, idx) => (
                   <Text key={idx}>
+                    {"\n"}⦿
                     {`Sleep from ${convertTimestamp(
                       el.sleepStart
-                    )} to ${convertTimestamp(el.sleepEnd)}, `}
+                    )} to ${convertTimestamp(el.sleepEnd)}`}
                   </Text>
                 ))
               ) : (
-                <Text> No sleep data </Text>
+                <Text> No sleep data {"\n"}</Text>
               )}
             </Text>
 
             <Text style={styles.dayDetail}>
-              Diaper Changes: {""}
+              Diaper Changes:
               {day.diapers.length > 0 ? (
                 day.diapers.map((el, idx) => (
                   <Text key={idx}>
-                    {el.type} at {el.time}, {""}
+                    {"\n"}⦿{el.type} at {el.time}
                   </Text>
                 ))
               ) : (
-                <Text> No diaper change data </Text>
+                <Text> No diaper change data {"\n"}</Text>
+              )}
+            </Text>
+
+            <Text style={styles.dayDetail}>
+              Comments:
+              {day.comments.length > 0 ? (
+                day.comments.map((el, idx) => (
+                  <Text key={idx}>
+                    {"\n"}⦿
+                    {`${el.user} commented ${el.text} at ${convertTimestamp(
+                      el.dateTime
+                    )}`}
+                  </Text>
+                ))
+              ) : (
+                <Text> No Comment data</Text>
               )}
             </Text>
           </View>
@@ -240,7 +272,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f2f5f7",
-    padding: 15,
+    padding: 20,
+    paddingTop: 25,
   },
   scrollContainer: {
     marginTop: 20,
@@ -248,12 +281,9 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: 40,
+    top: 57,
     left: 20,
     zIndex: 1,
-    backgroundColor: "#e4e7eb",
-    borderRadius: 10,
-    padding: 5,
   },
   title: {
     fontSize: 24,
