@@ -20,12 +20,17 @@ export default function HelpNSupport({ navigation }) {
           answer: "Yes, you can add and accept as many baby profiles as you want!"
         },
         {
+          question: "What happens when I delete a baby profile?",
+          answer: "Deleting a baby profile you created cannot be undone. This removes all logs and milestones associated with the baby profile and also deletes the profile from any shared users. If the user did not create the profile (the profile was shared with them) the delete button only removes it from your profile list. The original user still has the profile."
+        },
+        {
           question: "Who can I share my baby profile with?",
           answer: " Users who create a baby profile can share the profile with authorized users on Baby Tracker. If the email you type into the Share Baby screen does not have an account on Baby Tracker, they will not be able to receive the request."
         },
+        
         {
-          question: "Can I reset my password?",
-          answer: "Yes, if a user forgets their password, they can reset it on the login screen."
+          question: "Can I leave messages for people with whom I’ve shared profiles?",
+          answer: "Yes, you can leave messages on the specific baby profile in the comments section. Anyone who has access to that baby profile will be able to see the comment and who posted it."
         },
         {
           question: "Will my milestones be ordered based on when I entered them?",
@@ -38,6 +43,10 @@ export default function HelpNSupport({ navigation }) {
           {
           question: "What happens when I delete a baby profile?",
           answer: "Deleting a baby profile you created cannot be undone. This removes all logs and milestones associated with the baby profile and also deletes the profile from any shared users. If the user did not create the profile (the profile was shared with them) the delete button only removes it from your profile list. The original user still has the profile."
+        },
+        {
+          question: "Can I reset my password?",
+          answer: "Yes, if a user forgets their password, they can reset it on the login screen."
         },
         // Add more questions as needed
       ];
