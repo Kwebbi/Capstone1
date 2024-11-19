@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react"
-import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, } from "react-native"
+import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, Platform } from "react-native"
 import { SafeAreaView, withSafeAreaInsets, } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import DateTimePicker from "@react-native-community/datetimepicker"
@@ -17,13 +17,15 @@ export default function HomeScreen({ route, navigation }) {
   const [diaperChanges, setDiaperChanges] = useState([])
   const [sleepRecords, setSleepRecords] = useState([])
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [selectedTime, setSelectedTime] = useState(new Date())
   const [feedingAmount, setFeedingAmount] = useState("")
   const [foodChoice, setFoodChoice] = useState("")
   const [diaperType, setDiaperType] = useState("Wet")
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
   const [feedingModalVisible, setFeedingModalVisible] = useState(false)
   const [diaperModalVisible, setDiaperModalVisible] = useState(false)
   const [sleepModalVisible, setSleepModalVisible] = useState(false)
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
+  const [isTimePickerVisible, setTimePickerVisibility] = useState(false)
   const [isStartPickerVisible, setStartPickerVisibility] = useState(false)
   const [isEndPickerVisible, setEndPickerVisibility] = useState(false)
   const [sleepStart, setSleepStart] = useState(new Date())
@@ -176,10 +178,17 @@ export default function HomeScreen({ route, navigation }) {
     setDatePickerVisibility(false)
   }
 
+  // Handle time change
+  const onChangeTime = (event, selectedTime) => {
+    const currentTime = selectedTime || time
+    setSelectedTime(currentTime)
+    setTimePickerVisibility(false)
+  }
+
   const onChangeSleepStartDate = (event, selectedDate) => {
-  const currentDate = selectedDate || sleepStart;
-  setSleepStart(currentDate);
-  setStartDatePickerVisibility(false);
+    const currentDate = selectedDate || sleepStart;
+    setSleepStart(currentDate);
+    setStartDatePickerVisibility(false);
   };
 
   const onChangeSleepStartTime = (event, selectedTime) => {
@@ -217,12 +226,11 @@ export default function HomeScreen({ route, navigation }) {
     const newFeeding = {
       feedingAmount: Number(feedingAmount),
       feedingDate: selectedDate.toLocaleDateString(),
-      feedingTime: selectedDate.toLocaleTimeString(),
+      feedingTime: Platform.OS === 'ios' ? selectedDate.toLocaleTimeString() : selectedTime.toLocaleTimeString(), // Use selectedTime for Android
       dateTime: selectedDate.getTime(),
       babyID: babyID,
       foodChoice: foodChoice,
     }
-
     setFeedings([...feedings, newFeeding])
     setFeedingModalVisible(false)
     createFeedingTime()
@@ -543,14 +551,34 @@ export default function HomeScreen({ route, navigation }) {
           >
             <View style={styles.modalContainer}>
               <View style={styles.modalView}>
-                <Text>Enter Feeding Details:</Text>
-                <Button
-                  title="Pick Date & Time"
-                  onPress={() => setDatePickerVisibility(true)}
-                />
-                {isDatePickerVisible && (
+                <Text style={styles.modalTitle}>Enter Feeding Details</Text>
+                {Platform.OS === 'ios' && ( // ios view
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    <Text style={styles.modalSubtitle}>Date/Time: </Text>
+                    <TouchableOpacity onPress={() => setDatePickerVisibility(true)}>
+                      <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                {Platform.OS === 'android' && ( // android view
+                  <View style={{ flexDirection: 'column' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                      <Text style={styles.modalSubtitle}>Date: </Text>
+                      <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end' }} onPress={() => setDatePickerVisibility(true)}>
+                        <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                      <Text style={styles.modalSubtitle}>Time: </Text>
+                      <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end' }} onPress={() => setTimePickerVisibility(true)}>
+                        <Text style={styles.dateText}>{selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
+                {Platform.OS === 'ios' && isDatePickerVisible && ( // ios datetime picker
                   <DateTimePicker
-                    testID="dateTimePicker"
                     value={selectedDate}
                     mode="datetime"
                     display="default"
@@ -558,6 +586,26 @@ export default function HomeScreen({ route, navigation }) {
                     maximumDate={new Date()}
                   />
                 )}
+
+                {Platform.OS === 'android' && isDatePickerVisible && ( // android datetime picker
+                  <DateTimePicker
+                    value={selectedDate}
+                    mode="date"
+                    display="calendar"
+                    onChange={onChangeDate}
+                    maximumDate={new Date()}
+                  />
+                )}
+                {Platform.OS === 'android' && isTimePickerVisible && ( // android datetime picker
+                  <DateTimePicker
+                    value={selectedTime}
+                    mode="time"
+                    onChange={onChangeTime}
+                  />
+                )}
+
+                <View style={{ height: 15 }} />
+                
                 <TextInput
                   style={styles.input}
                   placeholder="Food Choice Name"
@@ -818,11 +866,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
-    margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
     padding: 40,
-    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -831,6 +877,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  modalSubtitle: {
+    fontSize: 15,
+    fontWeight: "bold",
+    marginRight: 10,
+  },
+  dateText: {
+    fontSize: 15,
+    color: '#007BFF',
   },
   input: {
     width: 200,
