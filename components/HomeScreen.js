@@ -646,10 +646,7 @@ export default function HomeScreen({ route, navigation }) {
                   keyboardType="numeric"
                 />
                 <Button title="Save" onPress={handleSaveFeeding} />
-                <Button
-                  title="Cancel"
-                  onPress={() => setFeedingModalVisible(false)}
-                />
+                <Button title="Cancel" onPress={() => setFeedingModalVisible(false)} color="red" />
               </View>
             </View>
           </Modal>
@@ -753,10 +750,7 @@ export default function HomeScreen({ route, navigation }) {
                 <View style={{ height: 15 }} />
                 
                 <Button title="Save" onPress={handleSaveDiaperChange} />
-                <Button
-                  title="Cancel"
-                  onPress={() => setDiaperModalVisible(false)}
-                />
+                <Button title="Cancel" onPress={() => setDiaperModalVisible(false)} color="red" />
               </View>
             </View>
           </Modal>
@@ -822,10 +816,7 @@ export default function HomeScreen({ route, navigation }) {
 
                 {/* Save and Cancel Buttons */}
                 <Button title="Save" onPress={handleSaveSleep} />
-                <Button
-                  title="Cancel"
-                  onPress={() => setSleepModalVisible(false)}
-                />
+                <Button title="Cancel" onPress={() => setSleepModalVisible(false)} color="red" />
               </View>
             </View>
           </Modal>
