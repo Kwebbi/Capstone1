@@ -187,7 +187,7 @@ const BabyMilestones = ({ route }) => {
                             </View>
                         )}
                         <Button title="Add Milestone" onPress={handleAddMilestone} />
-                        <View style={{ height: 15 }} />
+                        <View style={{ height: Platform.OS === 'android' ? 10 : 0 }} />
                         <Button title="Cancel" onPress={() => setModalVisible(false)} color="red" />
                     </View>
                 </View>

@@ -557,7 +557,7 @@ export default function HomeScreen({ route, navigation }) {
           >
             <View style={styles.modalContainer}>
               <View style={styles.modalView}>
-              <Text style={[styles.modalTitle, { marginBottom: 30 }]}>Add Feeding</Text>
+                <Text style={[styles.modalTitle, { marginBottom: 30 }]}>Add Feeding</Text>
                 {Platform.OS === 'ios' && ( // iOS datetime view
                   <View style={{ flexDirection: 'column', alignItems: 'center' }}>
                     <Text style={styles.modalSubtitle}>Date/Time</Text>
@@ -627,8 +627,12 @@ export default function HomeScreen({ route, navigation }) {
                   onChangeText={setFeedingAmount}
                   keyboardType="numeric"
                 />
-                <Button title="Save" onPress={handleSaveFeeding} />
-                <Button title="Cancel" onPress={() => setFeedingModalVisible(false)} color="red" />
+                {/* Save and Cancel Buttons */}
+                <View style={{ alignItems: 'center' }}>
+                  <Button title="Save" onPress={handleSaveFeeding} />
+                  <View style={{ height: Platform.OS === 'android' ? 10 : 0 }} />
+                  <Button title="Cancel" onPress={() => setFeedingModalVisible(false)} color="red" />
+                </View>
               </View>
             </View>
           </Modal>
@@ -713,8 +717,12 @@ export default function HomeScreen({ route, navigation }) {
 
                 <View style={{ height: 15 }} />
                 
-                <Button title="Save" onPress={handleSaveDiaperChange} />
-                <Button title="Cancel" onPress={() => setDiaperModalVisible(false)} color="red" />
+                {/* Save and Cancel Buttons */}
+                <View style={{ alignItems: 'center' }}>
+                  <Button title="Save" onPress={handleSaveFeeding} />
+                  <View style={{ height: Platform.OS === 'android' ? 10 : 0 }} />
+                  <Button title="Cancel" onPress={() => setDiaperModalVisible(false)} color="red" />
+                </View>
               </View>
             </View>
           </Modal>
@@ -779,8 +787,11 @@ export default function HomeScreen({ route, navigation }) {
                 )}
 
                 {/* Save and Cancel Buttons */}
-                <Button title="Save" onPress={handleSaveSleep} />
-                <Button title="Cancel" onPress={() => setSleepModalVisible(false)} color="red" />
+                <View style={{ alignItems: 'center' }}>
+                  <Button title="Save" onPress={handleSaveFeeding} />
+                  <View style={{ height: Platform.OS === 'android' ? 10 : 0 }} />
+                  <Button title="Cancel" onPress={() => setSleepModalVisible(false)} color="red" />
+                </View>
               </View>
             </View>
           </Modal>
