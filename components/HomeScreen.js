@@ -555,8 +555,14 @@ export default function HomeScreen({ route, navigation }) {
                 {Platform.OS === 'ios' && ( // ios view
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
                     <Text style={styles.modalSubtitle}>Date/Time: </Text>
-                    <TouchableOpacity onPress={() => setDatePickerVisibility(true)}>
-                      <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
+                    <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end' }} onPress={() => setDatePickerVisibility(true)}>
+                      {isDatePickerVisible ? (
+                        <View/>
+                      ) : (
+                        <View>
+                          <Text style={styles.dateText}>{selectedDate.toLocaleDateString() + " | " + selectedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                        </View>
+                      )}
                     </TouchableOpacity>
                   </View>
                 )}
@@ -578,16 +584,29 @@ export default function HomeScreen({ route, navigation }) {
                 )}
 
                 {Platform.OS === 'ios' && isDatePickerVisible && ( // ios datetime picker
-                  <DateTimePicker
-                    value={selectedDate}
-                    mode="datetime"
-                    display="default"
-                    onChange={onChangeDate}
-                    maximumDate={new Date()}
-                  />
+                  <View>
+                    <View style={{ height: 12 }} />
+                    <DateTimePicker
+                      value={selectedDate}
+                      mode="datetime"
+                      onChange={(event, date) => {
+                        if (date) {
+                          setSelectedDate(date); // Set selected date from date picker
+                          console.log("Selected date:", date.toLocaleDateString(), date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })); // Log the selected date
+                        }
+                      }}
+                      maximumDate={new Date()}
+                    />
+                    <Button
+                      title="Done"
+                      onPress={() => {
+                        setDatePickerVisibility(false);
+                      }}
+                    />
+                  </View>
                 )}
 
-                {Platform.OS === 'android' && isDatePickerVisible && ( // android datetime picker
+                {Platform.OS === 'android' && isDatePickerVisible && ( // android date picker
                   <DateTimePicker
                     value={selectedDate}
                     mode="date"
@@ -596,7 +615,7 @@ export default function HomeScreen({ route, navigation }) {
                     maximumDate={new Date()}
                   />
                 )}
-                {Platform.OS === 'android' && isTimePickerVisible && ( // android datetime picker
+                {Platform.OS === 'android' && isTimePickerVisible && ( // android time picker
                   <DateTimePicker
                     value={selectedTime}
                     mode="time"
@@ -879,9 +898,9 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 15,
+    marginBottom: 30,
     textAlign: "center",
   },
   modalSubtitle: {
@@ -894,7 +913,7 @@ const styles = StyleSheet.create({
     color: '#007BFF',
   },
   input: {
-    width: 200,
+    width: 250,
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 4,
