@@ -20,6 +20,8 @@ import useAuth from "./hooks/useAuth"
 const Stack = createNativeStackNavigator()
 import * as Notifications from "expo-notifications"
 import * as Device from "expo-device"
+import AccountDetails from "./components/AccoutDetails"
+
 
 export default function App() {
   const { user } = useAuth()
@@ -124,6 +126,11 @@ export default function App() {
             name="About"
             options={{ headerShown: false }}
             component={About}
+          />
+          <Stack.Screen
+            name="AccountDetails"
+            options={{ headerShown: false }}
+            component={AccountDetails}
           />
         </Stack.Navigator>
       </NavigationContainer>
