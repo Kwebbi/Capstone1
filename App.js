@@ -49,7 +49,7 @@ export default function App() {
       console.log("Notification permissions granted.")
       return true
     } else {
-      Alert.alert("Must use a physical device for notifications.")
+      console.log("Must use a physical device for notifications.")
       return false
     }
   }
