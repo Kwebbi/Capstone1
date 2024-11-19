@@ -37,7 +37,7 @@ export default function HomeScreen({ route, navigation }) {
   const todoItemsRef = ref(database, `todoItems/${userId}/${babyID}/`)
   const [colorModalVisible, setColorModalVisible] = useState(false);
   const [avatarColor, setAvatarColor] = useState("#ccc");
-  const colorOptions = ["black", "red", "blue", "green", "yellow", "pink", "purple"];
+  const colorOptions = ["red", "orange", "#ffea03", "#77DD77",  "#89CFF0", "#04258f", "#a184ff", "pink", "black"];
   const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
   const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
   const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);
@@ -442,8 +442,11 @@ export default function HomeScreen({ route, navigation }) {
             <View className="flex justify-center">
               <TouchableOpacity
                 style={[styles.avatarBubble, { backgroundColor: avatarColor }]}
+                
                 onPress={() => setColorModalVisible(true)}
-              />
+              >
+                <Image source={require('../assets/babyIcon.png')} style={{ tintColor: 'white', marginLeft: 0, width: 80, height: 80 }}/>
+              </TouchableOpacity>
               <Text style={styles.nameText}>{fullName}</Text>
             </View>
 
@@ -526,17 +529,20 @@ export default function HomeScreen({ route, navigation }) {
           >
             <View style={styles.modalContainer}>
               <View style={styles.modalView}>
-                <Text>Select Avatar Color:</Text>
-                {colorOptions.map((color, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[styles.colorOption, { backgroundColor: color }]}
-                    onPress={() => {
-                      updateAvatarColor(color);
-                      setColorModalVisible(false);
-                    }}
-                  />
-                ))}
+              <Text style={[styles.modalTitle, { marginBottom: 20 }]}>Select Avatar Color</Text>
+                <View style={styles.colorContainer}>
+                  {colorOptions.map((color, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={[styles.colorOption, { backgroundColor: color }]}
+                      onPress={() => {
+                        updateAvatarColor(color);
+                        setColorModalVisible(false);
+                      }}
+                    />
+                  ))}
+                </View>
+                <View style={{ height: 20 }} />
                 <Button title="Close" onPress={() => setColorModalVisible(false)} />
               </View>
             </View>
@@ -1010,6 +1016,13 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginVertical: 5,
     marginHorizontal: 10,
+  },
+  colorContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
   },
   bottomBar: {
     flexDirection: 'row',
