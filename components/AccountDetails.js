@@ -4,11 +4,7 @@ import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context
 import { useNavigation } from "@react-navigation/native";
 import { auth, database } from '../config/firebase'
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
 import { getDatabase, ref, get, child, update, onValue } from 'firebase/database';
-import RNPickerSelect from 'react-native-picker-select';
-import Dialog from "react-native-dialog";
 
 export default function AccountDetails({ navigation }) {
 
