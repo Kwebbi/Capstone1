@@ -246,7 +246,7 @@ export default function HomeScreen({ route, navigation }) {
       feedingTimeID: feedingTimeKey,
       feedingAmount: Number(feedingAmount),
       feedingDate: selectedDate.toLocaleDateString(),
-      feedingTime: selectedDate.toLocaleTimeString(),
+      feedingTime: Platform.OS === 'ios' ? selectedDate.toLocaleTimeString() : selectedTime.toLocaleTimeString(), // Use selectedTime for Android
       dateTime: selectedDate.getTime(),
       babyID: babyID,
       foodChoice: foodChoice,
@@ -266,7 +266,7 @@ export default function HomeScreen({ route, navigation }) {
   const handleSaveDiaperChange = () => {
     const newDiaperChange = {
       date: selectedDate.toLocaleDateString(),
-      time: selectedDate.toLocaleTimeString(),
+      time: Platform.OS === 'ios' ? selectedDate.toLocaleTimeString() : selectedTime.toLocaleTimeString(), // Use selectedTime for Android
       type: diaperType,
       babyID: babyID, // Include the babyID
     }
@@ -551,8 +551,8 @@ export default function HomeScreen({ route, navigation }) {
           >
             <View style={styles.modalContainer}>
               <View style={styles.modalView}>
-                <Text style={styles.modalTitle}>Enter Feeding Details</Text>
-                {Platform.OS === 'ios' && ( // ios view
+              <Text style={[styles.modalTitle, { marginBottom: 30 }]}>Add Feeding</Text>
+                {Platform.OS === 'ios' && ( // iOS datetime view
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
                     <Text style={styles.modalSubtitle}>Date/Time: </Text>
                     <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end' }} onPress={() => setDatePickerVisibility(true)}>
@@ -566,7 +566,7 @@ export default function HomeScreen({ route, navigation }) {
                     </TouchableOpacity>
                   </View>
                 )}
-                {Platform.OS === 'android' && ( // android view
+                {Platform.OS === 'android' && ( // android datetime view
                   <View style={{ flexDirection: 'column' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
                       <Text style={styles.modalSubtitle}>Date: </Text>
@@ -583,7 +583,7 @@ export default function HomeScreen({ route, navigation }) {
                   </View>
                 )}
 
-                {Platform.OS === 'ios' && isDatePickerVisible && ( // ios datetime picker
+                {Platform.OS === 'ios' && isDatePickerVisible && ( // iOS datetime picker
                   <View>
                     <View style={{ height: 12 }} />
                     <DateTimePicker
@@ -657,31 +657,95 @@ export default function HomeScreen({ route, navigation }) {
           >
             <View style={styles.modalContainer}>
               <View style={styles.modalView}>
-                <Text>Diaper Change Type:</Text>
+                <Text style={styles.modalTitle}>Add Diaper</Text>
+                {Platform.OS === 'android' && (
+                  <Text style={[styles.modalSubtitle, { marginTop: 20 }]}>Type: </Text>
+
+                )}
                 <Picker
                   selectedValue={diaperType}
                   onValueChange={(itemValue) => setDiaperType(itemValue)}
-                  style={{ width: 200, height: 200 }}
                 >
                   <Picker.Item label="Wet" value="Wet" />
                   <Picker.Item label="Dirty" value="Dirty" />
                   <Picker.Item label="Mixed" value="Mixed" />
                   <Picker.Item label="Dry" value="Dry" />
                 </Picker>
-                <Button
-                  title="Pick Date & Time"
-                  onPress={() => setDatePickerVisibility(true)}
-                />
-                {isDatePickerVisible && (
+
+                {Platform.OS === 'ios' && ( // iOS datetime view
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    <Text style={styles.modalSubtitle}>Date/Time: </Text>
+                    <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end' }} onPress={() => setDatePickerVisibility(true)}>
+                      {isDatePickerVisible ? (
+                        <View/>
+                      ) : (
+                        <View>
+                          <Text style={styles.dateText}>{selectedDate.toLocaleDateString() + " | " + selectedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
+                {Platform.OS === 'android' && ( // android datetime view
+                  <View style={{ flexDirection: 'column' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                      <Text style={styles.modalSubtitle}>Date: </Text>
+                      <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end' }} onPress={() => setDatePickerVisibility(true)}>
+                        <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                      <Text style={styles.modalSubtitle}>Time: </Text>
+                      <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end' }} onPress={() => setTimePickerVisibility(true)}>
+                        <Text style={styles.dateText}>{selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
+                {Platform.OS === 'ios' && isDatePickerVisible && ( // iOS datetime picker
+                  <View>
+                    <View style={{ height: 12 }} />
+                    <DateTimePicker
+                      value={selectedDate}
+                      mode="datetime"
+                      onChange={(event, date) => {
+                        if (date) {
+                          setSelectedDate(date);
+                          console.log("Selected date:", date.toLocaleDateString(), date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })); // Log the selected date
+                        }
+                      }}
+                      maximumDate={new Date()}
+                    />
+                    <Button
+                      title="Done"
+                      onPress={() => {
+                        setDatePickerVisibility(false);
+                      }}
+                    />
+                  </View>
+                )}
+
+                {Platform.OS === 'android' && isDatePickerVisible && ( // android date picker
                   <DateTimePicker
-                    testID="dateTimePicker"
                     value={selectedDate}
-                    mode="datetime"
-                    display="default"
+                    mode="date"
+                    display="calendar"
                     onChange={onChangeDate}
                     maximumDate={new Date()}
                   />
                 )}
+                {Platform.OS === 'android' && isTimePickerVisible && ( // android time picker
+                  <DateTimePicker
+                    value={selectedTime}
+                    mode="time"
+                    display="spinner"
+                    onChange={onChangeTime}
+                  />
+                )}
+
+                <View style={{ height: 15 }} />
+                
                 <Button title="Save" onPress={handleSaveDiaperChange} />
                 <Button
                   title="Cancel"
@@ -700,7 +764,7 @@ export default function HomeScreen({ route, navigation }) {
           >
             <View style={styles.modalContainer}>
               <View style={styles.modalView}>
-                <Text>Enter Sleep Details:</Text>
+                <Text style={styles.modalTitle}>Add Sleep</Text>
 
                 {/* Date Picker */}
                 <Button
@@ -888,7 +952,8 @@ const styles = StyleSheet.create({
   modalView: {
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 40,
+    padding: 30,
+    width: 300,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -901,7 +966,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 30,
     textAlign: "center",
   },
   modalSubtitle: {
