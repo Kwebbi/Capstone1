@@ -17,6 +17,7 @@ import WeeklyReport from "./components/WeeklyReport"
 import EditBaby from './components/EditBaby';
 import About from './components/About';
 import useAuth from "./hooks/useAuth"
+import HelpNSupport from "./components/HelpNSupport";
 const Stack = createNativeStackNavigator()
 import * as Notifications from "expo-notifications"
 import * as Device from "expo-device"
@@ -121,8 +122,13 @@ export default function App() {
             component={EditBaby}
           />
           <Stack.Screen
+            name="HelpNSupport"
+            options={{headerShown: false}}
+            component={HelpNSupport}
+          />
+          <Stack.Screen
             name="About"
-            options={{ headerShown: false }}
+            options={{headerShown: false}}
             component={About}
           />
         </Stack.Navigator>

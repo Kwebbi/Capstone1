@@ -8,7 +8,7 @@ import Dialog from "react-native-dialog";
 
 export default function ShareRequests({ route, navigation }) {
     const [isLoading, setIsLoading] = useState(true);
-    const [alerts, setAlerts] = useState(route.params.alerts);
+    const [alerts, setAlerts] = useState(route?.params?.alerts || []);
     const [visible, setVisible] = useState(false); //for dialog
     const [selectedAlert, setSelectedAlert] = useState(null);
     

@@ -37,9 +37,9 @@ const Settings = ({ route, navigation }) => {
     };
 
 
-    const handleHelpSupport = () => {
+    /*const handleHelpSupport = () => {
         console.log('Help & Support clicked');
-    };
+    };*/
 
     const handleAbout = () => {
         console.log('About clicked');
@@ -82,19 +82,19 @@ const Settings = ({ route, navigation }) => {
                 </View>
             </TouchableOpacity>
             {/*Pending Share Request Button */}
-            <TouchableOpacity onPress={() => navigation.navigate('ShareRequests', { alerts })} style={styles.logoutButton}>
+            <TouchableOpacity onPress={() => navigation.navigate('ShareRequests')} style={styles.logoutButton}>
                 <View style={styles.logoutContent}>
                     <Ionicons name="share" size={42} color="black" />
                     <Text style={styles.logoutButtonText}>Pending Share Requests</Text>
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleHelpSupport} style={styles.logoutButton}>
+            <TouchableOpacity onPress={() => navigation.navigate('HelpNSupport', { alerts })}  style={styles.logoutButton}>
                 <View style={styles.logoutContent}>
                     <Ionicons name="help-circle" size={42} color="black" />
                     <Text style={styles.logoutButtonText}>Help & Support</Text>
                 </View>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('About')} style={styles.logoutButton}>
+            <TouchableOpacity onPress={() => navigation.navigate('About', { alerts })} style={styles.logoutButton}>
                 <View style={styles.logoutContent}>
                     <Ionicons name="information-circle" size={42} color="black" />
                     <Text style={styles.logoutButtonText}>About</Text>
