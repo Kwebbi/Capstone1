@@ -63,7 +63,7 @@ const Settings = ({ route, navigation }) => {
             </SafeAreaView>
 
         <View style={styles.container}>
-            <TouchableOpacity onPress={handleAccount} style={styles.logoutButton}>
+            <TouchableOpacity onPress={() => navigation.navigate('AccountDetails')} style={styles.logoutButton}>
                 <View style={styles.logoutContent}>
                     <Ionicons name="person" size={42} color="black" />
                     <Text style={styles.logoutButtonText}>Account</Text>
@@ -91,7 +91,7 @@ const Settings = ({ route, navigation }) => {
             <TouchableOpacity onPress={() => navigation.navigate('HelpNSupport', { alerts })}  style={styles.logoutButton}>
                 <View style={styles.logoutContent}>
                     <Ionicons name="help-circle" size={42} color="black" />
-                    <Text style={styles.logoutButtonText}>Help & Support</Text>
+                    <Text style={styles.logoutButtonText}>Help & FAQ</Text>
                 </View>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('About', { alerts })} style={styles.logoutButton}>
