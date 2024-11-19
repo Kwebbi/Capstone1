@@ -139,7 +139,7 @@ const BabyMilestones = ({ route }) => {
                 onRequestClose={() => setModalVisible(false)}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modal
+                        <Text style={styles.modalTitle
                         }>Add New Milestone</Text>
                         <TextInput
                             style={styles.input}
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 15,
     },

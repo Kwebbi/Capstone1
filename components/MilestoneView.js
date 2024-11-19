@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ref, update, remove, get } from 'firebase/database';
 import { database } from '../config/firebase';
@@ -142,21 +142,30 @@ const MilestoneView = ({ navigation, route }) => {
                 <View style={styles.titleContainer}>
                     <Text style={styles.label}>Date:</Text>
                     {isEditing ? (
+                        Platform.OS === 'android' ? (
                         <>
                             {!showDatePicker && (
-                                <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                                    <Text style={styles.date}>{editedDate.toLocaleDateString()}</Text>
-                                </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                                <Text style={styles.date}>{editedDate.toLocaleDateString()}</Text>
+                            </TouchableOpacity>
                             )}
                             {showDatePicker && (
-                                <DateTimePicker
-                                    value={editedDate}
-                                    mode="date"
-                                    display="default"
-                                    onChange={onDateChange}
-                                />
+                            <DateTimePicker
+                                value={editedDate}
+                                mode="date"
+                                display="default"
+                                onChange={onDateChange}
+                            />
                             )}
                         </>
+                        ) : (
+                        <DateTimePicker
+                            value={editedDate}
+                            mode="date"
+                            display="default"
+                            onChange={onDateChange}
+                        />
+                        )
                     ) : (
                         <Text style={styles.value}>{editedDate.toLocaleDateString()}</Text>
                     )}
