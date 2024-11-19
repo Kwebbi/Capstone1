@@ -591,7 +591,7 @@ export default function HomeScreen({ route, navigation }) {
                       mode="datetime"
                       onChange={(event, date) => {
                         if (date) {
-                          setSelectedDate(date); // Set selected date from date picker
+                          setSelectedDate(date);
                           console.log("Selected date:", date.toLocaleDateString(), date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })); // Log the selected date
                         }
                       }}
@@ -619,6 +619,7 @@ export default function HomeScreen({ route, navigation }) {
                   <DateTimePicker
                     value={selectedTime}
                     mode="time"
+                    display="spinner"
                     onChange={onChangeTime}
                   />
                 )}
