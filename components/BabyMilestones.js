@@ -33,8 +33,11 @@ const BabyMilestones = ({ route }) => {
 
                 // Sort milestones by date
                 milestonesArray.sort((a, b) => {
-                    const dateA = new Date(a.date.split('/').join('-'));
-                    const dateB = new Date(b.date.split('/').join('-'));
+                    const [monthA, dayA, yearA] = a.date.split('/');
+                    const [monthB, dayB, yearB] = b.date.split('/');
+                    const dateA = new Date(yearA, monthA, dayA);
+                    const dateB = new Date(yearB, monthB , dayB);
+                
                     return dateA - dateB;
                 });
 
