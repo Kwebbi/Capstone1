@@ -9,20 +9,23 @@ import { Picker } from '@react-native-picker/picker';
 import { getDatabase, ref, get, child, update } from 'firebase/database';
 import RNPickerSelect from 'react-native-picker-select';
 import Dialog from "react-native-dialog";
+import { useTheme } from "../components/ThemeContext";
 
 export default function EditBaby({ route, navigation }) {
+
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   const { fullName, babyID, DOB, caretakers} = route.params; 
   const [dob, setDOB] = useState(new Date()); // date of birth
   const [dobSelected, setDOBSelected] = useState(false); // has date of birth been selected
   const [showPicker, setShowPicker] = useState(false); // state for showing the date picker
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [selectedCaretaker, setSelectedCaretaker] = useState("");
   const [fullNames, setFullNames] = useState([]);
   const [selectedCaretakerId, setSelectedCaretakerId] = useState(null);
   const [visible, setVisible] = useState(false);
   const [selecteddisplayName, setdisplayName] = useState(fullName);
-
+  const nameToSave = name.trim() === "" ? fullName : name;
 
   useEffect(() => {
     const fetchCaretakersFullNames = async () => {
@@ -51,7 +54,6 @@ export default function EditBaby({ route, navigation }) {
     };
 
     fetchCaretakersFullNames();
-    console.log("here are names and IDS: ")
     console.log(fullNames);    
   }, [caretakers]);
 
@@ -84,7 +86,7 @@ export default function EditBaby({ route, navigation }) {
     Alert.alert("Caretaker removed.");
   };
 
-
+  console.log(DOB);
 
   const showDialog = () => {
       console.log("selected caretakerID: ", selectedCaretakerId);
@@ -92,16 +94,16 @@ export default function EditBaby({ route, navigation }) {
   };
 
 
-
-
-  console.log("caretakers: " + caretakers);
-
-
   
   const updateBaby = () => {
     const babyRef = ref(database, `babies/${babyID}`);
 
-    //get the current caretakers
+    if (name.trim() === "") {
+      setName(fullName);
+      console.log("name field left empty")
+    }
+    const finalDOB = dobSelected ? dob.toLocaleDateString() : DOB;
+
     get(babyRef)
         .then((snapshot) => {
             if (snapshot.exists()) {
@@ -109,8 +111,8 @@ export default function EditBaby({ route, navigation }) {
 
                 // Update the baby record
                 update(babyRef, {
-                  DOB: dob.toLocaleDateString(), // Ensure date is stored in ISO format
-                  fullName: name
+                  DOB: finalDOB, 
+                  fullName: nameToSave
                 })
                 .then(() => {
                     console.log("Name and DOB updated successfully.");
@@ -123,72 +125,75 @@ export default function EditBaby({ route, navigation }) {
         .catch((error) => {
             console.error("Error fetching baby data: ", error);
         });
-        setdisplayName(name);
+        setdisplayName(nameToSave);
         Alert.alert("Baby's profile has been updated.");
 };
 
-  return (
-  <ScrollView automaticallyAdjustKeyboardInsets={true} contentContainerStyle={{ flexGrow: 1 }} style={{ backgroundColor: 'white' }}> 
-    <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
-    <SafeAreaView style={{ flex: 0 }}>
-        <View className="flex-row justify-center" style={styles.container}>
-            <TouchableOpacity style={{ position: "absolute", left: 22, top: 27 }} onPress={()=> navigation.navigate('Profiles')}>
-            <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
-            </TouchableOpacity>
-            <Text className="text-white mt-5" style={styles.titleText}>{selecteddisplayName}'s Info</Text>
-        </View>
-    </SafeAreaView>
-    <View style={styles.mainBody}> 
-        <View className="flex-row justify-center mt-3">
-        <Text style={{ fontSize: 18, color: '#28436d', fontWeight: 'bold', textAlign: 'center' }}>Edit Baby's Name or DOB</Text>
-        </View>
+  const containerStyle = isDarkMode ? styles.darkContainer : styles.lightContainer;
+  const titleTextStyle = isDarkMode ? styles.darkTitleText : styles.lightTitleText;
+  const textStyle = isDarkMode ? styles.darkText : styles.lightText;
+  const backgroundColor = isDarkMode ? 'black' : '#cfe2f3'; 
+  const iconColor = isDarkMode ? '#f1f1f1' : '#28436d'; 
 
-        <View className="form space-y-1 pt-5" style={{ flex: 0, justifyContent: "center"}}>
+  return (
+    <ScrollView automaticallyAdjustKeyboardInsets={true} contentContainerStyle={{ flexGrow: 1 }} style={{ backgroundColor: backgroundColor }}> 
+      <View style={containerStyle}>
+        <SafeAreaView style={{ flex: 0 }}>
+          <View style={styles.headerContainer}>
+            <TouchableOpacity style={{ position: "absolute", left: 22, top: 27 }} onPress={() => navigation.navigate('Profiles')}>
+              <Ionicons name="arrow-back" size={30} color={iconColor} />
+            </TouchableOpacity>
+            <Text style={titleTextStyle}>{selecteddisplayName}'s Info</Text>
+          </View>
+        </SafeAreaView>
+        
+        <View style={styles.mainBody}>
+          <Text style={[textStyle, styles.editInfoText]}>Edit Baby's Name or DOB</Text>
+
+          <View style={styles.form}>
             {/* Baby Name */}
-            <Text className="flex-end text-gray-700 ml-2">Baby's Name</Text>
-            <TextInput className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" 
-            value={name} onChangeText={value=> setName(value)} editable={true} placeholder={fullName}/>
+            <Text style={textStyle}>Baby's Name</Text>
+            <TextInput
+              style={styles.inputField}
+              value={name}
+              onChangeText={setName}
+              placeholder={fullName}
+            />
 
             {/* DOB */}
-            <Text className="text-gray-700 ml-2">Baby's Date of Birth</Text>
+            <Text style={textStyle}>Baby's Date of Birth</Text>
             <TouchableOpacity onPress={() => setShowPicker(true)}>
-            <View className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3" style={{ height: 50, justifyContent: 'center' }}>
-              <Text>
-                {dobSelected ? (dob.toLocaleDateString()) : (<Text className="p-4 bg-gray-100 text-#A9A9A9 rounded-2xl mb-3" style={{ color: '#C7C7C7' }}>{DOB}</Text>)}
-              </Text>
+              <View style={styles.dateInput}>
+                <Text style={textStyle}>
+                  {dobSelected ? dob.toLocaleDateString() : DOB}
+                </Text>
               </View>
             </TouchableOpacity>
+
             {showPicker && (
-              <View>  
-                <DateTimePicker
-                  value={dob}
-                  mode="date"
-                  display="spinner"
-                  onChange={(event, date) => {
-                    if (Platform.OS === 'android') { // Android automatically has confirm button
-                      setShowPicker(false);
-                    }
-                    if (date) {
-                      setDOB(date); // Set selected date from date picker
-                      setDOBSelected(true);
-                    }
-                  }}
-                />
-                {Platform.OS === 'ios' && ( // manually add confirmation button for iOS
-                  <Button
-                    title="Done"
-                    onPress={() => {
-                      setShowPicker(false);
-                    }}
-                  />
-                )}
-              </View>
-            )} 
+              <DateTimePicker
+                value={dob}
+                mode="date"
+                display="spinner"
+                onChange={(event, date) => {
+                  if (Platform.OS === 'android') {
+                    setShowPicker(false);
+                  }
+                  if (date) {
+                    setDOB(date);
+                    setDOBSelected(true);
+                  }
+                }}
+                maximumDate={new Date()}
+              />
+            )}
+
+            <TouchableOpacity style={styles.saveButton} onPress={updateBaby}>
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <TouchableOpacity className="py-1 bg-blue-200 rounded-3xl mt-5 mb-8">
-            <Text className="font-xl text-center text-gray-700 text-xl" onPress={()=> updateBaby()}>Save</Text>
-         </TouchableOpacity>
-         <View className="flex-row justify-center mt-3">
+        <View className="flex-row justify-center mt-3">
         <Text style={{ fontSize: 18, color: '#28436d', fontWeight: 'bold', textAlign: 'center' }}>Remove a Caretaker</Text>
         </View>
 
@@ -221,48 +226,89 @@ export default function EditBaby({ route, navigation }) {
         </>
       )}
     </View>
-  </View>
-  </View>
-</ScrollView>
-
+      </View>
+    </ScrollView>
   );
-
-
-
 }
 
 const styles = StyleSheet.create({
-
-  mainBody: { //for the rounded edges in the main body of each screen
-      flex: 1, // this allows the view to take the remaining space
-      backgroundColor: 'white', 
-      borderTopLeftRadius: 50,
-      borderTopRightRadius: 50,
-      padding: 16,
-      overflow: 'hidden', 
-      paddingHorizontal: 32, 
-      paddingTop: 32, 
+  mainBody: { 
+    flex: 1, 
+    padding: 16,
+    overflow: 'hidden', 
+    paddingHorizontal: 32, 
+    paddingTop: 32, 
   },
-  
-  titleText: {
-    color: '#28436d',
+
+  lightContainer: {
+    backgroundColor: '#cfe2f3', 
+  },
+
+  darkContainer: {
+    backgroundColor: 'black', 
+  },
+
+  lightTitleText: {
+    color: '#28436d', 
     fontSize: 35,
     fontWeight: 'bold',
   },
 
-  nameText: {
-    color: '#28436d',
-    fontSize: 27,
+  darkTitleText: {
+    color: '#ffffff', 
+    fontSize: 35,
     fontWeight: 'bold',
   },
 
-  ageText: {
-    color: '#28436d',
-    fontSize: 17,
+  lightText: {
+    color: '#28436d', 
+    fontSize: 18,
   },
 
-  inputBox: {
+  darkText: {
+    color: '#ffffff', 
+    fontSize: 18,
+  },
 
-  }
+  headerContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 
+  editInfoText: {
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    textAlign: 'center',
+  },
+
+  form: {
+    marginTop: 16,
+  },
+
+  inputField: {
+    padding: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+
+  dateInput: {
+    padding: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+
+  saveButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+
+  saveButtonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: 18,
+  },
 });
