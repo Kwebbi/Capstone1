@@ -740,8 +740,7 @@ export default function HomeScreen({ route, navigation }) {
 
                 {Platform.OS === 'ios' && ( // iOS datetime view
                   <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-                    <Text style={styles.modalSubtitle}>Date</Text>
-                    <View style={{ height: 12 }} />
+                    <Text style={[styles.modalSubtitle, { marginBottom: 6 }]}>Date</Text>
                     <DateTimePicker // iOS date picker
                       value={selectedDate}
                       mode="date"
@@ -753,8 +752,7 @@ export default function HomeScreen({ route, navigation }) {
                       maximumDate={new Date()}
                     />
 
-                    <Text style={styles.modalSubtitle}>Start Time</Text>
-                    <View style={{ height: 12 }} />
+                    <Text style={[styles.modalSubtitle, { marginTop: 12, marginBottom: 6 }]}>Start Time</Text>
                     <DateTimePicker // iOS start time picker
                       value={sleepStart}
                       mode="time"
@@ -766,8 +764,7 @@ export default function HomeScreen({ route, navigation }) {
                       }}
                     />
                     
-                    <Text style={styles.modalSubtitle}>End Time</Text>
-                    <View style={{ height: 12 }} />
+                    <Text style={[styles.modalSubtitle, { marginTop: 12, marginBottom: 6 }]}>End Time</Text>
                     <DateTimePicker // iOS end time picker
                       value={sleepEnd}
                       mode="time"
@@ -983,14 +980,13 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: "bold",
     textAlign: "center",
   },
   modalSubtitle: {
     fontSize: 17,
     fontWeight: "bold",
-    marginRight: 10,
   },
   dateText: {
     fontSize: 15,
