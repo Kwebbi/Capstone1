@@ -106,46 +106,32 @@ export default function AddProfile({ navigation }) {
             {/* Gender */}
             <Text className="text-gray-700 mb-3">Gender</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-              {/* Male Radio Button */}
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity
-                  onPress={() => setGender('Male')}
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 12,
-                    borderWidth: 2,
-                    borderColor: gender === 'Male' ? '#8ec3ff' : 'gray',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  {gender === 'Male' && (
-                    <View style={styles.selectedRadio}/>
-                  )}
+              {/* Male Image */}
+              <View style={{ flexDirection: 'row', marginLeft: 70 }}>
+                <TouchableOpacity onPress={() => setGender('Male')}>
+                  <Image
+                    source={require('../assets/boy.png')}
+                    style={{
+                      width: 35,
+                      height: 38,
+                      tintColor: gender === 'Male' ? '#8ec3ff' : 'gray',
+                    }}
+                  />
                 </TouchableOpacity>
-                <Text style={{ marginLeft: 8 }}>Male</Text>
               </View>
-              
-              {/* Female Radio Button */}
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity
-                  onPress={() => setGender('Female')}
-                  style={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: 12,
-                    borderWidth: 2,
-                    borderColor: gender === 'Female' ? '#8ec3ff' : 'gray',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  {gender === 'Female' && (
-                    <View style={styles.selectedRadio}/>
-                  )}
+
+              {/* Female Image */}
+              <View style={{ flexDirection: 'row', marginRight: 70 }}>
+                <TouchableOpacity onPress={() => setGender('Female')}>
+                  <Image
+                    source={require('../assets/girl.png')}
+                    style={{
+                      width: 59,
+                      height: 36,
+                      tintColor: gender === 'Female' ? '#f8a6c5' : 'gray',
+                    }}
+                  />
                 </TouchableOpacity>
-                <Text style={{ marginLeft: 8 }}>Female</Text>
               </View>
             </View>
           </View>
