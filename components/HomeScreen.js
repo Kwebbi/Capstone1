@@ -3,7 +3,16 @@ import { Button, Image, Modal, ScrollView, StyleSheet, Text, TextInput, Touchabl
 import { SafeAreaView, withSafeAreaInsets, } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import DateTimePicker from "@react-native-community/datetimepicker"
-import { ref, push, set, query, orderByChild, onValue, remove, get } from "firebase/database"
+import {
+  ref,
+  push,
+  set,
+  query,
+  orderByChild,
+  onValue,
+  remove,
+  get,
+} from "firebase/database"
 import { auth, database } from "../config/firebase"
 import { Picker } from "@react-native-picker/picker"
 import * as Notifications from "expo-notifications"
@@ -30,6 +39,11 @@ export default function HomeScreen({ route, navigation }) {
   const [isEndPickerVisible, setEndPickerVisibility] = useState(false)
   const [sleepStart, setSleepStart] = useState(new Date())
   const [sleepEnd, setSleepEnd] = useState(new Date())
+  const [feedingNotification, setFeedingNotification] = useState(false)
+  const [sleepNotification, setSleepNotification] = useState(false)
+  const [diaperChangeNotification, setDiaperChangeNotification] =
+    useState(false)
+  const [notifications, setNotifications] = useState([])
   const feedingTimeRef = ref(database, "feedingTimes/")
   const sleepTimeRef = ref(database, "sleepTimes/")
   const diaperChangeRef = ref(database, "diaperChanges/")
@@ -44,6 +58,102 @@ export default function HomeScreen({ route, navigation }) {
   const [isEndTimePickerVisible, setEndTimePickerVisibility] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true)
+  const [modalVisible, setModalVisible] = useState(false)
+
+  function containsTime(str) {
+    const timeRegex =
+      /\b(?:1[0-2]|[1-9]):[0-5][0-9](?:\s?[APap][Mm])?\b|\b(?:[01]?[0-9]|2[0-3]):[0-5][0-9]\b/
+    return timeRegex.test(str)
+  }
+  const formatTime = (date) => {
+    let hours = date.getHours()
+    const minutes = date.getMinutes().toString().padStart(2, "0")
+    const period = hours >= 12 ? "PM" : "AM"
+
+    hours = hours % 12 || 12
+
+    return `${hours}:${minutes} ${period}`
+  }
+
+  const extractTimeAndScheduleNotification = async (todo) => {
+    const timeMatch = todo.body.match(/\b(\d{1,2}:\d{2})(\s?[APap][Mm])?\b/)
+    if (!timeMatch) {
+      console.error("No valid time found in the todo body.")
+      return
+    }
+
+    const time = timeMatch[1]
+    const period = timeMatch[2]?.toUpperCase()?.trim() || ""
+
+    const [hour, minute] = time.split(":").map(Number)
+
+    const now = new Date()
+    let notificationHour = hour
+
+    if (period === "PM" && hour < 12) {
+      notificationHour += 12
+    } else if (period === "AM" && hour === 12) {
+      notificationHour = 0
+    }
+
+    const notificationTime = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      notificationHour,
+      minute,
+      0,
+      0
+    )
+
+    if (notificationTime <= now) {
+      return
+    }
+
+    const quoteMatch = todo.body.match(/"([^"]+)"/)
+    const notificationBody = quoteMatch ? quoteMatch[1] : todo.body
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Reminder",
+          body: notificationBody,
+          sound: "default",
+        },
+        trigger: notificationTime,
+      })
+      console.log(`Notification scheduled for ${notificationTime}`)
+    } catch (error) {
+      console.error("Failed to schedule notification:", error)
+    }
+  }
+
+  useEffect(() => {
+    const filterTodos = (notifications) =>
+      notifications.filter((notification) =>
+        notification.title.includes("New Todo")
+      )
+    filterTodos(notifications).forEach((todo) =>
+      extractTimeAndScheduleNotification(todo)
+    )
+  }, [notifications])
+
+  const removeNotificationsFunc = () => {
+    setNotifications([])
+    setModalVisible(false)
+  }
+
+  const addNotification = (title, body) => {
+    const newNotification = {
+      id: new Date().getTime(),
+      title,
+      body,
+      date: new Date().toLocaleString(),
+    }
+
+    const updatedNotifications = [...notifications, newNotification]
+    setNotifications(updatedNotifications)
+  }
 
   const { fullName, babyID } = route.params // Get baby info from navigation params
 
@@ -82,17 +192,75 @@ export default function HomeScreen({ route, navigation }) {
 
   useEffect(() => {
     if (sendNotification) {
+      const notificationBody = `Your new todo "${newTodo}" has been added!`
+
       Notifications.scheduleNotificationAsync({
         content: {
           title: "New Todo Added 📝",
-          body: `Your new todo ${newTodo} has been added!`,
+          body: notificationBody, 
           sound: "default",
         },
-        trigger: null
+        trigger: null,
       })
+      if (containsTime(newTodo)) {
+        addNotification("New Todo Added 📝", notificationBody)
+        setNewTodo("")
+      }else{
+        setNewTodo("")
+      }
     }
     return () => setSendNotification(false)
-  }, [sendNotification])
+  }, [sendNotification, newTodo])
+
+  useEffect(() => {
+    if (feedingNotification) {
+      const notificationBody = `${feedingAmount}ml of ${foodChoice} fed to the baby`
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: "New Feeding Added",
+          body: notificationBody,
+          sound: "default",
+        },
+        trigger: null,
+      })
+      addNotification("New Feeding Added", notificationBody)
+    }
+    return () => setFeedingNotification(false)
+  }, [feedingNotification])
+
+  useEffect(() => {
+    if (diaperChangeNotification) {
+      const notificationBody = `Diaper of type ${diaperType} has been changed!`
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: "New Diaper Changed",
+          body: notificationBody,
+          sound: "default",
+        },
+        trigger: null,
+      })
+      addNotification("New Diaper Changed", notificationBody)
+    }
+    return () => setDiaperChangeNotification(false)
+  }, [diaperChangeNotification])
+
+  useEffect(() => {
+    if (sleepNotification) {
+      const notificationBody = `Sleep from  ${formatTime(
+        sleepStart
+      )} to  ${formatTime(sleepEnd)} has been recorded`
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: "New Sleep Data added",
+          body: notificationBody,
+          sound: "default",
+        },
+        trigger: null,
+      })
+      addNotification("New Sleep Data added", notificationBody)
+    }
+    return () => setSleepNotification(false)
+  }, [sleepNotification])
 
   useEffect(() => {
     const unsubscribe = onValue(diaperChangeRef, (snapshot) => {
@@ -160,12 +328,14 @@ export default function HomeScreen({ route, navigation }) {
       console.error("Error adding Todo Item: ", error)
     }
     setSendNotification(true)
-    setNewTodo("");
   }
 
   // Function to delete a todo item
   const deleteTodoItem = (itemId) => {
-    const itemRef = ref(database, `todoItems/${babyID}/users/${userId}/${itemId}`)
+    const itemRef = ref(
+      database,
+      `todoItems/${babyID}/users/${userId}/${itemId}`
+    )
     remove(itemRef).catch((error) => {
       console.error("Error deleting todo:", error)
     })
@@ -192,34 +362,40 @@ export default function HomeScreen({ route, navigation }) {
   };
 
   const onChangeSleepStartTime = (event, selectedTime) => {
-    const currentTime = selectedTime || sleepStart;
-    setSleepStart((prevDate) => new Date(
-      prevDate.getFullYear(),
-      prevDate.getMonth(),
-      prevDate.getDate(),
-      currentTime.getHours(),
-      currentTime.getMinutes()
-    ));
-    setStartTimePickerVisibility(false);
-  };
+    const currentTime = selectedTime || sleepStart
+    setSleepStart(
+      (prevDate) =>
+        new Date(
+          prevDate.getFullYear(),
+          prevDate.getMonth(),
+          prevDate.getDate(),
+          currentTime.getHours(),
+          currentTime.getMinutes()
+        )
+    )
+    setStartTimePickerVisibility(false)
+  }
 
   const onChangeSleepEndDate = (event, selectedDate) => {
-    const currentDate = selectedDate || sleepEnd;
-    setSleepEnd(currentDate);
-    setEndDatePickerVisibility(false);
-  };
+    const currentDate = selectedDate || sleepEnd
+    setSleepEnd(currentDate)
+    setEndDatePickerVisibility(false)
+  }
 
   const onChangeSleepEndTime = (event, selectedTime) => {
-    const currentTime = selectedTime || sleepEnd;
-    setSleepEnd((prevDate) => new Date(
-      prevDate.getFullYear(),
-      prevDate.getMonth(),
-      prevDate.getDate(),
-      currentTime.getHours(),
-      currentTime.getMinutes()
-    ));
-    setEndTimePickerVisibility(false);
-  };
+    const currentTime = selectedTime || sleepEnd
+    setSleepEnd(
+      (prevDate) =>
+        new Date(
+          prevDate.getFullYear(),
+          prevDate.getMonth(),
+          prevDate.getDate(),
+          currentTime.getHours(),
+          currentTime.getMinutes()
+        )
+    )
+    setEndTimePickerVisibility(false)
+  }
 
   // Save feeding record
   const handleSaveFeeding = () => {
@@ -260,6 +436,7 @@ export default function HomeScreen({ route, navigation }) {
       .catch((error) => {
         console.log(error)
       })
+    setFeedingNotification(true)
   }
 
   // Save diaper change record
@@ -284,6 +461,7 @@ export default function HomeScreen({ route, navigation }) {
       })
 
     setDiaperModalVisible(false) // Close the modal after saving
+    setDiaperChangeNotification(true)
   }
 
   // Save sleep record
@@ -317,6 +495,7 @@ export default function HomeScreen({ route, navigation }) {
       .catch((error) => {
         console.error("Error saving sleep time: ", error)
       })
+    setSleepNotification(true)
   }
 
   // Function to delete a sleep record
@@ -337,99 +516,104 @@ export default function HomeScreen({ route, navigation }) {
 
   // Function to calculate the sleep duration
   function getSleepDuration(time1, time2) {
-    const diffInMs = time2 - time1;
-    const diffInMins = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInMs = time2 - time1
+    const diffInMins = Math.floor(diffInMs / (1000 * 60))
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
 
-    if (diffInHours >= 1) { // at least an hour ago
-      const mins = diffInMins % 60;
-      return `${diffInHours}h ${mins}m`;
+    if (diffInHours >= 1) {
+      // at least an hour ago
+      const mins = diffInMins % 60
+      return `${diffInHours}h ${mins}m`
     } else {
-      return `${diffInMins}m`;
+      return `${diffInMins}m`
     }
   }
 
   // Function to calculate the time difference for last data entries
   function getTimeAgo(date, time) {
     // Split date and time
-    const [month, day, year] = date.split("/");
-    const [clock, period] = time.split(" ");
-    let [hoursStr, minutes, seconds] = clock.split(":");
+    const [month, day, year] = date.split("/")
+    const [clock, period] = time.split(" ")
+    let [hoursStr, minutes, seconds] = clock.split(":")
 
     // Convert to 24-hour format
-    let hours = parseInt(hoursStr);
+    let hours = parseInt(hoursStr)
     if (period === "PM" && hours !== 12) {
-      hours += 12;
+      hours += 12
     }
     if (period === "AM" && hours === 12) {
-      hours = 0;
+      hours = 0
     }
 
     // Convert to ISO string format (YYYY-MM-DDTHH:mm:ss)
-    const isoString = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hours.toString().padStart(2, "0")}:${minutes}:${seconds}`;
+    const isoString = `${year}-${month.padStart(2, "0")}-${day.padStart(
+      2,
+      "0"
+    )}T${hours.toString().padStart(2, "0")}:${minutes}:${seconds}`
 
     // Get time difference
-    const lastTime = new Date(isoString).getTime();
-    const currentTime = Date.now();
-    const diffInMs = currentTime - lastTime;
-    const diffInMins = Math.floor(diffInMs / (1000 * 60));
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    const lastTime = new Date(isoString).getTime()
+    const currentTime = Date.now()
+    const diffInMs = currentTime - lastTime
+    const diffInMins = Math.floor(diffInMs / (1000 * 60))
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
 
-    if (diffInDays >= 1) { // at least a day ago
-      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-    } else if (diffInHours >= 1) { // at least an hour ago
-      const mins = diffInMins % 60;
-      return `${diffInHours}h ${mins}m ago`;
+    if (diffInDays >= 1) {
+      // at least a day ago
+      return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`
+    } else if (diffInHours >= 1) {
+      // at least an hour ago
+      const mins = diffInMins % 60
+      return `${diffInHours}h ${mins}m ago`
     } else {
-      return `${diffInMins}m ago`;
+      return `${diffInMins}m ago`
     }
   }
 
   useEffect(() => {
     const fetchAvatarColor = async () => {
       try {
-        const avatarRef = ref(database, `avatarColors/${babyID}`);
-        const snapshot = await get(avatarRef);
+        const avatarRef = ref(database, `avatarColors/${babyID}`)
+        const snapshot = await get(avatarRef)
         if (snapshot.exists()) {
-          const data = snapshot.val();
+          const data = snapshot.val()
           if (data.avatarColor) {
-            setAvatarColor(data.avatarColor);
+            setAvatarColor(data.avatarColor)
           }
         }
       } catch (error) {
-        console.error('Error fetching avatar color: ', error);
+        console.error("Error fetching avatar color: ", error)
       }
-    };
+    }
 
-    fetchAvatarColor();
-  }, [babyID]);
+    fetchAvatarColor()
+  }, [babyID])
 
   const updateAvatarColor = async (color) => {
     try {
-      setAvatarColor(color);
-      const avatarRef = ref(database, `avatarColors/${babyID}`);
-      await set(avatarRef, { avatarColor: color });
-      console.log('Color updated successfully');
+      setAvatarColor(color)
+      const avatarRef = ref(database, `avatarColors/${babyID}`)
+      await set(avatarRef, { avatarColor: color })
+      console.log("Color updated successfully")
     } catch (error) {
-      console.error('Error updating color: ', error);
+      console.error("Error updating color: ", error)
     }
-  };
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: "#cfe2f3" }}>
-
       {/* Top Header */}
-        <View style={{ ...styles.topHeader, backgroundColor: "#cfe2f3" }}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.navigate("Profiles")}
-          >
-            <Ionicons name="arrow-back" size={30} color="#28436d" />
-          </TouchableOpacity>
+      <View style={{ ...styles.topHeader, backgroundColor: "#cfe2f3" }}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("Profiles")}
+        >
+          <Ionicons name="arrow-back" size={30} color="#28436d" />
+        </TouchableOpacity>
 
-          <Text style={styles.titleText}>Activity Log</Text>
-        </View>
+        <Text style={styles.titleText}>Activity Log</Text>
+      </View>
 
       {/* Scrollable Content */}
       <ScrollView
@@ -452,7 +636,10 @@ export default function HomeScreen({ route, navigation }) {
 
             {/* To-Do List */}
             <View style={styles.todoList}>
-              <TouchableOpacity style={{ backgroundColor: "#cfe2f3", padding: 5 }} onPress={addTodoItem}>
+              <TouchableOpacity
+                style={{ backgroundColor: "#cfe2f3", padding: 5 }}
+                onPress={addTodoItem}
+              >
                 <Text style={styles.todoButtonText}>Add Todo</Text>
               </TouchableOpacity>
               <TextInput
@@ -472,52 +659,90 @@ export default function HomeScreen({ route, navigation }) {
             </View>
           </View>
 
-          <View style={{ height: 1.5, backgroundColor: 'grey' }} />
+          <View style={{ height: 1.5, backgroundColor: "grey" }} />
 
           {/* Feeding Button */}
-          <TouchableOpacity className="flex-row space-x-7" style={[ styles.dataButton, { backgroundColor: '#fd763e' }]} onPress={()=> setFeedingModalVisible(true)}>
-              <Image source={require('../assets/feedingIcon.png')} style={[ styles.dataIcon, { tintColor: '#e64d14' }]}/>
+          <TouchableOpacity
+            className="flex-row space-x-7"
+            style={[styles.dataButton, { backgroundColor: "#fd763e" }]}
+            onPress={() => setFeedingModalVisible(true)}
+          >
+            <Image
+              source={require("../assets/feedingIcon.png")}
+              style={[styles.dataIcon, { tintColor: "#e64d14" }]}
+            />
 
-              <View className="flex-1">
-                <Text style={styles.dataText}>Feeding</Text>
-                {feedings.length > 0 && (
-                  <Text style={[styles.recordPreview]}>
-                    {getTimeAgo(feedings[feedings.length - 1].feedingDate, feedings[feedings.length - 1].feedingTime)} •{" "}
-                    {feedings[feedings.length - 1].foodChoice} (
-                    {feedings[feedings.length - 1].feedingAmount} mL)
-                  </Text>
-                )}
-              </View>
+            <View className="flex-1">
+              <Text style={styles.dataText}>Feeding</Text>
+              {feedings.length > 0 && (
+                <Text style={[styles.recordPreview]}>
+                  {getTimeAgo(
+                    feedings[feedings.length - 1].feedingDate,
+                    feedings[feedings.length - 1].feedingTime
+                  )}{" "}
+                  • {feedings[feedings.length - 1].foodChoice} (
+                  {feedings[feedings.length - 1].feedingAmount} mL)
+                </Text>
+              )}
+            </View>
           </TouchableOpacity>
-          
-          {/* Diaper Change Button */}
-          <TouchableOpacity className="flex-row space-x-7" style={[styles.dataButton, { backgroundColor: '#23de62' } ]} onPress={()=> setDiaperModalVisible(true)}>
-              <Image source={require('../assets/diaperIcon.png')} style={[ styles.dataIcon, { marginTop: 2, tintColor: '#19b64f' }]}/>
 
-              <View className="flex-1">
+          {/* Diaper Change Button */}
+          <TouchableOpacity
+            className="flex-row space-x-7"
+            style={[styles.dataButton, { backgroundColor: "#23de62" }]}
+            onPress={() => setDiaperModalVisible(true)}
+          >
+            <Image
+              source={require("../assets/diaperIcon.png")}
+              style={[styles.dataIcon, { marginTop: 2, tintColor: "#19b64f" }]}
+            />
+
+            <View className="flex-1">
               <Text style={styles.dataText}>Diaper</Text>
               {diaperChanges.length > 0 && (
                 <Text style={styles.recordPreview}>
-                  {getTimeAgo(diaperChanges[diaperChanges.length - 1].date, diaperChanges[diaperChanges.length - 1].time)} •{" "}
-                  {diaperChanges[diaperChanges.length - 1].type}
+                  {getTimeAgo(
+                    diaperChanges[diaperChanges.length - 1].date,
+                    diaperChanges[diaperChanges.length - 1].time
+                  )}{" "}
+                  • {diaperChanges[diaperChanges.length - 1].type}
                 </Text>
-            )}
-              </View>
+              )}
+            </View>
           </TouchableOpacity>
-          
-          {/* Sleep Button */}
-          <TouchableOpacity className="flex-row space-x-7" style={[styles.dataButton, { backgroundColor: '#a184ff' } ]} onPress={()=> setSleepModalVisible(true)}>
-              <Image source={require('../assets/sleepIcon.png')} style={[ styles.dataIcon, { tintColor: '#8064de' }]}/>
 
-              <View className="flex-1">
+          {/* Sleep Button */}
+          <TouchableOpacity
+            className="flex-row space-x-7"
+            style={[styles.dataButton, { backgroundColor: "#a184ff" }]}
+            onPress={() => setSleepModalVisible(true)}
+          >
+            <Image
+              source={require("../assets/sleepIcon.png")}
+              style={[styles.dataIcon, { tintColor: "#8064de" }]}
+            />
+
+            <View className="flex-1">
               <Text style={styles.dataText}>Sleep</Text>
               {sleepRecords.length > 0 && (
                 <Text style={styles.recordPreview}>
-                  {getTimeAgo(new Date(sleepRecords[sleepRecords.length - 1].sleepEnd).toLocaleDateString("en-US"), new Date(sleepRecords[sleepRecords.length - 1].sleepEnd).toLocaleTimeString("en-US"))} •{" "}
-                  {getSleepDuration(sleepRecords[sleepRecords.length - 1].sleepStart, sleepRecords[sleepRecords.length - 1].sleepEnd)}
+                  {getTimeAgo(
+                    new Date(
+                      sleepRecords[sleepRecords.length - 1].sleepEnd
+                    ).toLocaleDateString("en-US"),
+                    new Date(
+                      sleepRecords[sleepRecords.length - 1].sleepEnd
+                    ).toLocaleTimeString("en-US")
+                  )}{" "}
+                  •{" "}
+                  {getSleepDuration(
+                    sleepRecords[sleepRecords.length - 1].sleepStart,
+                    sleepRecords[sleepRecords.length - 1].sleepEnd
+                  )}
                 </Text>
-            )}
-              </View>
+              )}
+            </View>
           </TouchableOpacity>
 
           {/* Color Selection Modal */}
@@ -843,45 +1068,92 @@ export default function HomeScreen({ route, navigation }) {
           </Modal>
         </View>
       </ScrollView>
-          {/* Bottom Bar */}
-          <View style={styles.bottomBar}>
-            <TouchableOpacity
-              style={styles.bottomButton }
-              onPress={() => navigation.navigate("WeeklyReport", { fullName, babyID })}
-             >
-              <Ionicons name="calendar" size={30} color="#28436d" />
-              <Text style={styles.bottomButtonText}>Report</Text>
-            </TouchableOpacity>
+      {/* Bottom Bar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity
+          style={styles.bottomButton}
+          onPress={() =>
+            navigation.navigate("WeeklyReport", { fullName, babyID })
+          }
+        >
+          <Ionicons name="calendar" size={30} color="#28436d" />
+          <Text style={styles.bottomButtonText}>Report</Text>
+        </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.bottomButton }
-              onPress={() => navigation.navigate("BabyMilestones", { fullName, babyID })}
-             >
-              <Ionicons name="trophy" size={30} color="#28436d" />
-              <Text style={styles.bottomButtonText}>Milestones</Text>
-            </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.bottomButton}
+          onPress={() =>
+            navigation.navigate("BabyMilestones", { fullName, babyID })
+          }
+        >
+          <Ionicons name="trophy" size={30} color="#28436d" />
+          <Text style={styles.bottomButtonText}>Milestones</Text>
+        </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.bottomButton }
-              onPress={() => navigation.navigate("Comments", { fullName, babyID })}
-             >
-              <Ionicons name="chatbubbles" size={30} color="#28436d" />
-              <Text style={styles.bottomButtonText}>Comments</Text>
-            </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.bottomButton}
+          onPress={() => navigation.navigate("Comments", { fullName, babyID })}
+        >
+          <Ionicons name="chatbubbles" size={30} color="#28436d" />
+          <Text style={styles.bottomButtonText}>Comments</Text>
+        </TouchableOpacity>
+        <Modal
+          transparent={true}
+          visible={modalVisible}
+          animationType="slide"
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.clearModalContainer}>
+              <Text style={styles.modalTitle}>Clear Notifications</Text>
+              <Text style={styles.modalMessage}>
+                Are you sure you want to clear all notifications?
+              </Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  onPress={removeNotificationsFunc}
+                >
+                  <Text style={styles.buttonText}>Yes</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.buttonText}>No</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
+        </Modal>
+        <TouchableOpacity
+          style={styles.bottomButton}
+          onLongPress={() => setModalVisible(true)}
+          onPress={() =>
+            navigation.navigate("Notification", {
+              fullName,
+              babyID,
+              notifications,
+            })
+          }
+        >
+          <Ionicons name="notifications" size={30} color="#28436d" />
+          <Text style={styles.bottomButtonText}>Notifications</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   topHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     height: 80,
     padding: 20,
     marginTop: 40,
   },
   backButton: {
-    position: 'absolute',
+    position: "absolute",
     left: 20,
     top: 25,
     zIndex: 1,
@@ -891,11 +1163,11 @@ const styles = StyleSheet.create({
     fontSize: 30,
     textAlign: "center",
     fontWeight: "bold",
-    color: '#28436d',
+    color: "#28436d",
   },
   dataButton: {
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     height: 100,
   },
   dataText: {
@@ -910,8 +1182,8 @@ const styles = StyleSheet.create({
   },
   profileSection: {
     flexDirection: "row",
-    justifyContent: 'space-between',
-    width: '100%',
+    justifyContent: "space-between",
+    width: "100%",
     marginHorizontal: 10,
   },
   avatarBubble: {
@@ -943,7 +1215,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   todoButtonText: {
-    color: '#28436d',
+    color: "#28436d",
     fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
@@ -963,9 +1235,9 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalView: {
     backgroundColor: "white",
@@ -1042,12 +1314,60 @@ const styles = StyleSheet.create({
   },
   bottomButton: {
     flex: 1,
-    alignItems: 'center',
-    flexDirection: 'column',
+    alignItems: "center",
+    flexDirection: "column",
     paddingVertical: 20,
   },
   bottomButtonText: {
-    color: '#28436d',
+    color: "#28436d",
     marginTop: 4,
   },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  clearModalContainer: {
+    width: 300,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalMessage: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  confirmButton: {
+    backgroundColor: "#28a745",
+    padding: 10,
+    borderRadius: 8,
+    marginRight: 10,
+    flex: 1,
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#dc3545",
+    padding: 10,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
 })
+
