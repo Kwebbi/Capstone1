@@ -543,7 +543,9 @@ export default function HomeScreen({ route, navigation }) {
                   ))}
                 </View>
                 <View style={{ height: 20 }} />
-                <Button title="Close" onPress={() => setColorModalVisible(false)} />
+                <View style={{ alignItems: 'center' }}>
+                  <Button title="Close" onPress={() => setColorModalVisible(false)} />
+                </View>
               </View>
             </View>
           </Modal>
