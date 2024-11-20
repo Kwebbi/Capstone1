@@ -1,280 +1,225 @@
-import React, { useEffect, useState } from 'react';
-import { Text, View, ActivityIndicator, StyleSheet, TouchableOpacity, Modal, TextInput, Button, Platform } from 'react-native';
-import { ref, onValue, push } from 'firebase/database';
-import { database } from '../config/firebase';
-import Timeline from 'react-native-timeline-flatlist';
-import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from "react";
+import { Button, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Platform } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { ref, push, set } from "firebase/database";
+import { auth, database } from '../config/firebase';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useTheme } from "../components/ThemeContext";  // Make sure to import this
+import { useTheme } from "../components/ThemeContext"; // Import ThemeContext
 
-// Define the BabyMilestones component
-const BabyMilestones = ({ route }) => {
-    const { fullName, babyID } = route.params;
+export default function AddProfile({ navigation }) {
+  const { isDarkMode } = useTheme();  // Get dark mode status
+  const [name, setName] = useState(''); // name
+  const [dob, setDOB] = useState(new Date()); // date of birth
+  const [dobSelected, setDOBSelected] = useState(false); // has date of birth been selected
+  const [showPicker, setShowPicker] = useState(false); // state for showing the date picker
+  const [gender, setGender] = useState('first'); // gender radio buttons
 
-    const [milestones, setMilestones] = useState([]); // State for storing milestones
-    const [loading, setLoading] = useState(true); // Loading state
-    const [modalVisible, setModalVisible] = useState(false); // State for controlling the modal visibility
-    const [newTitle, setNewTitle] = useState(''); // State for new milestone title
-    const [newDescription, setNewDescription] = useState(''); // State for new milestone description
-    const [selectedDate, setSelectedDate] = useState(new Date()); // State for selected date
-    const [showDatePicker, setShowDatePicker] = useState(false); // State for showing the date picker
-    const navigation = useNavigation();
+  function createBaby() {
+    const babyRef = ref(database, 'babies/');
+    const newBabyRef = push(babyRef);
+    const babyKey = newBabyRef.key;
 
-    // Dark mode settings from ThemeContext
-    const { isDarkMode, toggleDarkMode } = useTheme();
-
-    // Effect to fetch milestones from Firebase on component mount
-    useEffect(() => {
-        const milestonesRef = ref(database, `babies/${babyID}/milestone`);
-        onValue(milestonesRef, (snapshot) => {
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                const milestonesArray = Object.keys(data).map((key) => ({
-                    milestoneId: key,
-                    ...data[key],
-                }));
-
-                // Sort milestones by date
-                milestonesArray.sort((a, b) => {
-                    const dateA = new Date(a.date.split('/').join('-'));
-                    const dateB = new Date(b.date.split('/').join('-'));
-                    return dateA - dateB;
-                });
-
-                setMilestones(milestonesArray);
-            } else {
-                setMilestones([]); // No milestones found
-            }
-            setLoading(false); // Stop loading
-        });
-    }, [babyID]);
-
-    // Map milestones to timeline data
-    const timelineData = milestones.map((milestone) => ({
-        time: milestone.date,
-        title: milestone.title,
-        description: milestone.description,
-        onPress: () => handleMilestonePress(milestone),
-    }));
-
-    // Function to navigate to MilestoneView on milestone press
-    const handleMilestonePress = (milestone) => {
-        navigation.navigate('MilestoneView', { 
-            milestone, 
-            babyID, 
-            fullName, 
-            milestoneId: milestone.milestoneId,
-        });
+    // Create the new baby entry with a uniquely generated key
+    const newBaby = {
+      fullName: name,
+      DOB: dob.toLocaleDateString(),
+      babyID: babyKey,
+      Gender: gender,
+      parents: [auth.currentUser.uid]
     };
 
-    // Function to handle adding a new milestone
-    const handleAddMilestone = () => {
-        const newMilestoneRef = ref(database, `babies/${babyID}/milestone`);
-        const newMilestone = {
-            title: newTitle,
-            description: newDescription,
-            date: selectedDate.toLocaleDateString(), // Use the selected date
-        };
-        
-        // Push new milestone to the database
-        push(newMilestoneRef, newMilestone)
-            .then(() => {
-                console.log("New milestone added:", newMilestone); // Log new milestone details
-                setModalVisible(false); // Close modal after saving
-                setNewTitle(''); // Reset input fields
-                setNewDescription('');
-                setSelectedDate(new Date()); // Reset selected date
-            })
-            .catch((error) => {
-                console.error("Error adding milestone: ", error); // Log any errors during the addition
-            });
-    };
+    // Set the new baby entry in the database and to a catch error in case there is an error
+    set(newBabyRef, newBaby).then(() => {
+      console.log("Baby was successfully added");
+    }).catch((error) => {
+      console.log(error);
+    })
+  };
 
-    // Function to render timeline item detail
-    const renderDetail = (rowData) => (
-        <TouchableOpacity onPress={rowData.onPress}>
-            <Text style={styles.title}>{rowData.title}</Text>
-            <Text style={styles.description}>{rowData.description}</Text>
-        </TouchableOpacity>
-    );
+  function handleOnPress() {
+    createBaby();
+    navigation.navigate('Profiles');
+  }
 
-    // Apply dynamic styles for dark and light mode
-    const containerStyle = isDarkMode ? styles.darkContainer : styles.lightContainer;
-    const titleTextStyle = isDarkMode ? styles.darkTitleText : styles.lightTitleText;
-    const textStyle = isDarkMode ? styles.darkText : styles.lightText;
-    const backgroundColor = isDarkMode ? 'black' : '#cfe2f3'; // Dark or light background
-    const iconColor = isDarkMode ? '#f1f1f1' : '#28436d'; // Dark or light icon color
+  // Dynamic background and text colors based on dark mode
+  const backgroundColor = isDarkMode ? 'black' : '#cfe2f3';
+  const textColor = isDarkMode ? 'white' : '#28436d';
+  const placeholderTextColor = isDarkMode ? 'black' : '#999999';
+  const borderColor = isDarkMode ? '#444444' : '#8ec3ff';
 
-    // Modal styles for dark and light mode
-    const modalBackgroundColor = isDarkMode ? '#333' : 'white'; // Modal background color
-    const modalTextColor = isDarkMode ? '#1E90FF' : '#1E90FF'; // Modal text color
-    const inputBackgroundColor = isDarkMode ? '#444' : '#f0f0f0'; // Input field background color
-    const inputTextColor = isDarkMode ? 'white' : 'black'; // Input text color
-
-    return (
-        <View style={[styles.container, { backgroundColor }]}>
-            <TouchableOpacity style={{ position: 'absolute', left: 17, top: 82, zIndex: 10 }} onPress={() => navigation.goBack()}>
-                <Ionicons name="arrow-back" size={30} color={iconColor} />
+  return (
+    <ScrollView automaticallyAdjustKeyboardInsets={true} style={{ backgroundColor: backgroundColor }}>
+      <View style={[styles.container, { backgroundColor: backgroundColor }]}>
+        <SafeAreaView>
+          <View style={styles.header}>
+            <TouchableOpacity style={{ position: "absolute", left: -10, top: 17 }} onPress={() => navigation.navigate('Profiles')}>
+              <Ionicons name="arrow-back" size={30} color={textColor} />
             </TouchableOpacity>
-            <Text style={[titleTextStyle, { textAlign: 'center', marginVertical: 60, fontSize: 24, fontWeight: 'bold' }]}>{fullName}'s Milestones</Text>
+            <Text style={[styles.titleText, { color: textColor }]}>Add Profile</Text>
+          </View>
+        </SafeAreaView>
 
-            {/* Add Milestone Button */}
-            <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-                <Text style={styles.addButtonText}>Add Milestone</Text>
+        <View style={styles.mainBody}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.headerText, { color: textColor }]}>Baby Info</Text>
+          </View>
+
+          <View style={styles.form}>
+            {/* Name */}
+            <Text style={[styles.inputLabel, { color: textColor }]}>Name</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: isDarkMode ? '#818181' : '#f9f9f9', color: textColor }]}
+              value={name}
+              onChangeText={setName}
+              placeholder="Enter name"
+              placeholderTextColor={placeholderTextColor}
+            />
+
+            {/* DOB */}
+            <Text style={[styles.inputLabel, { color: textColor }]}>Date of Birth</Text>
+            <TouchableOpacity onPress={() => setShowPicker(true)}>
+              <Text style={[styles.input, { backgroundColor: isDarkMode ? '#818181' : '#f9f9f9', color: textColor }]}>
+                {dobSelected ? dob.toLocaleDateString() : <Text style={{ color: placeholderTextColor }}>Enter DOB</Text>}
+              </Text>
             </TouchableOpacity>
-
-            {/* Loading indicator while fetching milestones */}
-            {loading ? (
-                <ActivityIndicator size="large" color="#0000ff" />
-            ) : (
-                <Timeline
-                    data={timelineData}
-                    circleSize={20}
-                    innerCircle={'dot'}
-                    circleColor='rgb(45,156,219)'
-                    lineColor='rgb(45,156,219)'
-                    timeStyle={{ textAlign: 'center', backgroundColor: '#ff9797', color: 'white', padding: 5, borderRadius: 13 }}
-                    timeContainerStyle={{ minWidth: 100 }}
-                    descriptionStyle={{ color: 'gray' }}
-                    options={{
-                        style: { paddingTop: 5 },
-                        removeClippedSubviews: false
-                    }}
-                    separator={true}
-                    renderDetail={renderDetail}
+            {showPicker && (
+              <View>
+                <DateTimePicker
+                  value={dob}
+                  mode="date"
+                  display="spinner"
+                  onChange={(event, date) => {
+                    if (Platform.OS === 'android') { // Android automatically has confirm button
+                      setShowPicker(false);
+                    }
+                    if (date) {
+                      setDOB(date); // Set selected date from date picker
+                      setDOBSelected(true);
+                    }
+                  }}
+                  maximumDate={new Date()} // Restrict date picker to the current date
+                  style={{ backgroundColor: isDarkMode ? '#818181' : '#f9f9f9' }}  // Background color for the date picker
                 />
+                {Platform.OS === 'ios' && (
+                  <Button
+                    title="Done"
+                    onPress={() => setShowPicker(false)}
+                  />
+                )}
+              </View>
             )}
 
-            {/* Modal for adding a new milestone */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <View style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
-                    <View style={[styles.modalContent, { backgroundColor: modalBackgroundColor }]}>
-                        <Text style={[styles.modalTitle, { color: '#1E90FF', textAlign: 'center' }]}>Add New Milestone</Text>
-                        <TextInput
-                            style={[styles.input, { backgroundColor: inputBackgroundColor, color: inputTextColor }]}
-                            placeholder="Title"
-                            value={newTitle}
-                            onChangeText={setNewTitle}
-                            placeholderTextColor="#c2c2c2"
-                        />
-                        <TextInput
-                            style={[styles.input, { backgroundColor: inputBackgroundColor, color: inputTextColor }]}
-                            placeholder="Description"
-                            value={newDescription}
-                            onChangeText={setNewDescription}
-                            placeholderTextColor="#c2c2c2"
-                        />
-                        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                            <Text style={[styles.dateText, { color: modalTextColor, textAlign: 'center' }]}>{selectedDate.toLocaleDateString()}</Text>
-                        </TouchableOpacity>
-                        {showDatePicker && (
-                            <View>
-                                <DateTimePicker
-                                    value={selectedDate}
-                                    mode="date"
-                                    display="spinner"
-                                    onChange={(event, date) => {
-                                        if (Platform.OS === 'android') {
-                                            setShowDatePicker(false);
-                                        }
-                                        if (date) {
-                                            setSelectedDate(date);
-                                        }
-                                    }}
-                                    textColor="black"
-                                />
-                                {Platform.OS === 'ios' && (
-                                    <Button
-                                        title="Done"
-                                        onPress={() => setShowDatePicker(false)}
-                                    />
-                                )}
-                            </View>
-                        )}
-                        <Button title="Add Milestone" onPress={handleAddMilestone} />
-                        <View style={{ height: 15 }} />
-                        <Button title="Cancel" onPress={() => setModalVisible(false)} color="red" />
-                    </View>
-                </View>
-            </Modal>
+            {/* Gender */}
+            <Text style={[styles.inputLabel, { color: textColor }]}>Gender</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+              {/* Male Radio Button */}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity
+                  onPress={() => setGender('Male')}
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
+                    borderWidth: 2,
+                    borderColor: gender === 'Male' ? '#8ec3ff' : borderColor,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  {gender === 'Male' && <View style={styles.selectedRadio} />}
+                </TouchableOpacity>
+                <Text style={{ marginLeft: 8, color: textColor }}>Male</Text>
+              </View>
+
+              {/* Female Radio Button */}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity
+                  onPress={() => setGender('Female')}
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
+                    borderWidth: 2,
+                    borderColor: gender === 'Female' ? '#8ec3ff' : borderColor,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  {gender === 'Female' && <View style={styles.selectedRadio} />}
+                </TouchableOpacity>
+                <Text style={{ marginLeft: 8, color: textColor }}>Female</Text>
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity onPress={handleOnPress} style={[styles.submitButton, { backgroundColor: '#8ec3ff' }]}>
+            <Text style={styles.submitButtonText}>+</Text>
+          </TouchableOpacity>
         </View>
-    );
-};
+      </View>
+    </ScrollView>
+  );
+}
 
-// Styles including dynamic color changes for light/dark mode
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 15,
-    },
-    lightContainer: {
-        backgroundColor: '#cfe2f3',
-    },
-    darkContainer: {
-        backgroundColor: 'black',
-    },
-    lightText: {
-        color: 'black',
-    },
-    darkText: {
-        color: 'white',
-    },
-    lightTitleText: {
-        color: '#28436d',
-    },
-    darkTitleText: {
-        color: '#f1f1f1',
-    },
-    title: {
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    description: {
-        color: 'gray',
-    },
-    addButton: {
-        padding: 10,
-        backgroundColor: '#007bff',
-        alignItems: 'center',
-        marginBottom: 10,
-        borderRadius: 5,
-    },
-    addButtonText: {
-        color: 'white',
-        fontSize: 16,
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    modalContent: {
-        padding: 20,
-        borderRadius: 10,
-        width: '80%',
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    input: {
-        height: 40,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        marginBottom: 10,
-        paddingLeft: 8,
-    },
-    dateText: {
-        fontSize: 16,
-        marginBottom: 10,
-    },
+  container: {
+    flex: 1,
+    paddingTop: 32,
+    paddingHorizontal: 32,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  titleText: {
+    fontSize: 35,
+    fontWeight: 'bold',
+  },
+  mainBody: {
+    flex: 1,
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+    padding: 16,
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  headerText: {
+    fontSize: 25,
+    fontWeight: 'bold',
+  },
+  form: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  inputLabel: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  input: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    borderWidth: 1,
+  },
+  selectedRadio: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#8ec3ff',
+  },
+  submitButton: {
+    paddingVertical: 10,
+    borderRadius: 25,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    fontSize: 24,
+    color: '#ffffff',
+  },
 });
-
-export default BabyMilestones;
