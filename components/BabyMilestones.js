@@ -6,6 +6,7 @@ import Timeline from 'react-native-timeline-flatlist';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTheme } from "../components/ThemeContext";  // Make sure to import this
 
 // Define the BabyMilestones component
 const BabyMilestones = ({ route }) => {
@@ -19,6 +20,9 @@ const BabyMilestones = ({ route }) => {
     const [selectedDate, setSelectedDate] = useState(new Date()); // State for selected date
     const [showDatePicker, setShowDatePicker] = useState(false); // State for showing the date picker
     const navigation = useNavigation();
+
+    // Dark mode settings from ThemeContext
+    const { isDarkMode, toggleDarkMode } = useTheme();
 
     // Effect to fetch milestones from Firebase on component mount
     useEffect(() => {
@@ -95,16 +99,27 @@ const BabyMilestones = ({ route }) => {
         </TouchableOpacity>
     );
 
-    return (
-        <View style={styles.container}>
-            <View style={{ height: 15 }} />
-            {/* Back button to navigate to previous screen */}
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Ionicons name="arrow-back" size={24} color="black" />
-            </TouchableOpacity>
-            <Text style={styles.title}>{fullName}'s Milestones</Text>
+    // Apply dynamic styles for dark and light mode
+    const containerStyle = isDarkMode ? styles.darkContainer : styles.lightContainer;
+    const titleTextStyle = isDarkMode ? styles.darkTitleText : styles.lightTitleText;
+    const textStyle = isDarkMode ? styles.darkText : styles.lightText;
+    const backgroundColor = isDarkMode ? 'black' : '#cfe2f3'; // Dark or light background
+    const iconColor = isDarkMode ? '#f1f1f1' : '#28436d'; // Dark or light icon color
 
-            {/* Add Milestone Button - Positioned above Timeline */}
+    // Modal styles for dark and light mode
+    const modalBackgroundColor = isDarkMode ? '#333' : 'white'; // Modal background color
+    const modalTextColor = isDarkMode ? '#1E90FF' : '#1E90FF'; // Modal text color
+    const inputBackgroundColor = isDarkMode ? '#444' : '#f0f0f0'; // Input field background color
+    const inputTextColor = isDarkMode ? 'white' : 'black'; // Input text color
+
+    return (
+        <View style={[styles.container, { backgroundColor }]}>
+            <TouchableOpacity style={{ position: 'absolute', left: 17, top: 82, zIndex: 10 }} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={30} color={iconColor} />
+            </TouchableOpacity>
+            <Text style={[titleTextStyle, { textAlign: 'center', marginVertical: 60, fontSize: 24, fontWeight: 'bold' }]}>{fullName}'s Milestones</Text>
+
+            {/* Add Milestone Button */}
             <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
                 <Text style={styles.addButtonText}>Add Milestone</Text>
             </TouchableOpacity>
@@ -119,13 +134,13 @@ const BabyMilestones = ({ route }) => {
                     innerCircle={'dot'}
                     circleColor='rgb(45,156,219)'
                     lineColor='rgb(45,156,219)'
-                    timeStyle={{textAlign: 'center', backgroundColor:'#ff9797', color:'white', padding:5, borderRadius:13}}
+                    timeStyle={{ textAlign: 'center', backgroundColor: '#ff9797', color: 'white', padding: 5, borderRadius: 13 }}
                     timeContainerStyle={{ minWidth: 100 }}
                     descriptionStyle={{ color: 'gray' }}
                     options={{
                         style: { paddingTop: 5 },
                         removeClippedSubviews: false
-                    }}        
+                    }}
                     separator={true}
                     renderDetail={renderDetail}
                 />
@@ -136,27 +151,27 @@ const BabyMilestones = ({ route }) => {
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}>
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Add New Milestone</Text>
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+                    <View style={[styles.modalContent, { backgroundColor: modalBackgroundColor }]}>
+                        <Text style={[styles.modalTitle, { color: '#1E90FF', textAlign: 'center' }]}>Add New Milestone</Text>
                         <TextInput
-                            style={styles.input}
+                            style={[styles.input, { backgroundColor: inputBackgroundColor, color: inputTextColor }]}
                             placeholder="Title"
                             value={newTitle}
                             onChangeText={setNewTitle}
                             placeholderTextColor="#c2c2c2"
                         />
                         <TextInput
-                            style={styles.input}
+                            style={[styles.input, { backgroundColor: inputBackgroundColor, color: inputTextColor }]}
                             placeholder="Description"
                             value={newDescription}
                             onChangeText={setNewDescription}
                             placeholderTextColor="#c2c2c2"
                         />
-                        {/* Date Picker */}
                         <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-                            <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
+                            <Text style={[styles.dateText, { color: modalTextColor, textAlign: 'center' }]}>{selectedDate.toLocaleDateString()}</Text>
                         </TouchableOpacity>
                         {showDatePicker && (
                             <View>
@@ -165,24 +180,21 @@ const BabyMilestones = ({ route }) => {
                                     mode="date"
                                     display="spinner"
                                     onChange={(event, date) => {
-                                        if (Platform.OS === 'android') { // Android automatically has confirm button
+                                        if (Platform.OS === 'android') {
                                             setShowDatePicker(false);
                                         }
                                         if (date) {
-                                            setSelectedDate(date); // Set selected date from date picker
-                                            console.log("Selected date:", date.toLocaleDateString()); // Log the selected date
+                                            setSelectedDate(date);
                                         }
                                     }}
                                     textColor="black"
                                 />
-                                {Platform.OS === 'ios' && ( // manually add confirmation button for iOS
+                                {Platform.OS === 'ios' && (
                                     <Button
                                         title="Done"
-                                        onPress={() => {
-                                            setShowDatePicker(false);
-                                        }}
+                                        onPress={() => setShowDatePicker(false)}
                                     />
-                                 )}
+                                )}
                             </View>
                         )}
                         <Button title="Add Milestone" onPress={handleAddMilestone} />
@@ -194,67 +206,74 @@ const BabyMilestones = ({ route }) => {
         </View>
     );
 };
+
+// Styles including dynamic color changes for light/dark mode
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        padding: 15,
     },
-    backButton: {
-        position: 'absolute',
-        top: 57,
-        left: 20,
-        zIndex: 1,
+    lightContainer: {
+        backgroundColor: '#cfe2f3',
+    },
+    darkContainer: {
+        backgroundColor: 'black',
+    },
+    lightText: {
+        color: 'black',
+    },
+    darkText: {
+        color: 'white',
+    },
+    lightTitleText: {
+        color: '#28436d',
+    },
+    darkTitleText: {
+        color: '#f1f1f1',
     },
     title: {
-        fontSize: 24,
         fontWeight: 'bold',
-        marginVertical: 20,
-        textAlign: 'center',
-    },
-    addButton: {
-        backgroundColor: '#007BFF',
-        padding: 10,
-        borderRadius: 5,
-        marginBottom: 20,
-        alignItems: 'center',
-    },
-    addButtonText: {
-        color: '#fff',
         fontSize: 16,
     },
     description: {
         color: 'gray',
     },
+    addButton: {
+        padding: 10,
+        backgroundColor: '#007bff',
+        alignItems: 'center',
+        marginBottom: 10,
+        borderRadius: 5,
+    },
+    addButtonText: {
+        color: 'white',
+        fontSize: 16,
+    },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        width: '80%',
-        backgroundColor: 'white',
         padding: 20,
         borderRadius: 10,
-        alignItems: 'center',
+        width: '80%',
     },
     modalTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 15,
+        marginBottom: 10,
     },
     input: {
-        width: '100%',
-        borderWidth: 1,
+        height: 40,
         borderColor: '#ccc',
-        padding: 10,
-        marginBottom: 15,
-        borderRadius: 5,
+        borderWidth: 1,
+        marginBottom: 10,
+        paddingLeft: 8,
     },
     dateText: {
         fontSize: 16,
-        color: '#007BFF',
-        marginBottom: 15,
+        marginBottom: 10,
     },
 });
 
