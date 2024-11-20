@@ -1,21 +1,15 @@
-// Import the functions you need from the SDKs you need
+// Import the necessary functions from Firebase SDK
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-import {getAuth} from "firebase/auth"
-import {getDatabase} from "firebase/database";
+import { getAuth, initializeAuth, getReactNativePersistence } from "firebase/auth";
+import { getDatabase, ref, set, get, child } from "firebase/database"; // Import Realtime Database methods
 
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBTqUuVFLikR5nXGtWcBIaB7Tov0iTZuGM",
   authDomain: "baby-tracker-c9d75.firebaseapp.com",
+  databaseURL: "https://baby-tracker-c9d75-default-rtdb.firebaseio.com", // Add your Realtime Database URL here
   projectId: "baby-tracker-c9d75",
   storageBucket: "baby-tracker-c9d75.appspot.com",
   messagingSenderId: "582498097273",
@@ -25,14 +19,14 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 
-//this is new
+// Initialize Auth
 const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
 });
-const database = getDatabase(app);
 
-//export const auth = getAuth(app);
-//export const database = getDatabase(app);
-export { auth, database };
+// Initialize Realtime Database
+const database = getDatabase(app); // Get a reference to the Realtime Database
+
+// Export the services
+export { auth, database, ref, set, get, child }; // Export Realtime Database methods
