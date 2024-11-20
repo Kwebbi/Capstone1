@@ -516,6 +516,10 @@ export default function HomeScreen({ route, navigation }) {
 
   // Function to calculate the sleep duration
   function getSleepDuration(time1, time2) {
+    // if time2 is earlier than time1, assume time2 is in the future
+    if (time2 < time1) {
+      time2 += 24 * 60 * 60 * 1000; // add 24 hours in milliseconds
+    }
     const diffInMs = time2 - time1
     const diffInMins = Math.floor(diffInMs / (1000 * 60))
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
