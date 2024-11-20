@@ -1,18 +1,19 @@
-import React, { Component, useState } from "react";
+import React, { useState } from "react";
 import { Button, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Platform } from "react-native";
-import { SafeAreaView, withSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { ref, push, set } from "firebase/database";
-import { auth, database} from '../config/firebase'
+import { auth, database } from '../config/firebase';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTheme } from "../components/ThemeContext"; // Import ThemeContext
 
 export default function AddProfile({ navigation }) {
-
+  const { isDarkMode } = useTheme();  // Get dark mode status
   const [name, setName] = useState(''); // name
   const [dob, setDOB] = useState(new Date()); // date of birth
   const [dobSelected, setDOBSelected] = useState(false); // has date of birth been selected
   const [showPicker, setShowPicker] = useState(false); // state for showing the date picker
-  const [gender, setGender] = React.useState('first'); // gender radio buttons
+  const [gender, setGender] = useState('first'); // gender radio buttons
 
   function createBaby() {
     const babyRef = ref(database, 'babies/');
@@ -29,54 +30,61 @@ export default function AddProfile({ navigation }) {
     };
 
     // Set the new baby entry in the database and to a catch error in case there is an error
-    set(newBabyRef, newBaby).then (() => {
-      console.log("Baby was successfully added")
+    set(newBabyRef, newBaby).then(() => {
+      console.log("Baby was successfully added");
     }).catch((error) => {
       console.log(error);
     })
   };
 
   function handleOnPress() {
-    //setOpen(!open);
     createBaby();
     navigation.navigate('Profiles');
   }
 
+  // Dynamic background and text colors based on dark mode
+  const backgroundColor = isDarkMode ? 'black' : '#cfe2f3';
+  const textColor = isDarkMode ? 'white' : '#28436d';
+  const placeholderTextColor = isDarkMode ? 'black' : '#999999';
+  const borderColor = isDarkMode ? '#444444' : '#8ec3ff';
+
   return (
-    <ScrollView automaticallyAdjustKeyboardInsets={true} style={{ backgroundColor: 'white' }}>
-      <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
-        <SafeAreaView className="flex">
-          <View className="flex-row justify-center" style={styles.container}>
-              <TouchableOpacity style={{ position: "absolute", left: 22, top: 27 }} onPress={()=> navigation.navigate('Profiles')}>
-                <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
-              </TouchableOpacity>
-              
-            <Text className="text-white mt-5" style={styles.titleText}>Add Profile</Text>
+    <ScrollView automaticallyAdjustKeyboardInsets={true} style={{ backgroundColor: backgroundColor }}>
+      <View style={[styles.container, { backgroundColor: backgroundColor }]}>
+        <SafeAreaView>
+          <View style={styles.header}>
+            <TouchableOpacity style={{ position: "absolute", left: -10, top: 17 }} onPress={() => navigation.navigate('Profiles')}>
+              <Ionicons name="arrow-back" size={30} color={textColor} />
+            </TouchableOpacity>
+            <Text style={[styles.titleText, { color: textColor }]}>Add Profile</Text>
           </View>
         </SafeAreaView>
 
         <View style={styles.mainBody}>
-          <View className="flex-row justify-center">
-            <Text className="text-black font-bold mb-5" style={{ fontSize: 25 }}>Baby Info</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.headerText, { color: textColor }]}>Baby Info</Text>
           </View>
 
-          <View className="form space-y-1" style={{ flex: 1, justifyContent: "center"}}>
-
+          <View style={styles.form}>
             {/* Name */}
-            <Text className="flex-end text-gray-700">Name</Text>
-            <TextInput className="p-4 bg-gray-100 text-gray-700 mb-3" 
-              value={name} onChangeText={value=> setName(value)} placeholder='Enter name'/>
+            <Text style={[styles.inputLabel, { color: textColor }]}>Name</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: isDarkMode ? '#818181' : '#f9f9f9', color: textColor }]}
+              value={name}
+              onChangeText={setName}
+              placeholder="Enter name"
+              placeholderTextColor={placeholderTextColor}
+            />
 
             {/* DOB */}
-            <Text className="text-gray-700">Date of Birth</Text>
+            <Text style={[styles.inputLabel, { color: textColor }]}>Date of Birth</Text>
             <TouchableOpacity onPress={() => setShowPicker(true)}>
-              <Text
-                className="p-4 bg-gray-100 text-gray-700 mb-3">
-                {dobSelected ? (dob.toLocaleDateString()) : (<Text className="text-gray-400 opacity-60">Enter DOB</Text>)}
+              <Text style={[styles.input, { backgroundColor: isDarkMode ? '#818181' : '#f9f9f9', color: textColor }]}>
+                {dobSelected ? dob.toLocaleDateString() : <Text style={{ color: placeholderTextColor }}>Enter DOB</Text>}
               </Text>
             </TouchableOpacity>
             {showPicker && (
-              <View>  
+              <View>
                 <DateTimePicker
                   value={dob}
                   mode="date"
@@ -90,20 +98,20 @@ export default function AddProfile({ navigation }) {
                       setDOBSelected(true);
                     }
                   }}
+                  maximumDate={new Date()} // Restrict date picker to the current date
+                  style={{ backgroundColor: isDarkMode ? '#818181' : '#f9f9f9' }}  // Background color for the date picker
                 />
-                {Platform.OS === 'ios' && ( // manually add confirmation button for iOS
+                {Platform.OS === 'ios' && (
                   <Button
                     title="Done"
-                    onPress={() => {
-                      setShowPicker(false);
-                    }}
+                    onPress={() => setShowPicker(false)}
                   />
                 )}
               </View>
             )}
 
             {/* Gender */}
-            <Text className="text-gray-700 mb-3">Gender</Text>
+            <Text style={[styles.inputLabel, { color: textColor }]}>Gender</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
               {/* Male Radio Button */}
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -114,18 +122,16 @@ export default function AddProfile({ navigation }) {
                     height: 24,
                     borderRadius: 12,
                     borderWidth: 2,
-                    borderColor: gender === 'Male' ? '#8ec3ff' : 'gray',
+                    borderColor: gender === 'Male' ? '#8ec3ff' : borderColor,
                     justifyContent: 'center',
                     alignItems: 'center',
                   }}
                 >
-                  {gender === 'Male' && (
-                    <View style={styles.selectedRadio}/>
-                  )}
+                  {gender === 'Male' && <View style={styles.selectedRadio} />}
                 </TouchableOpacity>
-                <Text style={{ marginLeft: 8 }}>Male</Text>
+                <Text style={{ marginLeft: 8, color: textColor }}>Male</Text>
               </View>
-              
+
               {/* Female Radio Button */}
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <TouchableOpacity
@@ -135,88 +141,85 @@ export default function AddProfile({ navigation }) {
                     height: 24,
                     borderRadius: 12,
                     borderWidth: 2,
-                    borderColor: gender === 'Female' ? '#8ec3ff' : 'gray',
+                    borderColor: gender === 'Female' ? '#8ec3ff' : borderColor,
                     justifyContent: 'center',
                     alignItems: 'center',
                   }}
                 >
-                  {gender === 'Female' && (
-                    <View style={styles.selectedRadio}/>
-                  )}
+                  {gender === 'Female' && <View style={styles.selectedRadio} />}
                 </TouchableOpacity>
-                <Text style={{ marginLeft: 8 }}>Female</Text>
+                <Text style={{ marginLeft: 8, color: textColor }}>Female</Text>
               </View>
             </View>
           </View>
-          
-          <TouchableOpacity className="py-1 bg-blue-300 rounded-3xl mt-5 mb-8">
-            <Text className="font-xl text-center text-gray-700 text-3xl" onPress={()=> handleOnPress()}>+</Text>
+
+          <TouchableOpacity onPress={handleOnPress} style={[styles.submitButton, { backgroundColor: '#8ec3ff' }]}>
+            <Text style={styles.submitButtonText}>+</Text>
           </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
   );
-} 
+}
 
 const styles = StyleSheet.create({
-
-
-  mainBody: { //for the rounded edges in the main body of each screen
-    flex: 1, // this allows the view to take the remaining space
-    backgroundColor: 'white', 
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 50,
-    padding: 16,
-    overflow: 'hidden', 
-    paddingHorizontal: 32, 
-    paddingTop: 32, 
+  container: {
+    flex: 1,
+    paddingTop: 32,
+    paddingHorizontal: 32,
   },
-
-
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
   titleText: {
-    color: '#28436d',
     fontSize: 35,
     fontWeight: 'bold',
   },
-
-  nameText: {
-    color: '#28436d',
-    fontSize: 27,
+  mainBody: {
+    flex: 1,
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+    padding: 16,
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  headerText: {
+    fontSize: 25,
     fontWeight: 'bold',
   },
-
-  ageText: {
-    color: '#28436d',
-    fontSize: 17,
+  form: {
+    flex: 1,
+    justifyContent: 'center',
   },
-
+  inputLabel: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  input: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    borderWidth: 1,
+  },
   selectedRadio: {
     width: 16,
     height: 16,
     borderRadius: 8,
     backgroundColor: '#8ec3ff',
   },
-
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
+  submitButton: {
+    paddingVertical: 10,
+    borderRadius: 25,
+    marginTop: 20,
     alignItems: 'center',
-    marginTop: 22,
   },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    width: '90%',
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  }
+  submitButtonText: {
+    fontSize: 24,
+    color: '#ffffff',
+  },
 });
