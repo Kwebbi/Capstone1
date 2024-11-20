@@ -556,9 +556,14 @@ export default function HomeScreen({ route, navigation }) {
     )}T${hours.toString().padStart(2, "0")}:${minutes}:${seconds}`
 
     // Get time difference
-    const lastTime = new Date(isoString).getTime()
-    const currentTime = Date.now()
-    const diffInMs = currentTime - lastTime
+    lastTime = new Date(isoString).getTime()
+    currentTime = Date.now()
+    diffInMs = currentTime - lastTime
+    // if the difference is negative, assume lastTime was from the previous day
+    if (diffInMs < 0) {
+      lastTime -= 24 * 60 * 60 * 1000; // subtract 24 hours in milliseconds
+      diffInMs = currentTime - lastTime; // recalculate the difference
+    }
     const diffInMins = Math.floor(diffInMs / (1000 * 60))
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
