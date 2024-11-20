@@ -719,7 +719,7 @@ export default function HomeScreen({ route, navigation }) {
                 
                 {/* Save and Cancel Buttons */}
                 <View style={{ alignItems: 'center' }}>
-                  <Button title="Save" onPress={handleSaveFeeding} />
+                  <Button title="Save" onPress={handleSaveDiaperChange} />
                   <View style={{ height: Platform.OS === 'android' ? 10 : 0 }} />
                   <Button title="Cancel" onPress={() => setDiaperModalVisible(false)} color="red" />
                 </View>
@@ -736,16 +736,77 @@ export default function HomeScreen({ route, navigation }) {
           >
             <View style={styles.modalContainer}>
               <View style={styles.modalView}>
-                <Text style={styles.modalTitle}>Add Sleep</Text>
+                <Text style={[styles.modalTitle, { marginBottom: 30 }]}>Add Sleep</Text>
 
-                {/* Date Picker */}
-                <Button
-                  title="Pick Date"
-                  onPress={() => setDatePickerVisibility(true)}
-                />
-                {isDatePickerVisible && (
+                {Platform.OS === 'ios' && ( // iOS datetime view
+                  <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                    <Text style={styles.modalSubtitle}>Date</Text>
+                    <View style={{ height: 12 }} />
+                    <DateTimePicker // iOS date picker
+                      value={selectedDate}
+                      mode="date"
+                      onChange={(event, date) => {
+                        if (date) {
+                          setSelectedDate(date);
+                        }
+                      }}
+                      maximumDate={new Date()}
+                    />
+
+                    <Text style={styles.modalSubtitle}>Start Time</Text>
+                    <View style={{ height: 12 }} />
+                    <DateTimePicker // iOS start time picker
+                      value={sleepStart}
+                      mode="time"
+                      display="clock"
+                      onChange={(event, time) => {
+                        if (time) {
+                          setSleepStart(time);
+                        }
+                      }}
+                    />
+                    
+                    <Text style={styles.modalSubtitle}>End Time</Text>
+                    <View style={{ height: 12 }} />
+                    <DateTimePicker // iOS end time picker
+                      value={sleepEnd}
+                      mode="time"
+                      display="clock"
+                      onChange={(event, time) => {
+                        if (time) {
+                          setSleepEnd(time);
+                        }
+                      }}
+                    />
+                  </View>
+                )}
+                {Platform.OS === 'android' && ( // android datetime view
+                  <View style={{ flexDirection: 'column' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                      <Text style={styles.modalSubtitle}>Date: </Text>
+                      <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end' }} onPress={() => setDatePickerVisibility(true)}>
+                        <Text style={styles.dateText}>{selectedDate.toLocaleDateString()}</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                      <Text style={styles.modalSubtitle}>Start Time: </Text>
+                      <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end' }} onPress={() => setStartTimePickerVisibility(true)}>
+                        <Text style={styles.dateText}>{sleepStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                      <Text style={styles.modalSubtitle}>End Time: </Text>
+                      <TouchableOpacity style={{ flex: 1, alignItems: 'flex-end' }} onPress={() => setEndTimePickerVisibility(true)}>
+                        <Text style={styles.dateText}>{sleepEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
+                {Platform.OS === 'android' && isDatePickerVisible && ( // android date picker
                   <DateTimePicker
-                    testID="datePicker"
                     value={selectedDate}
                     mode="date"
                     display="calendar"
@@ -753,42 +814,28 @@ export default function HomeScreen({ route, navigation }) {
                     maximumDate={new Date()}
                   />
                 )}
-
-                {/* Start Time Picker */}
-                <Text>Pick Start Time:</Text>
-                <Button
-                  title="Pick Start Time"
-                  onPress={() => setStartTimePickerVisibility(true)}
-                />
-                {isStartTimePickerVisible && (
+                {Platform.OS === 'android' && isStartTimePickerVisible && ( // android start time picker
                   <DateTimePicker
-                    testID="startTimePicker"
                     value={sleepStart}
                     mode="time"
-                    display="clock"
+                    display="spinner"
                     onChange={onChangeSleepStartTime}
                   />
                 )}
-
-                {/* End Time Picker */}
-                <Text>Pick End Time:</Text>
-                <Button
-                  title="Pick End Time"
-                  onPress={() => setEndTimePickerVisibility(true)}
-                />
-                {isEndTimePickerVisible && (
+                {Platform.OS === 'android' && isEndTimePickerVisible && ( // android end time picker
                   <DateTimePicker
-                    testID="endTimePicker"
                     value={sleepEnd}
                     mode="time"
-                    display="clock"
+                    display="spinner"
                     onChange={onChangeSleepEndTime}
                   />
                 )}
 
+                <View style={{ height: 15 }} />
+                
                 {/* Save and Cancel Buttons */}
                 <View style={{ alignItems: 'center' }}>
-                  <Button title="Save" onPress={handleSaveFeeding} />
+                  <Button title="Save" onPress={handleSaveSleep} />
                   <View style={{ height: Platform.OS === 'android' ? 10 : 0 }} />
                   <Button title="Cancel" onPress={() => setSleepModalVisible(false)} color="red" />
                 </View>
