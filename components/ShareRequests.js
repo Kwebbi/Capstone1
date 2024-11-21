@@ -82,7 +82,7 @@ export default function ShareRequests({ route, navigation }) {
       <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
         <SafeAreaView className="flex">
           <View className="flex-row justify-center" style={styles.container}>
-          <TouchableOpacity style={{ position: "absolute", left: 22, top: 27 }} onPress={()=> navigation.navigate('Profiles')}>
+          <TouchableOpacity style={{ position: "absolute", left: 22, top: 27 }} onPress={()=> navigation.navigate('Settings')}>
                 <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
               </TouchableOpacity>
             <Text className="text-white mt-5" style={styles.titleText}>Pending Share Requests</Text>
@@ -123,9 +123,9 @@ export default function ShareRequests({ route, navigation }) {
                                             <>Loading...</>
                                         )}
                                         </Dialog.Description>
-                                        <Dialog.Button label="Cancel" onPress={handleCancel} />
+                                        <Dialog.Button label="Cancel" onPress={handleCancel} color="grey" />
                                         <Dialog.Button label="Accept" onPress={handleAccept} />
-                                        <Dialog.Button label="Deny" onPress={handleDeny} />
+                                        <Dialog.Button label="Deny" onPress={handleDeny} color="red" />
                                     </Dialog.Container>
                                 </View>
                         </View>
@@ -161,6 +161,7 @@ const styles = StyleSheet.create({
     color: '#28436d',
     fontSize: 35,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
 
   nameText: {

@@ -63,13 +63,13 @@ export default function HelpNSupport({ navigation }) {
             <Ionicons name="arrow-back" size={30} color="#28436d" />
               </TouchableOpacity>
 
-              <Text className="text-white" style={styles.titleText}>Help and Support</Text>
+              <Text style={styles.titleText}>Help & Support</Text>
             </View>
         </SafeAreaView>
       </View>
 
       <View style={styles.container}>
-      <Text style={styles.title}>Frequently Asked Questions (FAQs)</Text>
+      <Text style={styles.title}>Frequently Asked Questions</Text>
       {faqData.map((faq, index) => (
         <View key={index} style={styles.faqItem}>
           <TouchableOpacity onPress={() => toggleExpand(index)}>
@@ -102,6 +102,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     color: '#333',
+    textAlign: 'center',
   },
   faqItem: {
     marginBottom: 15,

@@ -216,7 +216,7 @@ export default function EditBaby({ route, navigation }) {
                   Are you sure you want to delete this caretaker?
               </Dialog.Description>
               <Dialog.Button label="Cancel" onPress={() => setVisible(false)} />
-              <Dialog.Button label="Delete" onPress={removeCaretaker} />
+              <Dialog.Button label="Delete" onPress={removeCaretaker} color="red" />
               </Dialog.Container>
         </>
       )}

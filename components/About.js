@@ -28,7 +28,7 @@ export default function About({ navigation }) {
               <Image source={require('../assets/logo.png')} style={{ width: 225, height: 225 }}/>
             </View>
             <View className="flex-row justify-center" style={styles.container}>
-            <Text className="text-white mt-5" style={styles.titleText}>About</Text>
+            <Text className="text-white" style={styles.titleText}>About</Text>
             </View>
             </SafeAreaView>
             

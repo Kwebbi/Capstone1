@@ -60,7 +60,7 @@ useEffect(() => {
               editable={false} placeholder={parentInfo.username}/>  
             </View>
             <TouchableOpacity className="py-1 bg-blue-200 rounded-3xl mt-5 mb-8" onPress={handleGoBack}>
-            <Text className="font-xl text-center text-gray-700 text-xl">Done</Text>
+            <Text className="font-xl text-center text-gray-700 text-xl font-bold">Done</Text>
          </TouchableOpacity>    
         </View>
         <View>

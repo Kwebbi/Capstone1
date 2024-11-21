@@ -243,7 +243,7 @@ export default function Profiles({ navigation }) {
                                             Are you sure you want to delete {selectedBaby?.fullName}'s profile? This cannot be undone.
                                         </Dialog.Description>
                                         <Dialog.Button label="Cancel" onPress={() => setVisible(false)} />
-                                        <Dialog.Button label="Delete" onPress={handleDelete} />
+                                        <Dialog.Button label="Delete" onPress={handleDelete} color="red" />
                                         </Dialog.Container>
                                     {!item.isCaretaker && (
                                     <TouchableOpacity style={{ position: "absolute", right: 130, bottom: 10 }} onPress={()=> navigation.navigate('ShareBaby', item)}>
