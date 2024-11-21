@@ -4,7 +4,6 @@ import { ref, push, set, query, orderByChild, onValue, remove } from "firebase/d
 import { auth, database } from "../config/firebase"
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
 
 const Comments = ({ route }) => {
   const { fullName, babyID } = route.params;
@@ -92,6 +91,26 @@ const Comments = ({ route }) => {
       })
   }
 
+  const getTimeAgo = (timestamp) => {
+    const now = new Date().getTime();
+    const diff = now - timestamp;
+  
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) {
+      return days + (days === 1 ? " day ago" : " days ago");
+    } else if (hours > 0) {
+      return hours + (hours === 1 ? " hour ago" : " hours ago");
+    } else if (minutes > 0) {
+      return minutes + (minutes === 1 ? " minute ago" : " minutes ago");
+    } else {
+      return seconds + (seconds === 1 ? " second ago" : " seconds ago");
+    }
+  };
+
   return (
     <View style={styles.container}>
     <View style={{ height: 13 }} />
@@ -110,28 +129,27 @@ const Comments = ({ route }) => {
             value={comment}
             onChangeText={(text) => setComment(text)}
             mode="outlined"
-            placeholder="Enter your comment here..."
+            placeholder="Add comment..."
           />
           {/* Submit Button */}
-          <View style={{ marginVertical: 5 }}>
-            <Button
-              mode="contained"
-              title="  Post  "
-              onPress={handleSaveComment}
-            ></Button>
-          </View>
+          <TouchableOpacity style={styles.commentButton} onPress={handleSaveComment}>
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Post</Text>
+          </TouchableOpacity>
           {/* Display list of comments */}
           <FlatList
             data={comments}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
               <View style={styles.comment}>
-                <Text style={styles.user}>User: {item.user}</Text>
-                <Text>Date: {item.commentDate}</Text>
+                <View style={{ flexDirection: 'row', marginBottom: 5 }}>
+                  <Text style={styles.user}>{item.user.charAt(0).toUpperCase() + item.user.slice(1)}</Text>
+                  <Text style={styles.date}>{getTimeAgo(item.dateTime)}</Text>
+                </View>
                 <Text>{item.text}</Text>
               </View>
             )}
-            ListEmptyComponent={<Text>No comments yet.</Text>}
+            ListEmptyComponent={<Text style={styles.empty}>No comments yet.</Text>}
+            showsVerticalScrollIndicator={false}
           />
         </View>
     </View>
@@ -140,7 +158,7 @@ const Comments = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 10,
     paddingTop: 25,
   },
   backButton: {
@@ -149,6 +167,15 @@ const styles = StyleSheet.create({
     left: 20,
     zIndex: 1,
   },
+  commentButton: {
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 15,
+    alignItems: 'center',
+    alignSelf: 'center',
+    width: 70,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -156,31 +183,47 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: "#28436d",
   },
+  user: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  date: {
+    fontSize: 14,
+    color: 'grey',
+    marginLeft: 6,
+  },
+  empty: {
+    fontSize: 18,
+    color: 'grey',
+    alignSelf: 'center',
+    marginTop: 170,
+  },
   comment: {
     margin: 3,
     fontWeight: "bold",
-    padding: 10,
+    padding: 12,
     borderWidth: 1,
     borderRadius: 8,
     borderColor: "#999",
     width: 320,
+    alignSelf: 'center',
   },
   commentInput: {
     width: 320,
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 4,
-    padding: 10,
-    marginBottom: 10,
-    marginTop: 10,
-    height: 80,
+    padding: 12,
+    marginTop: 15,
+    height: 60,
+    fontSize: 15,
+    alignSelf: 'center',
   },
   commentSection: {
     backgroundColor: "white",
     padding: 10,
     margin: 5,
     borderRadius: 20,
-    alignItems: "center",
     shadowColor: "#000",
     height: 700,
     shadowOffset: {

@@ -806,7 +806,6 @@ export default function HomeScreen({ route, navigation }) {
                       onChange={(event, date) => {
                         if (date) {
                           setSelectedDate(date);
-                          console.log("Selected date:", date.toLocaleDateString(), date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })); // Log the selected date
                         }
                       }}
                       maximumDate={new Date()}
@@ -909,7 +908,6 @@ export default function HomeScreen({ route, navigation }) {
                       onChange={(event, date) => {
                         if (date) {
                           setSelectedDate(date);
-                          console.log("Selected date:", date.toLocaleDateString(), date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })); // Log the selected date
                         }
                       }}
                       maximumDate={new Date()}
@@ -1348,6 +1346,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
+    textAlign: "center",
   },
   modalMessage: {
     fontSize: 16,
