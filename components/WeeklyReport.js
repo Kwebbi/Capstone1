@@ -26,7 +26,7 @@ const getLastWeekDates = () => {
     const day = date.getDate().toString()
     const year = date.getFullYear().toString()
 
-    const formattedDate = `${day}/${month}/${year}`
+    const formattedDate = `${month}/${day}/${year}`
 
     lastWeekDates.push({
       date,
@@ -38,12 +38,12 @@ const getLastWeekDates = () => {
   return lastWeekDates.reverse()
 }
 
-const formatTimestampToDDMMYY = (timestamp) => {
+const formatTimestampToMMDDYY = (timestamp) => {
   const date = new Date(timestamp)
   const month = date.getMonth() + 1
   const day = date.getDate()
   const year = date.getFullYear()
-  return `${day}/${month}/${year}`
+  return `${month}/${day}/${year}`
 }
 
 function convertTimestamp(timestamp) {
@@ -163,8 +163,8 @@ const WeeklyReport = ({ route }) => {
       diapers: diaperChanges.filter((d) => isDateEqual(d.date, day.label)),
       sleep: sleepRecords.filter(
         (s) =>
-          isDateEqual(formatTimestampToDDMMYY(s.sleepStart), day.label) ||
-          isDateEqual(formatTimestampToDDMMYY(s.sleepEnd), day.label)
+          isDateEqual(formatTimestampToMMDDYY(s.sleepStart), day.label) ||
+          isDateEqual(formatTimestampToMMDDYY(s.sleepEnd), day.label)
       ),
       comments: comments.filter((c) => isDateEqual(c.commentDate, day.label)),
     }))
@@ -192,12 +192,12 @@ const WeeklyReport = ({ route }) => {
       </TouchableOpacity>
       <Text style={styles.title}>{fullName}'s Weekly Report</Text>
 
-      <ScrollView style={styles.scrollContainer}>
+      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         {dailyReports.map((day, index) => (
           <View key={index} style={styles.dayContainer}>
             <Text
               style={styles.dayTitle}
-            >{`${day.dayName} (${day.date})`}</Text>
+            >{`${day.dayName}, ${day.date}`}</Text>
 
             <Text style={styles.dayDetail}>
               <Text style={styles.daySubtitle}>Feeding: </Text>
@@ -276,8 +276,7 @@ const styles = StyleSheet.create({
     paddingTop: 25,
   },
   scrollContainer: {
-    marginTop: 20,
-    marginBottom: 20,
+    marginVertical: 20,
   },
   backButton: {
     position: "absolute",
@@ -289,7 +288,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#28436d",
-    marginVertical: 20,
+    marginTop: 20,
     textAlign: "center",
     paddingLeft: 20,
   },
@@ -308,7 +307,7 @@ const styles = StyleSheet.create({
   },
   dayTitle: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "bold",
     color: "black",
     marginBottom: 10,
   },
