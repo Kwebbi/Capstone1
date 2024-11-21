@@ -51,7 +51,7 @@ export default function HomeScreen({ route, navigation }) {
   const todoItemsRef = ref(database, `todoItems/${userId}/${babyID}/`)
   const [colorModalVisible, setColorModalVisible] = useState(false);
   const [avatarColor, setAvatarColor] = useState("#ccc");
-  const colorOptions = ["red", "orange", "#ffea03", "#77DD77",  "#89CFF0", "#04258f", "#a184ff", "pink", "black"];
+  const colorOptions = ["red", "orange", "#ffea03", "#77DD77",  "#89CFF0", "#1645de", "#c0adff", "pink", "black"];
   const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
   const [isStartTimePickerVisible, setStartTimePickerVisibility] = useState(false);
   const [isEndDatePickerVisible, setEndDatePickerVisibility] = useState(false);

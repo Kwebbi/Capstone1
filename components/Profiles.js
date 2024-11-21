@@ -97,8 +97,6 @@ export default function Profiles({ navigation }) {
             });
             return () => unsubscribe();
     }, []);
-        
-
 
     const deleteBaby = async () => {
         const babyRef = ref(database, `babies/${selectedBaby.babyID}`);
@@ -219,7 +217,9 @@ export default function Profiles({ navigation }) {
                             <View className="form space-y-2 mb-8 border rounded-3xl">
                                 <TouchableOpacity className="flex-row space-x-2.5" onPress={()=> navigation.navigate('HomeScreen', item)}>
 
-                                    <Image source={require('../assets/logo.png')} style={{ width: 150, height: 150 }}/>
+                                    <View style={[ styles.circle, { backgroundColor: item.Gender === 'Male' ? '#89CFF0' : 'pink' }, ]}>
+                                        <Image source={require('../assets/logo.png')} style={{ width: 150, height: 150 }}/>
+                                    </View>
 
                                     <View style={{ borderRightWidth: 1, borderRightColor: 'black' }}></View>
 
@@ -303,6 +303,16 @@ const styles = StyleSheet.create({
   ageText: {
     color: '#28436d',
     fontSize: 17,
+  },
+  circle: {
+    width: 120,
+    height: 120,
+    margin: 18,
+    marginRight: 10,
+    borderRadius: 70,
+    backgroundColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
   },
     settingsButton: {
     flexDirection: 'row', 
