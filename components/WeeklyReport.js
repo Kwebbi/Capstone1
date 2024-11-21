@@ -200,11 +200,11 @@ const WeeklyReport = ({ route }) => {
             >{`${day.dayName} (${day.date})`}</Text>
 
             <Text style={styles.dayDetail}>
-              Feeding: {""}
+              <Text style={styles.daySubtitle}>Feeding: </Text>
               {day.feeding.length > 0 ? (
                 day.feeding.map((el, idx) => (
                   <Text key={idx}>
-                    {"\n"}⦿{el.foodChoice} {el.feedingAmount} ml at{" "}
+                    {"\n"}⦿ {el.foodChoice} {el.feedingAmount} ml at{" "}
                     {el.feedingTime}
                   </Text>
                 ))
@@ -214,12 +214,12 @@ const WeeklyReport = ({ route }) => {
             </Text>
 
             <Text style={styles.dayDetail}>
-              Sleep Records:
+              <Text style={styles.daySubtitle}>Sleep Records: </Text>
               {day.sleep.length > 0 ? (
                 day.sleep.map((el, idx) => (
                   <Text key={idx}>
                     {"\n"}⦿
-                    {`Sleep from ${convertTimestamp(
+                    {` Slept from ${convertTimestamp(
                       el.sleepStart
                     )} to ${convertTimestamp(el.sleepEnd)}`}
                   </Text>
@@ -230,11 +230,11 @@ const WeeklyReport = ({ route }) => {
             </Text>
 
             <Text style={styles.dayDetail}>
-              Diaper Changes:
+              <Text style={styles.daySubtitle}>Diaper Changes: </Text>
               {day.diapers.length > 0 ? (
                 day.diapers.map((el, idx) => (
                   <Text key={idx}>
-                    {"\n"}⦿{el.type} at {el.time}
+                    {"\n"}⦿ {el.type} at {el.time}
                   </Text>
                 ))
               ) : (
@@ -243,12 +243,12 @@ const WeeklyReport = ({ route }) => {
             </Text>
 
             <Text style={styles.dayDetail}>
-              Comments:
+              <Text style={styles.daySubtitle}>Comments: </Text>
               {day.comments.length > 0 ? (
                 day.comments.map((el, idx) => (
                   <Text key={idx}>
                     {"\n"}⦿
-                    {`${el.user} commented ${el.text} at ${convertTimestamp(
+                    {` ${el.user.charAt(0).toUpperCase() + el.user.slice(1)} commented "${el.text}" at ${convertTimestamp(
                       el.dateTime
                     )}`}
                   </Text>
@@ -311,6 +311,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "black",
     marginBottom: 10,
+  },
+  daySubtitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#444",
   },
   dayDetail: {
     fontSize: 16,

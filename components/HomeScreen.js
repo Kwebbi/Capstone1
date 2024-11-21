@@ -629,13 +629,12 @@ export default function HomeScreen({ route, navigation }) {
         automaticallyAdjustKeyboardInsets={true}
         style={{ backgroundColor: "white" }}
       >
-        <View className="flex space-y-5 bg-white px-4 pt-8">
+        <View className="flex space-y-5 bg-white px-4 pt-6">
           <View style={styles.profileSection}>
             {/* Avatar Section */}
-            <View className="flex justify-center">
+            <View className="flex justify-center" style={{ marginLeft: 20 }}>
               <TouchableOpacity
                 style={[styles.avatarBubble, { backgroundColor: avatarColor }]}
-                
                 onPress={() => setColorModalVisible(true)}
               >
                 <Image source={require('../assets/babyIcon.png')} style={{ tintColor: 'white', marginLeft: 0, width: 80, height: 80 }}/>
@@ -1189,7 +1188,6 @@ const styles = StyleSheet.create({
   },
   profileSection: {
     flexDirection: "row",
-    justifyContent: "space-between",
     width: "100%",
     marginHorizontal: 10,
   },
@@ -1212,8 +1210,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   todoList: {
-    marginLeft: 80,
-    marginRight: 20,
+    marginLeft: 60,
+    marginRight: 15,
     fontWeight: "bold",
     padding: 10,
     borderWidth: 1,
