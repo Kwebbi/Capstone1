@@ -49,119 +49,136 @@ const Settings = ({ route, navigation }) => {
     const toggleDarkMode = () => setIsDarkMode(previousState => !previousState);
  
     return (
-    <ScrollView automaticallyAdjustKeyboardInsets={true}
-        style={{ backgroundColor: "#cfe2f3" }}
-        >
-        <View className="flex-1 bg-white" style={{ backgroundColor: "#cfe2f3" }}>
-            <SafeAreaView style={{ flex: 0 }}>
-                <View className="flex-row justify-center" style={styles.container}>
-                    <TouchableOpacity style={{ position: "absolute", left: 22, top: 50 }} onPress={()=> navigation.navigate('Profiles')}>
-                    <Ionicons name= "arrow-back" size={30} color= "#28436d"/>
-                    </TouchableOpacity>
-                    <Text className="text-white mt-5" style={styles.titleText}>Settings</Text>
-                </View>
-            </SafeAreaView>
+        <View style={{ flex: 1, backgroundColor: "#cfe2f3" }}>
+            {/* Top Header */}
+            <View style={{ ...styles.topHeader, backgroundColor: "#cfe2f3" }}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Profiles")}>
+                    <Ionicons name="arrow-back" size={30} color="#28436d" />
+                </TouchableOpacity>
+                <Text style={styles.titleText}>Settings</Text>
+            </View>
 
-        <View style={styles.container}>
-            <TouchableOpacity onPress={() => navigation.navigate('AccountDetails')} style={styles.logoutButton}>
-                <View style={styles.logoutContent}>
-                    <Ionicons name="person" size={42} color="black" />
-                    <Text style={styles.logoutButtonText}>Account</Text>
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleNotifications} style={styles.logoutButton}>
-                <View style={styles.logoutContent}>
-                    <Ionicons name="notifications" size={42} color="black" />
-                    <Text style={styles.logoutButtonText}>Notifications</Text>
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleAppearance} style={styles.logoutButton}>
-                <View style={styles.logoutContent}>
-                    <Ionicons name="color-palette" size={42} color="black" />
-                    <Text style={styles.logoutButtonText}>Appearance</Text>
-                </View>
-            </TouchableOpacity>
-            {/*Pending Share Request Button */}
-            <TouchableOpacity onPress={() => navigation.navigate('ShareRequests')} style={styles.logoutButton}>
-                <View style={styles.logoutContent}>
-                    <Ionicons name="share" size={42} color="black" />
-                    <Text style={styles.logoutButtonText}>Pending Share Requests</Text>
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('HelpNSupport', { alerts })}  style={styles.logoutButton}>
-                <View style={styles.logoutContent}>
-                    <Ionicons name="help-circle" size={42} color="black" />
-                    <Text style={styles.logoutButtonText}>Help & FAQ</Text>
-                </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('About', { alerts })} style={styles.logoutButton}>
-                <View style={styles.logoutContent}>
-                    <Ionicons name="information-circle" size={42} color="black" />
-                    <Text style={styles.logoutButtonText}>About</Text>
-                </View>
-            </TouchableOpacity>
-            {/* Sign Out Button */}
-            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-                <View style={styles.logoutContent}>
-                    <Ionicons name="log-out" size={42} color="black" />
-                    <Text style={styles.logoutButtonText}>Sign out</Text>
-                </View>
-            </TouchableOpacity>
-             {/* Notification Modal */}
-            <Modal
-                transparent={true}
-                animationType="slide"
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <View style={styles.modalBackground}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>Alert Notifications</Text>
-                        <View style={styles.switchContainer}>
-                            <Text>{isEnabled ? "Enabled" : "Disabled"}</Text>
-                            <Switch
-                                trackColor={{ false: "#767577", true: "#cfe2f3" }}
-                                thumbColor={isEnabled ? "black" : "black"}
-                                onValueChange={toggleSwitch}
-                                value={isEnabled}
-                            />
-                        </View>
-                        <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
-                            <Text style={styles.closeButtonText}>Close</Text>
+            {/* Scrollable Content */}
+            <ScrollView automaticallyAdjustKeyboardInsets={true} style={{ backgroundColor: "white" }}>
+                <View className="flex space-y-5 bg-white px-2">
+                    <View style={styles.container}>
+                        {/* Account Button */}
+                        <TouchableOpacity onPress={() => navigation.navigate('AccountDetails')} style={styles.button}>
+                            <View style={styles.buttonContent}>
+                                <Ionicons name="person" size={38} color="#262f40" />
+                                <Text style={styles.buttonText}>Account</Text>
+                            </View>
                         </TouchableOpacity>
+                        <View style={{ height: 1.5, backgroundColor: "#b5b5b5" }} />
+                        
+                        {/* Notifications Button */}
+                        <TouchableOpacity onPress={handleNotifications} style={styles.button}>
+                            <View style={styles.buttonContent}>
+                                <Ionicons name="notifications" size={38} color="#262f40" />
+                                <Text style={styles.buttonText}>Notifications</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <View style={{ height: 1.5, backgroundColor: "#b5b5b5" }} />
+                        
+                        {/* Appearance */}
+                        <TouchableOpacity onPress={handleAppearance} style={styles.button}>
+                            <View style={styles.buttonContent}>
+                                <Ionicons name="color-palette" size={38} color="#262f40" />
+                                <Text style={styles.buttonText}>Appearance</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <View style={{ height: 1.5, backgroundColor: "#b5b5b5" }} />
+
+                        {/* Pending Share Request Button */}
+                        <TouchableOpacity onPress={() => navigation.navigate('ShareRequests')} style={styles.button}>
+                            <View style={styles.buttonContent}>
+                                <Ionicons name="share" size={38} color="#262f40" />
+                                <Text style={styles.buttonText}>Pending Share Requests</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <View style={{ height: 1.5, backgroundColor: "#b5b5b5" }} />
+                        
+                        {/* Help & Support Button */}
+                        <TouchableOpacity onPress={() => navigation.navigate('HelpNSupport', { alerts })}  style={styles.button}>
+                            <View style={styles.buttonContent}>
+                                <Ionicons name="help-circle" size={38} color="#262f40" />
+                                <Text style={styles.buttonText}>Help & Support</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <View style={{ height: 1.5, backgroundColor: "#b5b5b5" }} />
+                        
+                        {/* About Button */}
+                        <TouchableOpacity onPress={() => navigation.navigate('About', { alerts })} style={styles.button}>
+                            <View style={styles.buttonContent}>
+                                <Ionicons name="information-circle" size={38} color="#262f40" />
+                                <Text style={styles.buttonText}>About</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <View style={{ height: 1.5, backgroundColor: "#b5b5b5" }} />
+
+                        {/* Sign Out Button */}
+                        <TouchableOpacity onPress={handleLogout} style={styles.button}>
+                            <View style={styles.buttonContent}>
+                                <Ionicons name="log-out" size={38} color="#262f40" />
+                                <Text style={styles.buttonText}>Sign out</Text>
+                            </View>
+                        </TouchableOpacity>
+
+                        {/* Notification Modal */}
+                        <Modal
+                            transparent={true}
+                            animationType="slide"
+                            visible={modalVisible}
+                            onRequestClose={() => setModalVisible(false)}
+                        >
+                            <View style={styles.modalBackground}>
+                                <View style={styles.modalContainer}>
+                                    <Text style={styles.modalTitle}>Alert Notifications</Text>
+                                    <View style={styles.switchContainer}>
+                                        <Text>{isEnabled ? "Enabled" : "Disabled"}</Text>
+                                        <Switch
+                                            trackColor={{ false: "#767577", true: "#cfe2f3" }}
+                                            thumbColor={isEnabled ? "black" : "black"}
+                                            onValueChange={toggleSwitch}
+                                            value={isEnabled}
+                                        />
+                                    </View>
+                                    <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                                        <Text style={styles.closeButtonText}>Close</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Modal>
+
+                        {/* Appearance Modal */}
+                        <Modal
+                            transparent={true}
+                            animationType="slide"
+                            visible={appearanceModalVisible}
+                            onRequestClose={() => setAppearanceModalVisible(false)}
+                        >
+                            <View style={styles.modalBackground}>
+                                <View style={styles.modalContainer}>
+                                    <Text style={styles.modalTitle}>Appearance</Text>
+                                    <View style={styles.switchContainer}>
+                                        <Text>{isDarkMode ? "Dark Mode" : "Light Mode"}</Text>
+                                        <Switch
+                                            trackColor={{ false: "#767577", true: "#cfe2f3" }}
+                                            thumbColor={isDarkMode ? "black" : "black"}
+                                            onValueChange={toggleDarkMode}
+                                            value={isDarkMode}
+                                        />
+                                    </View>
+                                    <TouchableOpacity style={styles.closeButton} onPress={() => setAppearanceModalVisible(false)}>
+                                        <Text style={styles.closeButtonText}>Close</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Modal>
                     </View>
                 </View>
-            </Modal>
-
-            {/* Appearance Modal */}
-            <Modal
-                transparent={true}
-                animationType="slide"
-                visible={appearanceModalVisible}
-                onRequestClose={() => setAppearanceModalVisible(false)}
-            >
-                <View style={styles.modalBackground}>
-                    <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>Appearance</Text>
-                        <View style={styles.switchContainer}>
-                            <Text>{isDarkMode ? "Dark Mode" : "Light Mode"}</Text>
-                            <Switch
-                                trackColor={{ false: "#767577", true: "#cfe2f3" }}
-                                thumbColor={isDarkMode ? "black" : "black"}
-                                onValueChange={toggleDarkMode}
-                                value={isDarkMode}
-                            />
-                        </View>
-                        <TouchableOpacity style={styles.closeButton} onPress={() => setAppearanceModalVisible(false)}>
-                            <Text style={styles.closeButtonText}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
+            </ScrollView>
         </View>
-        </View>
-        </ScrollView>
-        
     );
 };
 
@@ -170,9 +187,19 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'space-around',
-        alignItems: 'center',
-        backgroundColor: '#cfe2f3',
         padding: 20,
+    },
+    topHeader: {
+      alignItems: "center",
+      height: 80,
+      padding: 20,
+      marginTop: 40,
+    },
+    backButton: {
+      position: "absolute",
+      left: 20,
+      top: 25,
+      zIndex: 1,
     },
     titleText: {
         color: '#28436d',
@@ -184,21 +211,21 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
     },
-    logoutButton: {
-        padding: 15,
+    button: {
+        paddingVertical: 18,
         width: '100%',
         alignItems: 'flex-start',
     },
-    logoutContent: {
+    buttonContent: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    logoutButtonText: {
+    buttonText: {
         color: 'black',
-        fontSize: 32,
-        marginLeft: 10,
+        fontSize: 25,
+        marginLeft: 12,
     },
- modalBackground: {
+    modalBackground: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",

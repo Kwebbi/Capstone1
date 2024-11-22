@@ -625,10 +625,7 @@ export default function HomeScreen({ route, navigation }) {
       </View>
 
       {/* Scrollable Content */}
-      <ScrollView
-        automaticallyAdjustKeyboardInsets={true}
-        style={{ backgroundColor: "white" }}
-      >
+      <ScrollView automaticallyAdjustKeyboardInsets={true} style={{ backgroundColor: "white" }}>
         <View className="flex space-y-5 bg-white px-4 pt-6">
           <View style={styles.profileSection}>
             {/* Avatar Section */}
